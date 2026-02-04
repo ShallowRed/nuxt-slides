@@ -1,0 +1,47 @@
+/**
+ * Utility classes: callouts, badges, dark backgrounds, controls
+ */
+
+@use 'variables' as *;
+
+// DSFR Callout / Highlight boxes
+.reveal .fr-callout {
+  background: var(--dsfr-blue-france-950);
+  border-left: 4px solid var(--dsfr-blue-france-main-525);
+  padding: $dsfr-spacing-xlarge;
+  margin: $dsfr-spacing-large 0;
+
+  &--green {
+    background: var(--dsfr-green-emeraude-950);
+    border-left-color: var(--dsfr-green-emeraude-main-632);
+  }
+
+  &--red {
+    background: var(--dsfr-red-marianne-925);
+    border-left-color: var(--dsfr-red-marianne-main-472);
+  }
+}
+
+// DSFR Badges / Tags
+.reveal .fr-badge {
+  display: inline-block;
+  padding: 0.3em 0.8em;
+  background: var(--dsfr-blue-france-main-525);
+  color: var(--dsfr-grey-1000);
+  border-radius: 3px;
+  font-size: 0.75em;
+  font-weight: 700;
+
+  &--success {
+    background: var(--dsfr-green-emeraude-main-632);
+  }
+
+  &--error {
+    background: var(--dsfr-red-marianne-main-472);
+  }
+}
+
+// Controls
+.reveal .controls {
+  color: var(--dsfr-blue-france-main-525);
+}

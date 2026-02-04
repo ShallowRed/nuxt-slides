@@ -1,0 +1,271 @@
+# Theme System Reference
+
+## Overview
+SCSS themes compiled to CSS, loaded dynamically per presentation.
+
+## File Structure
+```
+themes/
+├── dsfr/
+│   ├── dsfr.scss           # Main entry (imports all partials)
+│   ├── _variables.scss     # Colors, fonts, spacing
+│   ├── _base.scss          # Reset, body, html
+│   ├── _typography.scss    # Headings, text styles
+│   ├── _components.scss    # Buttons, alerts, etc.
+│   ├── _layouts.scss       # Slide layouts
+│   ├── _utilities.scss     # Helper classes
+│   └── _responsive.scss    # Media queries
+└── minimal/
+    └── minimal.scss        # Single-file theme
+
+public/themes/              # Compiled output (git-ignored)
+├── dsfr.css
+└── minimal.css
+```
+
+## Compilation
+
+### Script: scripts/build-themes.js
+**Purpose**: Compiles SCSS to CSS.
+
+**Usage**:
+```bash
+pnpm build:themes          # Compile all themes
+pnpm build:theme dsfr      # Compile specific theme
+node scripts/build-themes.js --watch  # Watch mode
+node scripts/build-themes.js dsfr     # Specific + watch
+```
+
+**Process**:
+1. Reads `themes/` directory
+2. Finds `*.scss` files (non-partials, no `_` prefix)
+3. Compiles via `sass.compile(path, { style: 'expanded' })`
+4. Writes to `public/themes/[name].css`
+5. In watch mode: uses `fs.watch(dir, { recursive: true })`
+
+**Configuration**:
+- Input: `themes/[name]/[name].scss`
+- Output: `public/themes/[name].css`
+- Style: `expanded` (readable, not minified)
+- Source maps: Not generated
+
+---
+
+## Hot-Reload Plugin
+
+### plugins/theme-watcher.js
+**Type**: Vite plugin
+
+**Purpose**: Auto-recompile themes during dev, trigger page reload.
+
+**Hooks**:
+- `buildStart()`: Compiles all themes on server start
+- `configureServer(server)`: Sets up file watchers
+  - Watches `themes/dsfr/` and `themes/minimal/` recursively
+  - On change: Compiles theme, calls `server.ws.send({ type: 'full-reload' })`
+
+**Integration**: Added to `nuxt.config.ts`:
+```ts
+vite: {
+  plugins: [themeWatcher()]
+}
+```
+
+**Behavior**:
+- Dev mode: Changes to SCSS → instant browser reload
+- Build mode: Compiles once in `buildStart`
+
+---
+
+## Loading Mechanism
+
+### useTheme Composable
+Dynamically injects `<link>` tags:
+```ts
+const { loadTheme } = useTheme(themeName)
+loadTheme('dsfr') // Creates <link href="/themes/dsfr.css">
+```
+
+### Component Integration
+RevealPresentation.vue:
+```ts
+const { loadTheme, unloadTheme, watchTheme } = useTheme(toRef(props, 'theme'))
+
+onMounted(() => {
+  loadTheme(props.theme)
+  watchTheme() // Auto-reload if theme prop changes
+})
+
+onUnmounted(() => {
+  unloadTheme() // Cleanup <link> tag
+})
+```
+
+### Per-Presentation Selection
+Frontmatter in `.md` file:
+```yaml
+---
+theme: dsfr  # or minimal, or custom
+---
+```
+
+Loaded via metadata:
+```ts
+const { data } = usePresentation(slug)
+// data.value.metadata.theme = 'dsfr'
+```
+
+---
+
+## Creating New Theme
+
+### Steps
+1. **Create directory**: `themes/mytheme/`
+2. **Create main file**: `themes/mytheme/mytheme.scss`
+3. **Write styles**:
+```scss
+// mytheme.scss
+.reveal {
+  background: #fff;
+  
+  h1 { color: #333; font-size: 3em; }
+  h2 { color: #666; font-size: 2em; }
+  
+  section { padding: 2rem; }
+}
+```
+
+4. **Compile**: `pnpm build:theme mytheme`
+5. **Use in presentation**:
+```yaml
+---
+theme: mytheme
+---
+```
+
+### Advanced: Multi-File Theme
+```
+themes/mytheme/
+├── mytheme.scss           # @import './variables'; @import './base';
+├── _variables.scss        # $primary: #007bff;
+├── _base.scss             # .reveal { ... }
+└── _components.scss       # .alert { ... }
+```
+
+Main file:
+```scss
+@import './variables';
+@import './base';
+@import './components';
+```
+
+---
+
+## Styling Slides by Heading Level
+
+### CSS Classes
+Parser adds classes to sections:
+- `slide-h1`: Title slides
+- `slide-h2`: Horizontal slides
+- `slide-h3`: Vertical slides
+
+### Example Usage
+```scss
+.reveal {
+  section.slide-h1 {
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+  }
+  
+  section.slide-h2 {
+    h2 { border-bottom: 2px solid #007bff; }
+  }
+  
+  section.slide-h3 {
+    background: #f8f9fa;
+  }
+}
+```
+
+---
+
+## DSFR Theme Structure
+
+### Design System
+Based on French Government Design System (Système de Design de l'État).
+
+### Key Features
+- **Colors**: Blue primary (#000091), greys
+- **Typography**: Marianne font family
+- **Components**: Buttons, alerts with official styles
+- **Accessibility**: WCAG AA compliant
+
+### Files
+- `_variables.scss`: DSFR color palette, spacing scale
+- `_base.scss`: Reset, body defaults
+- `_typography.scss`: Font sizes, line heights
+- `_components.scss`: Button, alert, badge styles
+- `_layouts.scss`: Grid, flex utilities
+- `_responsive.scss`: Breakpoints, mobile adjustments
+
+---
+
+## Minimal Theme
+
+### Characteristics
+- Single file: `themes/minimal/minimal.scss`
+- Helvetica font stack
+- Light background, dark text
+- Simple, clean aesthetic
+- No design system dependencies
+
+### Use Case
+Default/fallback theme for simple presentations.
+
+---
+
+## Build Integration
+
+### package.json Scripts
+```json
+{
+  "dev": "pnpm build:themes && nuxt dev",
+  "build": "pnpm build:themes && nuxt build",
+  "generate": "pnpm build:themes && nuxt generate"
+}
+```
+
+All build commands compile themes first.
+
+### SSG Output
+Compiled CSS copied to `.output/public/themes/`:
+```
+.output/public/
+├── themes/
+│   ├── dsfr.css
+│   └── minimal.css
+```
+
+Static hosting serves these directly.
+
+---
+
+## Troubleshooting
+
+### Theme not loading
+1. Check file exists: `public/themes/[name].css`
+2. Compile: `pnpm build:theme [name]`
+3. Check frontmatter: `theme: [name]`
+4. Check browser network tab for 404s
+
+### Changes not appearing
+1. Dev mode: Should auto-reload (Vite plugin)
+2. Manual: `pnpm build:themes`
+3. Hard refresh: Cmd+Shift+R (Mac) / Ctrl+Shift+R (Windows)
+
+### Compilation errors
+1. Check SCSS syntax
+2. Ensure partials start with `_`
+3. Check import paths (relative)
+4. Run: `node scripts/build-themes.js [theme]` to see errors

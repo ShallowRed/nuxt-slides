@@ -1,0 +1,346 @@
+# Presentation Format Reference
+
+## File Structure
+Location: `presentations/[slug].md`
+
+## Frontmatter Schema
+```yaml
+---
+title: "Presentation Title"    # Display name (optional, defaults to slug)
+theme: dsfr                    # Theme name (optional, defaults to 'dsfr')
+transition: slide              # Reveal.js transition (optional, defaults to 'slide')
+center: true                   # Vertical centering (optional, defaults to true)
+# Custom fields supported for future extensions
+---
+```
+
+## Slide Hierarchy
+
+### Title Slide (H1)
+```markdown
+# Main Title
+Subtitle or description
+```
+- First H1 creates title slide
+- Content until next H2 included in title section
+- Only one H1 per presentation
+- Gets `slide-h1` CSS class
+
+### Horizontal Slides (H2)
+```markdown
+## Section Title
+Content for this slide
+```
+- Creates new horizontal slide
+- Navigate with ← → arrows
+- Gets `slide-h2` CSS class
+- Can contain vertical slides (H3)
+
+### Vertical Slides (H3)
+```markdown
+## Parent Section
+
+### First Vertical
+Content here
+
+### Second Vertical
+More content
+```
+- Nested under previous H2
+- Navigate with ↑ ↓ arrows
+- Gets `slide-h3` CSS class
+- Groups multiple related slides
+
+### Alternative Separator (HR)
+```markdown
+Content for slide 1
+
+---
+
+Content for slide 2
+```
+- `---` creates horizontal break
+- Alternative to H2
+- Useful for slides without titles
+
+---
+
+## MDC Components
+
+### Alert
+```markdown
+::alert{type="info"}
+This is an informational alert
+::
+
+::alert{type="warning"}
+Warning message
+::
+
+::alert{type="error"}
+Error message
+::
+```
+**Props**: `type` = "info" | "warning" | "error"
+
+### Three Columns
+```markdown
+::three-columns
+### Column 1
+Content for first column
+
+### Column 2
+Content for second column
+
+### Column 3
+Content for third column
+::
+```
+**Note**: Each H3 starts new column. Grouped via DOM manipulation in `onMounted`.
+
+### Centered Content
+```markdown
+::centered
+This content will be vertically and horizontally centered
+::
+```
+
+### Divider
+```markdown
+::divider
+```
+Visual separator line.
+
+---
+
+## MDC Syntax Support
+
+### Inline Formatting
+```markdown
+**bold** text
+*italic* text
+`code` inline
+```
+
+### Lists
+```markdown
+- Unordered item 1
+- Unordered item 2
+
+1. Ordered item 1
+2. Ordered item 2
+```
+
+### Code Blocks
+````markdown
+```javascript
+const greeting = 'Hello World'
+console.log(greeting)
+```
+````
+
+### Links
+```markdown
+[Link text](https://example.com)
+```
+
+### Images
+```markdown
+![Alt text](/path/to/image.jpg)
+```
+
+---
+
+## Component Registration
+
+### Adding Custom Component
+1. Create: `src/components/mdc/MyComponent.vue`
+2. Register in `src/config/presentation.ts`:
+```ts
+export const MDC_COMPONENTS = {
+  'my-component': 'MyComponent',
+  // ...
+}
+```
+3. Use in markdown:
+```markdown
+::my-component{prop="value"}
+Content
+::
+```
+
+### Auto-Import
+Nuxt auto-imports components from `src/components/mdc/`.
+No manual imports needed.
+
+---
+
+## Example Presentations
+
+### Simple Presentation
+```markdown
+---
+title: "Quick Demo"
+theme: minimal
+---
+
+# Welcome
+
+A simple presentation
+
+## First Topic
+
+Content goes here
+
+## Second Topic
+
+More content
+
+---
+
+# Thank You
+```
+
+### Complex Presentation
+```markdown
+---
+title: "Advanced Topics"
+theme: dsfr
+transition: fade
+---
+
+# Main Title
+Subtitle text
+
+## Horizontal Section
+
+### Vertical Slide 1
+First nested slide
+
+### Vertical Slide 2
+Second nested slide
+
+## Another Section
+
+::three-columns
+### Column A
+Left content
+
+### Column B
+Middle content
+
+### Column C
+Right content
+::
+
+---
+
+::centered
+## Centered Slide
+Important message
+::
+
+## Code Example
+
+```javascript
+function demo() {
+  return "Hello"
+}
+```
+
+::alert{type="info"}
+Note: This is important
+::
+```
+
+---
+
+## Reveal.js Features
+
+### Fragments (Progressive Display)
+Not yet implemented. Future: Add `{.fragment}` class support.
+
+### Speaker Notes
+Not yet implemented. Future: Add `::notes` component.
+
+### Backgrounds
+Not yet implemented. Future: Add `data-background` frontmatter support.
+
+---
+
+## Parsing Logic
+
+### Algorithm Summary
+1. Split by H1: Title section (everything until first H2)
+2. Split by H2/HR: Horizontal sections
+3. Within each H2: Split by H3 for vertical slides
+4. Detect first heading in each section → assign CSS class
+5. Return nested structure: `Slide[]` with optional `verticalSlides`
+
+### AST Structure
+```ts
+Slide = {
+  body: {
+    type: 'root',
+    children: [/* AST nodes */]
+  },
+  headingLevel: 'h1' | 'h2' | 'h3',
+  verticalSlides?: Slide[]  // Only if H3 found
+}
+```
+
+### CSS Class Application
+Template applies classes:
+```vue
+<section :class="section.headingLevel ? `slide-${section.headingLevel}` : ''">
+```
+Outputs: `<section class="slide-h2">...</section>`
+
+---
+
+## File Naming
+- Use kebab-case: `my-presentation.md`
+- Avoid spaces, special characters
+- Slug = filename without `.md`
+- Slug used in URLs: `/slides/my-presentation`
+
+---
+
+## Frontmatter Validation
+All fields optional. Defaults:
+```ts
+{
+  theme: 'dsfr',
+  transition: 'slide',
+  center: true
+}
+```
+
+Unknown fields preserved for future use (e.g., `author`, `date`).
+
+---
+
+## Best Practices
+
+### Structure
+- One H1 (title) per presentation
+- Use H2 for main sections
+- Use H3 for sub-topics within sections
+- Keep slides concise (3-5 bullets max)
+
+### Content
+- Short sentences
+- High contrast colors
+- Large text (20pt+)
+- Minimal animations
+
+### Organization
+- Logical flow: Intro → Topics → Conclusion
+- Group related slides vertically (H3)
+- Use dividers for major transitions
+
+### Assets
+- Place images in `public/images/`
+- Reference: `![](/images/photo.jpg)`
+- Optimize file sizes
+- Use modern formats (WebP, AVIF)

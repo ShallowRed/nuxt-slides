@@ -1,0 +1,574 @@
+# Instructions pour la Création de Contenu de Présentation Nuxt + Reveal.js
+
+## Objectif
+Générer du contenu structuré au format Markdown (MDC) pour des présentations reveal.js dans un système Nuxt.
+
+## Format de Fichier
+
+### Extension
+`.md` (Markdown)
+
+### Structure Complète
+```markdown
+---
+title: "Titre de la Présentation"
+theme: dsfr
+transition: slide
+center: true
+backgrounds:
+  h1: "/backgrounds/titre.jpg"
+  h2: "/backgrounds/section.jpg"
+---
+
+# Titre Principal
+Sous-titre ou description courte
+
+## Première Section
+Contenu de la première diapositive
+
+### Sous-section 1
+Détails ou points spécifiques
+
+### Sous-section 2
+Plus de détails
+
+## Deuxième Section
+Nouveau sujet principal
+
+## Règles de Structure
+
+### Hiérarchie des Titres
+
+1. **H1 (`#`)** - Diapositive de titre
+   - UN SEUL par présentation
+   - Premier titre de la présentation
+   - Tout le contenu jusqu'au premier H2 est inclus
+   - Classe CSS: `slide-h1`
+
+2. **H2 (`##`)** - Diapositives horizontales
+   - Sépare les sections principales
+   - Navigation: flèches gauche/droite
+   - Classe CSS: `slide-h2`
+
+3. **H3 (`###`)** - Diapositives verticales
+   - Sous-sections imbriquées dans un H2
+   - Navigation: flèches haut/bas
+   - Classe CSS: `slide-h3`
+
+4. **HR (`---`)** - Séparateur alternatif
+   - Équivalent à H2 sans titre
+   - Crée une nouvelle diapositive horizontale
+
+### Métadonnées (Frontmatter)
+
+```yaml
+---
+title: "Titre Affiché"                    # Obligatoire pour l'index
+theme: dsfr                                # Options: dsfr, minimal, custom
+transition: slide                          # Options: slide, fade, convex, zoom, none
+center: true                               # Centrage vertical: true/false
+backgrounds:                               # Images de fond (optionnel)
+  h1: "/backgrounds/image-titre.jpg"
+  h2: "/backgrounds/image-section.jpg"
+  h3: "/backgrounds/image-detail.jpg"
+  default: "/backgrounds/image-defaut.jpg"
+---
+```
+
+## Composants MDC Disponibles
+
+### 1. Alert (Messages d'Alerte)
+```markdown
+::alert{type="info"}
+Message informatif
+::
+
+::alert{type="warning"}
+Message d'avertissement
+::
+
+::alert{type="error"}
+Message d'erreur
+::
+```
+
+### 2. TwoColumns (Deux Colonnes)
+```markdown
+::TwoColumns
+### Colonne Gauche
+Contenu de la première colonne
+
+### Colonne Droite  
+Contenu de la seconde colonne
+::
+```
+
+### 3. Quote (Citation)
+```markdown
+::Quote{author="Nom Auteur" role="Titre/Rôle" avatar="/chemin/avatar.jpg"}
+Texte de la citation
+::
+```
+
+### 4. StatCard (Carte Statistique)
+```markdown
+::StatCard{value="98%" label="Satisfaction" trend="up" icon="⭐" color="#10b981"}
+::
+```
+- **trend**: "up", "down", ou "neutral"
+- **icon**: emoji ou symbole
+- **color**: code couleur hexadécimal
+
+### 5. ImageWithCaption (Image avec Légende)
+```markdown
+::ImageWithCaption{src="/chemin/image.jpg" alt="Description" width="80%"}
+Légende de l'image
+::
+```
+
+### 6. Timeline (Chronologie)
+```markdown
+::Timeline
+### Étape 1
+Description de la première étape
+
+### Étape 2
+Description de la deuxième étape
+
+### Étape 3
+Description de la troisième étape
+::
+```
+
+### 7. Callout (Mise en Avant)
+```markdown
+::Callout{type="tip" title="Conseil"}
+Contenu du conseil
+::
+
+::Callout{type="info" title="Information"}
+Contenu informatif
+::
+
+::Callout{type="warning" title="Attention"}
+Contenu d'avertissement
+::
+
+::Callout{type="danger" title="Important"}
+Contenu important/dangereux
+::
+```
+
+### 8. StepsList (Liste d'Étapes)
+```markdown
+::StepsList
+### Première étape
+Description détaillée
+
+### Deuxième étape
+Description détaillée
+
+### Troisième étape
+Description détaillée
+::
+```
+
+### 9. ComparisonTable (Tableau Comparatif)
+```markdown
+::ComparisonTable
+| Critère | Option A | Option B | Option C |
+|---------|----------|----------|----------|
+| Prix    | Gratuit  | 10€/mois | 50€/mois |
+| Support | Email    | Chat     | Téléphone|
+::
+```
+
+### 10. Tabs (Onglets)
+```markdown
+::Tabs
+### JavaScript
+Code JavaScript
+
+### Python
+Code Python
+
+### TypeScript
+Code TypeScript
+::
+```
+
+### 11. AccordionList (Accordéon)
+```markdown
+::AccordionList
+### Question 1
+Réponse à la première question
+
+### Question 2
+Réponse à la deuxième question
+
+### Question 3
+Réponse à la troisième question
+::
+```
+
+### 12. FullScreenImage (Image Plein Écran)
+```markdown
+::FullScreenImage{src="/chemin/image.jpg" overlay="0.4" position="center"}
+# Titre sur l'image
+Contenu avec fond d'image
+::
+```
+- **overlay**: opacité du fond noir (0-1)
+- **position**: "center", "top", "bottom", "left", "right"
+
+### 13. ThreeColumns (Trois Colonnes)
+```markdown
+::ThreeColumns
+### Colonne 1
+Contenu de la première colonne
+
+### Colonne 2
+Contenu de la deuxième colonne
+
+### Colonne 3
+Contenu de la troisième colonne
+::
+```
+
+### 14. Centered (Contenu Centré)
+```markdown
+::Centered
+Ce contenu sera centré verticalement et horizontalement
+::
+```
+
+### 15. Divider (Séparateur Visuel)
+```markdown
+::Divider
+::
+```
+
+## Syntaxe Markdown Standard
+
+### Formatage Texte
+```markdown
+**texte en gras**
+*texte en italique*
+`code inline`
+~~texte barré~~
+```
+
+### Listes
+```markdown
+- Liste non ordonnée
+- Item 2
+  - Sous-item
+
+1. Liste ordonnée
+2. Item 2
+   1. Sous-item
+```
+
+### Code
+````markdown
+```javascript
+const exemple = 'Code avec coloration syntaxique'
+console.log(exemple)
+```
+````
+
+### Liens
+```markdown
+[Texte du lien](https://example.com)
+```
+
+### Images
+```markdown
+![Texte alternatif](/images/photo.jpg)
+```
+
+### Citations
+```markdown
+> Citation importante
+> Sur plusieurs lignes
+```
+
+## Bonnes Pratiques
+
+### Contenu des Diapositives
+1. **Concision**: Maximum 5-7 points par diapositive
+2. **Phrases courtes**: Privilégier les énoncés directs
+3. **Mots-clés**: Mettre en avant les concepts importants
+4. **Hiérarchie visuelle**: Utiliser les niveaux de titres appropriés
+
+### Organisation
+1. **Introduction** (H1): Titre, contexte, objectifs
+2. **Développement** (H2): Sections thématiques principales
+3. **Détails** (H3): Sous-points pour approfondir
+4. **Conclusion** (H2): Synthèse, appel à l'action
+
+### Images et Médias
+- Placer dans `public/images/`
+- Référencer: `![](/images/nom-fichier.jpg)`
+- Formats: JPG, PNG, SVG, WebP
+- Optimiser: < 500KB par image
+
+### Thèmes
+
+#### DSFR (Système de Design de l'État Français)
+- Style officiel gouvernemental
+- Couleurs: Bleu (#000091), gris
+- Police: Marianne
+- Usage: Présentations institutionnelles
+
+#### Minimal
+- Design épuré et moderne
+- Couleurs: Tons clairs
+- Police: Helvetica
+- Usage: Présentations simples, techniques
+
+## Exemples de Structures
+
+### Présentation Simple
+```markdown
+---
+title: "Introduction au Sujet"
+theme: minimal
+---
+
+# Introduction au Sujet
+Présentation par [Votre Nom]
+
+## Contexte
+- Point de contexte 1
+- Point de contexte 2
+- Point de contexte 3
+
+## Problématique
+Description du problème à résoudre
+
+## Solution Proposée
+Explication de la solution
+
+---
+
+## Démonstration
+Exemple concret ou cas d'usage
+
+## Résultats
+- Résultat 1
+- Résultat 2
+- Résultat 3
+
+## Conclusion
+Message de clôture
+```
+
+### Présentation Complexe avec Sous-sections
+```markdown
+---
+title: "Analyse Approfondie"
+theme: dsfr
+backgrounds:
+  h1: "/backgrounds/cover.jpg"
+  h2: "/backgrounds/section.jpg"
+---
+
+# Analyse Approfondie
+Étude complète du sujet
+
+## Introduction
+
+### Contexte Général
+Mise en situation
+
+### Objectifs
+- Objectif 1
+- Objectif 2
+- Objectif 3
+
+### Méthodologie
+Approche utilisée
+
+## Première Partie
+
+### Aspect A
+Détails sur l'aspect A
+
+### Aspect B
+Détails sur l'aspect B
+
+::three-columns
+### Avantage 1
+Description
+
+### Avantage 2
+Description
+
+### Avantage 3
+Description
+::
+
+## Deuxième Partie
+
+### Analyse Technique
+```javascript
+const code = 'exemple'
+```
+
+### Résultats Quantitatifs
+| Métrique | Valeur |
+|----------|--------|
+| A        | 85%    |
+| B        | 92%    |
+
+::alert{type="info"}
+Point important à noter
+::
+
+## Conclusion
+
+::centered
+### Message Principal
+Synthèse en quelques mots
+::
+```
+
+### Présentation avec Colonnes
+```markdown
+---
+title: "Comparaison de Solutions"
+theme: dsfr
+---
+
+# Comparaison de Solutions
+Analyse comparative
+
+## Vue d'Ensemble
+Introduction aux solutions
+
+## Critères d'Évaluation
+
+::three-columns
+### Performance
+- Rapidité
+- Scalabilité
+- Fiabilité
+
+### Coût
+- Initial
+- Maintenance
+- Formation
+
+### Facilité
+- Déploiement
+- Utilisation
+- Support
+::
+
+## Solution A
+
+### Avantages
+- Avantage 1
+- Avantage 2
+
+### Inconvénients
+- Inconvénient 1
+- Inconvénient 2
+
+## Solution B
+
+### Avantages
+- Avantage 1
+- Avantage 2
+
+### Inconvénients
+- Inconvénient 1
+- Inconvénient 2
+
+## Recommandation
+
+::centered
+**Solution recommandée: Solution A**
+
+Justification en une phrase
+::
+```
+
+## Checklist de Validation
+
+Avant de finaliser le contenu, vérifier:
+
+- [ ] Frontmatter complet et valide
+- [ ] UN SEUL H1 au début
+- [ ] H2 pour sections principales
+- [ ] H3 uniquement sous H2 (pour verticales)
+- [ ] Pas plus de 5-7 points par diapositive
+- [ ] Code formaté avec triple backticks
+- [ ] Images optimisées et chemins corrects
+- [ ] Composants MDC bien fermés (`::`)
+- [ ] Pas de lignes vides excessives
+- [ ] Ponctuation et orthographe vérifiées
+
+## Conseils pour un Contenu Efficace
+
+### Rythme
+- Alterner contenu dense et diapositives simples
+- Prévoir 2-3 minutes par diapositive H2
+- 30 secondes par diapositive H3
+
+### Visuel
+- Privilégier les listes à puces aux paragraphes
+- Utiliser `::centered` pour messages clés
+- Ajouter des images pour illustrer concepts complexes
+
+### Narration
+- Commencer par le "pourquoi"
+- Développer le "comment"
+- Conclure avec le "quoi faire"
+
+### Interactivité
+- Poser des questions rhétoriques
+- Inclure des exemples concrets
+- Prévoir des pauses de réflexion
+
+## Erreurs à Éviter
+
+1. ❌ Plusieurs H1 dans la présentation
+2. ❌ H3 sans H2 parent
+3. ❌ Paragraphes trop longs (> 3 lignes)
+4. ❌ Plus de 7 points par diapositive
+5. ❌ Images non optimisées (> 500KB)
+6. ❌ Composants MDC mal fermés
+7. ❌ Oublier le frontmatter
+8. ❌ Utiliser des chemins relatifs pour images
+
+## Commandes Utiles
+
+Une fois le contenu créé:
+
+1. Placer le fichier dans `presentations/nom-fichier.md`
+2. Compiler les thèmes: `pnpm build:themes`
+3. Lancer le serveur: `pnpm dev`
+4. Accéder: `http://localhost:3000`
+5. Visualiser: `http://localhost:3000/slides/nom-fichier`
+
+## Navigation dans la Présentation
+
+- `→` / `←` : Diapositives horizontales (H2)
+- `↓` / `↑` : Diapositives verticales (H3)
+- `Espace` : Diapositive suivante
+- `Esc` : Vue d'ensemble
+- `F` : Plein écran
+- `S` : Notes de présentateur (si activées)
+
+## Support et Ressources
+
+- Documentation complète: `docs/`
+- Exemples: `presentations/`
+- Guide architecture: `docs/architecture.llm.txt`
+- Format détaillé: `docs/presentation-format.llm.txt`
+
+---
+
+**Note**: Ce système utilise MDC (Markdown Component) qui permet d'intégrer des composants Vue dans du Markdown standard. Tous les composants doivent être encadrés par `::nom-composant` et `::`.

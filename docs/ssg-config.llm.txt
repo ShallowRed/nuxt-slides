@@ -1,0 +1,355 @@
+# Static Site Generation Configuration
+
+## Overview
+Nuxt Nitro prerendering system generates static HTML/JSON for all presentations.
+
+## Configuration Location
+`nuxt.config.ts`
+
+## Prerender Settings
+
+### Basic Config
+```ts
+nitro: {
+  prerender: {
+    crawlLinks: true,              // Follow <NuxtLink> from home page
+    routes: ['/api/presentations'] // Manually add API list endpoint
+  }
+}
+```
+
+### Route Discovery Hook
+```ts
+hooks: {
+  'nitro:config': async (nitroConfig) => {
+    // Read presentations directory
+    const files = await readdir('presentations/')
+    const slugs = files
+      .filter(file => file.endsWith('.md'))
+      .map(file => file.replace('.md', ''))
+    
+    // Generate routes for each presentation
+    const routes = slugs.flatMap(slug => [
+      `/slides/${slug}`,              // Page route
+      `/api/presentations/${slug}`     // API route
+    ])
+    
+    // Add to prerender list
+    nitroConfig.prerender.routes.push(...routes)
+  }
+}
+```
+
+**Behavior**:
+- Runs during build (`pnpm generate`)
+- Discovers all `.md` files automatically
+- No manual route list maintenance needed
+
+---
+
+## Build Process
+
+### Commands
+```bash
+pnpm generate           # Full static generation
+pnpm preview:static     # Generate + preview locally
+pnpm preview            # Preview last build
+```
+
+### Build Flow
+```
+1. pnpm generate
+   ↓
+2. Runs build:themes (pre-script)
+   ↓
+3. nuxt generate
+   ↓
+4. nitro:config hook discovers routes
+   ↓
+5. Prerenders pages (HTML)
+   ↓
+6. Prerenders API routes (JSON)
+   ↓
+7. Outputs to .output/public/
+```
+
+---
+
+## Output Structure
+
+### Directory Layout
+```
+.output/public/
+├── index.html                          # Home page
+├── 200.html                            # SPA fallback
+├── slides/
+│   ├── my-talk/
+│   │   └── index.html                  # Presentation page
+│   └── workshop/
+│       └── index.html
+├── api/
+│   ├── presentations.json              # List endpoint
+│   └── presentations/
+│       ├── my-talk.json                # Content endpoint
+│       └── workshop.json
+├── themes/
+│   ├── dsfr.css                        # Theme assets
+│   └── minimal.css
+├── _nuxt/                              # JS/CSS bundles
+│   ├── [hash].js
+│   └── [hash].css
+└── favicon.ico
+```
+
+### HTML Pages
+- Full SSR-rendered HTML with hydration data
+- Instant first paint
+- Vue hydrates for interactivity
+- Client-side routing after load
+
+### JSON API Routes
+- Prerendered as static files
+- `$fetch('/api/presentations')` fetches JSON file
+- No server required
+
+---
+
+## Hydration Strategy
+
+### Initial Load (Static HTML)
+1. Browser requests `/slides/my-talk`
+2. CDN/host serves `slides/my-talk/index.html`
+3. HTML contains pre-rendered presentation structure
+4. Vue hydrates, Reveal.js initializes
+
+### Subsequent Navigation
+1. User clicks link to `/slides/workshop`
+2. Vue Router handles client-side
+3. `usePresentation('workshop')` checks cache
+4. If not cached, fetches `/api/presentations/workshop.json`
+5. Parses and renders without page reload
+
+### API "Calls"
+```ts
+const response = await $fetch('/api/presentations/my-talk')
+```
+- Dev mode: Hits server endpoint
+- Production (SSG): Fetches `/api/presentations/my-talk.json` file
+- Same interface, zero config change
+
+---
+
+## Deployment
+
+### Generic Static Host
+Upload `.output/public/` contents to:
+- Netlify
+- Vercel
+- Cloudflare Pages
+- GitHub Pages
+- S3 + CloudFront
+- Any CDN
+
+### SPA Fallback Configuration
+Configure host to serve `/200.html` for unknown routes (client-side routing).
+
+**Netlify** (`netlify.toml`):
+```toml
+[build]
+  command = "pnpm generate"
+  publish = ".output/public"
+
+[[redirects]]
+  from = "/*"
+  to = "/200.html"
+  status = 200
+```
+
+**Vercel** (`vercel.json`):
+```json
+{
+  "buildCommand": "pnpm generate",
+  "outputDirectory": ".output/public",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/200.html" }
+  ]
+}
+```
+
+---
+
+## Advanced Configuration
+
+### Ignore Routes
+Skip certain paths from prerendering:
+```ts
+nitro: {
+  prerender: {
+    ignore: ['/admin', '/api/private-data']
+  }
+}
+```
+
+### Concurrency Control
+```ts
+nitro: {
+  prerender: {
+    concurrency: 10,    // Parallel prerender limit
+    interval: 100       // Delay between routes (ms)
+  }
+}
+```
+
+### Error Handling
+```ts
+nitro: {
+  prerender: {
+    failOnError: true   // Fail build on prerender errors
+  }
+}
+```
+
+### Route Generation Hook
+```ts
+nitro: {
+  hooks: {
+    'prerender:generate'(route) {
+      // Skip specific routes dynamically
+      if (route.route?.includes('draft')) {
+        route.skip = true
+      }
+    }
+  }
+}
+```
+
+---
+
+## CI/CD Integration
+
+### GitHub Actions Example
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm generate
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .output/public
+```
+
+---
+
+## Performance Benefits
+
+### Before (SSR)
+- Server runtime required
+- Dynamic rendering per request
+- API calls hit server
+- Scaling complexity
+
+### After (SSG)
+- No server needed
+- Instant page loads (pre-rendered)
+- "API calls" fetch static files
+- Infinite scaling via CDN
+- Global distribution
+- Zero cold starts
+
+---
+
+## Incremental Static Regeneration (ISR)
+
+### Vercel/Netlify Support
+```ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/slides/**': { 
+      swr: 3600  // Revalidate after 1 hour
+    }
+  }
+})
+```
+
+Combines:
+- Static generation at build time
+- Automatic regeneration after TTL
+- Fresh content without full rebuilds
+
+---
+
+## Content Updates
+
+### Workflow
+1. Edit/add `.md` files in `presentations/`
+2. Commit to git
+3. CI/CD triggers `pnpm generate`
+4. Deploys new `.output/public/`
+5. CDN cache invalidates
+
+### Manual Update
+```bash
+git pull
+pnpm generate
+# Upload .output/public/
+```
+
+---
+
+## Troubleshooting
+
+### Route not prerendered
+**Check**:
+1. Is route linked from home page? (crawlLinks enabled)
+2. Add to `nitro.prerender.routes` manually
+3. Check build logs for discovery
+
+### API route 404
+**Fix**: Add route to prerender list:
+```ts
+nitro: {
+  prerender: {
+    routes: ['/api/your-endpoint']
+  }
+}
+```
+
+### Blank page on refresh
+**Cause**: Host not serving SPA fallback  
+**Fix**: Configure host to serve `/200.html` for all routes
+
+### Outdated content
+**Cause**: CDN cache  
+**Fix**: Invalidate CDN cache or wait for TTL
+
+---
+
+## Development vs Production
+
+### Dev Mode
+- `pnpm dev`: SSR with hot-reload
+- API routes hit server
+- Themes watch for changes
+
+### Production (SSG)
+- `pnpm generate`: Static files
+- API routes are JSON files
+- Themes pre-compiled
+- Deploy to CDN

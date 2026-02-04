@@ -1,0 +1,2 @@
+# Don't ignore presentations folder (Vercel ignores it by default)
+!presentations/

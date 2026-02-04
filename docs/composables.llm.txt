@@ -1,0 +1,251 @@
+# Composables Reference
+
+## usePresentation(slug: string)
+**Location**: `src/composables/usePresentation.ts`
+
+Loads and caches presentation data via useAsyncData.
+
+**Parameters**:
+- `slug`: Presentation identifier (filename without .md)
+
+**Returns**: `{ data, error, status, refresh }`
+- `data`: Ref<PresentationData> - { slides, metadata }
+- `error`: Ref<Error | null>
+- `status`: Ref<'idle' | 'pending' | 'success' | 'error'>
+- `refresh`: () => Promise<void>
+
+**Process**:
+1. Fetches `/api/presentations/${slug}` (returns { content: string })
+2. Parses MDC via `parseMarkdown(content)` → AST
+3. Merges metadata: `DEFAULT_METADATA + ast.data`
+4. Parses slides: `parseSlides(ast)` → Slide[]
+5. Returns { slides, metadata }
+
+**Cache Key**: `presentation-${slug}`
+
+**Default Value**: `{ slides: [], metadata: DEFAULT_METADATA }`
+
+**Usage**:
+```ts
+const { data, error } = usePresentation('my-talk')
+// data.value.slides: Slide[]
+// data.value.metadata: { theme, transition, center, ... }
+```
+
+---
+
+## useSlideParser()
+**Location**: `src/composables/useSlideParser.ts`
+
+Converts MDC AST to structured slide array.
+
+**Returns**: `{ parseSlides, getHeadingLevel }`
+
+### parseSlides(ast: MDCParserResult): Slide[]
+Splits content by heading hierarchy.
+
+**Algorithm**:
+1. Iterate `ast.body.children` nodes
+2. Track state: `foundFirstH1`, `inH1Section`
+3. **H1 detection**: First H1 starts title section
+4. **H2 detection**: Ends H1 section, starts new horizontal section
+5. **HR detection**: Alternative horizontal separator
+6. **Section creation**: Group nodes, detect heading level, create Slide
+7. **Vertical processing**: Pass each section to `processVerticalSlides()`
+
+**Vertical Slide Logic**:
+- If section contains H3 nodes, split into vertical slides
+- Each H3 starts new vertical slide
+- Return `{ body, verticalSlides: [...] }` if multiple verticals found
+
+**Output**:
+```ts
+Slide[] = [
+  { body: {...}, headingLevel: 'h1' },                    // Title
+  { body: {...}, headingLevel: 'h2' },                    // Horizontal
+  { body: {...}, verticalSlides: [                        // Horizontal with verticals
+      { body: {...}, headingLevel: 'h3' },
+      { body: {...}, headingLevel: 'h3' }
+    ]
+  }
+]
+```
+
+### getHeadingLevel(children: any[]): string | undefined
+Finds first element node with tag matching `/^h[1-6]$/`, returns tag name.
+
+**Usage**:
+```ts
+const { parseSlides } = useSlideParser()
+const slides = parseSlides(ast)
+```
+
+---
+
+## useReveal(container: Ref<HTMLElement | null>, config: Partial<RevealConfig>)
+**Location**: `src/composables/useReveal.ts`
+
+Manages Reveal.js instance lifecycle.
+
+**Parameters**:
+- `container`: Ref to DOM element for Reveal.js
+- `config`: Override default configuration
+
+**Returns**: `{ initialize, destroy, getInstance, sync, syncSlide, slide, getIndices, on, off }`
+
+### initialize(): Promise<any>
+1. Checks `container.value` exists
+2. Dynamic imports: `import('reveal.js')`
+3. Merges config: `{ ...DEFAULT_REVEAL_CONFIG, ...config }`
+4. Creates instance: `new Reveal(container.value, mergedConfig)`
+5. Calls `revealInstance.initialize()`
+6. **Calls `revealInstance.sync()`** - Critical for Vue/Nuxt apps to pick up dynamically rendered content
+7. Returns instance
+
+### sync(): void
+Syncs Reveal.js with current DOM state. **Call after dynamically adding/removing slides or content**.
+
+Essential for:
+- Lightbox (`data-preview-image`)
+- Video preview (`data-preview-video`)
+- Link preview (`data-preview-link`)
+- Fragment animations (`.fragment`)
+- Auto-animate (`data-auto-animate`)
+
+### syncSlide(slide: HTMLElement): void
+Syncs a specific slide after content changes.
+
+### destroy(): void
+Calls `revealInstance.destroy()`, sets to null.
+
+### getInstance(): any
+Returns current Reveal.js instance or null.
+
+### slide(indexh, indexv?, indexf?): void
+Navigate to a specific slide by indices.
+
+### getIndices(): { h, v, f }
+Get current slide indices (horizontal, vertical, fragment).
+
+### on(event, callback): void
+Add Reveal.js event listener.
+
+### off(event, callback): void
+Remove Reveal.js event listener.
+
+**Usage**:
+```ts
+const container = ref<HTMLElement | null>(null)
+const { initialize, destroy, sync, on } = useReveal(container, { transition: 'fade' })
+
+onMounted(async () => {
+  await initialize()
+  
+  // Listen to slide changes
+  on('slidechanged', (event) => {
+    console.log('Moved to slide', event.indexh, event.indexv)
+  })
+})
+onUnmounted(() => {
+  destroy()
+})
+```
+
+---
+
+## useRevealSync()
+**Location**: `src/composables/useRevealSync.ts`
+
+Access Reveal.js sync function from child components (via provide/inject).
+
+**Returns**: `{ sync, getInstance }`
+
+### sync(): void
+Triggers Reveal.js sync. Use after async content changes in MDC components.
+
+### getInstance(): any
+Returns current Reveal.js instance or null.
+
+**Usage in MDC components**:
+```ts
+const { sync } = useRevealSync()
+
+onMounted(async () => {
+  await loadSomeAsyncContent()
+  sync() // Tell Reveal.js to rescan the DOM
+})
+```
+
+---
+
+## useTheme(themeName: Ref<string> | string)
+**Location**: `src/composables/useTheme.ts`
+
+Dynamic CSS theme loading/unloading.
+
+**Parameters**:
+- `themeName`: Theme identifier (static or reactive)
+
+**Returns**: `{ loadTheme, unloadTheme, watchTheme }`
+
+### loadTheme(theme: string): void
+1. Removes existing `<link>` if present
+2. Creates new `<link rel="stylesheet" href="/themes/${theme}.css">`
+3. Appends to `document.head`
+
+### unloadTheme(): void
+Removes theme `<link>` from DOM, sets to null.
+
+### watchTheme(): void
+If `themeName` is Ref, watches for changes and calls `loadTheme(newValue)`.
+
+**Usage**:
+```ts
+const theme = ref('dsfr')
+const { loadTheme, unloadTheme, watchTheme } = useTheme(theme)
+
+onMounted(() => {
+  loadTheme('dsfr')
+  watchTheme() // Auto-reload on theme.value change
+})
+onUnmounted(() => {
+  unloadTheme()
+})
+```
+
+---
+
+## Common Patterns
+
+### SSR-Safe Data Loading
+Always use `useAsyncData` for data fetching:
+```ts
+const { data } = await useAsyncData('key', async () => {
+  return await $fetch('/api/endpoint')
+})
+```
+
+### Client-Only Initialization
+Use `onMounted` for browser APIs:
+```ts
+onMounted(async () => {
+  const { initialize } = useReveal(container, config)
+  await initialize()
+})
+```
+
+### Reactive Configuration
+Convert props to refs for reactivity:
+```ts
+const themeRef = toRef(props, 'theme')
+const { loadTheme, watchTheme } = useTheme(themeRef)
+```
+
+### Cleanup Pattern
+Always cleanup in `onUnmounted`:
+```ts
+onUnmounted(() => {
+  destroy()
+  unloadTheme()
+})
+```

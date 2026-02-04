@@ -1,0 +1,6 @@
+# Semi-Private Presentations
+
+This folder contains password-protected presentations.
+They require a password to access but don't need GitHub authentication.
+
+Files in this folder are gitignored for security.

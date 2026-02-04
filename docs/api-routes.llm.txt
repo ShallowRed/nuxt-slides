@@ -1,0 +1,154 @@
+# API Routes Reference
+
+## GET /api/presentations
+**Location**: `src/server/api/presentations.get.ts`
+
+Returns list of all presentations with metadata.
+
+**Process**:
+1. Reads `presentations/` directory via `readdir()`
+2. Filters `.md` files
+3. For each file:
+   - Extracts slug: filename without `.md`
+   - Reads file content
+   - Parses with `parseMarkdown(content)`
+   - Extracts `title` from `ast.data?.title` or uses slug
+   - Extracts `theme` from `ast.data?.theme` or defaults to 'dsfr'
+4. Returns array of presentation objects
+
+**Response Schema**:
+```ts
+Array<{
+  slug: string        // Filename without .md
+  title: string       // From frontmatter or slug fallback
+  theme: string       // From frontmatter or 'dsfr' default
+  filename: string    // Original filename with .md
+}>
+```
+
+**Example Response**:
+```json
+[
+  {
+    "slug": "my-talk",
+    "title": "My Amazing Talk",
+    "theme": "dsfr",
+    "filename": "my-talk.md"
+  },
+  {
+    "slug": "workshop",
+    "title": "Workshop Title",
+    "theme": "minimal",
+    "filename": "workshop.md"
+  }
+]
+```
+
+**Error Handling**: Returns `[]` on error, logs to console.
+
+**SSG**: Prerendered to `/api/presentations.json` during `pnpm generate`.
+
+---
+
+## GET /api/presentations/[slug]
+**Location**: `src/server/api/presentations/[slug].get.ts`
+
+Returns raw markdown content for specific presentation.
+
+**Parameters**:
+- `slug`: Route parameter (filename without .md)
+
+**Process**:
+1. Extracts slug from route: `getRouterParam(event, 'slug')`
+2. Validates slug exists
+3. Constructs path: `presentations/${slug}.md`
+4. Reads file via `readFile(path, 'utf-8')`
+5. Returns content object
+
+**Response Schema**:
+```ts
+{
+  content: string  // Raw markdown with frontmatter
+}
+```
+
+**Example Response**:
+```json
+{
+  "content": "---\ntitle: My Talk\ntheme: dsfr\n---\n\n# First Slide\n\nContent here"
+}
+```
+
+**Error Handling**: Returns 404 with error message if file not found.
+
+**SSG**: Prerendered to `/api/presentations/${slug}.json` during generation.
+
+---
+
+## SSG Prerendering
+
+### Route Discovery
+`nuxt.config.ts` → `hooks['nitro:config']`:
+```ts
+const files = await readdir('presentations/')
+const slugs = files.filter(f => f.endsWith('.md')).map(f => f.replace('.md', ''))
+const routes = slugs.flatMap(slug => [
+  `/slides/${slug}`,
+  `/api/presentations/${slug}`
+])
+nitroConfig.prerender.routes.push(...routes)
+```
+
+### Build Output
+```
+.output/public/
+├── api/
+│   ├── presentations.json              # List endpoint
+│   └── presentations/
+│       ├── my-talk.json                # Individual presentations
+│       └── workshop.json
+```
+
+### Client Fetching
+Pages use `$fetch` to retrieve prerendered JSON:
+```ts
+const response = await $fetch<{ content: string }>(`/api/presentations/${slug}`)
+```
+
+In production (SSG), this fetches static JSON file, not server endpoint.
+
+---
+
+## Adding New Endpoints
+
+### Example: GET /api/presentations/[slug]/metadata
+```ts
+// src/server/api/presentations/[slug]/metadata.get.ts
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
+import { readFile } from 'node:fs/promises'
+
+export default defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, 'slug')
+  const content = await readFile(`presentations/${slug}.md`, 'utf-8')
+  const ast = await parseMarkdown(content)
+  
+  return {
+    title: ast.data?.title || slug,
+    theme: ast.data?.theme || 'dsfr',
+    slideCount: ast.body?.children.filter(n => 
+      n.type === 'element' && ['h1', 'h2', 'hr'].includes(n.tag)
+    ).length
+  }
+})
+```
+
+### Prerendering New Route
+Add to `nuxt.config.ts`:
+```ts
+hooks: {
+  'nitro:config': async (nitroConfig) => {
+    const routes = slugs.map(slug => `/api/presentations/${slug}/metadata`)
+    nitroConfig.prerender.routes.push(...routes)
+  }
+}
+```

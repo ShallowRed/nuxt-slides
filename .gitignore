@@ -1,0 +1,47 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# pnpm
+pnpm-lock.yaml
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Sensitive presentations (keep structure but ignore content)
+presentations/private/*
+!presentations/private/.gitkeep
+presentations/semi-private/*
+!presentations/semi-private/.gitkeep
+presentations/draft/*
+!presentations/draft/.gitkeep
+
+# Public presentations - keep only examples
+presentations/public/*
+!presentations/public/example.md
+!presentations/public/example-minimal.md
+
+# Other sensitive presentation files
+presentations/*.csv
+
+# Exports (may contain sensitive content)
+export/*
+!export/.gitkeep

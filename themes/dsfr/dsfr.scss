@@ -1,0 +1,54 @@
+/**
+ * DSFR-inspired theme for reveal.js presentations
+ * Based on Système de Design de l'État Français
+ * 
+ * This is the main entry point that imports all partial files.
+ */
+
+// Import all modules first - @use rules must come before any other rules
+@use 'variables' as *;
+@use 'base';
+@use 'typography';
+@use 'components';
+@use 'utilities';
+
+// Generate CSS custom properties from Sass variables
+:root {
+  // Primary colors - Bleu France
+  --dsfr-blue-france-sun-113: #{$dsfr-blue-france-sun-113};
+  --dsfr-blue-france-main-525: #{$dsfr-blue-france-main-525};
+  --dsfr-blue-france-850: #{$dsfr-blue-france-850};
+  --dsfr-blue-france-925: #{$dsfr-blue-france-925};
+  --dsfr-blue-france-950: #{$dsfr-blue-france-950};
+  --dsfr-blue-france-975: #{$dsfr-blue-france-975};
+
+  // Secondary colors - Rouge Marianne
+  --dsfr-red-marianne-main-472: #{$dsfr-red-marianne-main-472};
+  --dsfr-red-marianne-850: #{$dsfr-red-marianne-850};
+  --dsfr-red-marianne-925: #{$dsfr-red-marianne-925};
+
+  // Accent colors
+  --dsfr-green-emeraude-main-632: #{$dsfr-green-emeraude-main-632};
+  --dsfr-green-emeraude-950: #{$dsfr-green-emeraude-950};
+
+  // Neutral colors
+  --dsfr-grey-950: #{$dsfr-grey-950};
+  --dsfr-grey-1000: #{$dsfr-grey-1000};
+  --dsfr-grey-200: #{$dsfr-grey-200};
+  --dsfr-grey-425: #{$dsfr-grey-425};
+  --dsfr-grey-625: #{$dsfr-grey-625};
+
+  // Text colors
+  --dsfr-text-title: #{$dsfr-text-title};
+  --dsfr-text-default: #{$dsfr-text-default};
+  --dsfr-text-mention: #{$dsfr-text-mention};
+
+  // Backgrounds
+  --dsfr-background-default: #{$dsfr-background-default};
+  --dsfr-background-alt: #{$dsfr-background-alt};
+  --dsfr-background-contrast: #{$dsfr-background-contrast};
+
+  // Borders
+  --dsfr-border-default: #{$dsfr-border-default};
+  --dsfr-border-action: #{$dsfr-border-action};
+}

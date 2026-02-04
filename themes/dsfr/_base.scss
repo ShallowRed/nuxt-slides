@@ -1,0 +1,41 @@
+/**
+ * Base reveal.js overrides and global styles
+ */
+
+@use 'variables' as *;
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: var(--dsfr-background-default);
+}
+
+.reveal {
+  font-family: $dsfr-font-family;
+  font-size: $dsfr-font-size-base;
+  font-weight: 400;
+  color: var(--dsfr-text-default);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  height: 100%;
+}
+
+.reveal ::selection {
+  color: var(--dsfr-grey-1000) !important;
+  background: var(--dsfr-blue-france-main-525);
+  text-shadow: none;
+}
+
+.reveal ::-moz-selection {
+  color: var(--dsfr-grey-1000) !important;
+  background: var(--dsfr-blue-france-main-525);
+  text-shadow: none;
+}

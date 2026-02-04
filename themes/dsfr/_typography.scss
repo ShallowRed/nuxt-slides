@@ -1,0 +1,196 @@
+/**
+ * Typography styles for headers, text, and inline elements
+ */
+
+@use 'variables' as *;
+
+// Headers
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 $dsfr-spacing-medium 0;
+  color: var(--dsfr-text-title);
+  font-family: $dsfr-font-family;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+.reveal h2 em {
+    font-style: normal;
+    color: $as-contrast-title-em;
+  }
+.reveal h3 em {
+    font-style: normal;
+    color: $dsfr-blue-france-main-525;
+  }
+
+.reveal h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--dsfr-blue-france-main-525);
+  margin-bottom: $dsfr-spacing-medium;
+  background: linear-gradient(89deg, #2828B2 30.04%, #8F8FFC 100.41%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.reveal h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--dsfr-text-title);
+  padding-bottom: 0.2em;
+  margin-bottom: $dsfr-spacing-medium;
+}
+
+.reveal h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--dsfr-blue-france-main-525);
+  margin-bottom: 1em;
+}
+
+.reveal h4 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.reveal h5 {
+  font-size: 1.5rem;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+
+// Paragraph and inline text
+.reveal p {
+  margin: $dsfr-spacing-medium 0;
+  line-height: $dsfr-line-height-base;
+  text-align: left;
+}
+
+.reveal strong,
+.reveal b {
+  font-weight: 700;
+  color: var(--dsfr-text-title);
+}
+
+.reveal em {
+  font-style: italic;
+}
+
+.reveal small {
+  font-size: 0.75em;
+  color: var(--dsfr-text-mention);
+}
+
+// Text size utilities
+.reveal .text-sm {
+  font-size: 0.85em;
+}
+
+.reveal .text-xs {
+  font-size: 0.75em;
+}
+
+.reveal .text-lg {
+  font-size: 1.15em;
+}
+
+.reveal section.slide-h1,
+.reveal section.slide-h2 {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.reveal section.slide-h2 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--dsfr-grey-950) !important;
+  }
+
+  p {
+    color: var(--dsfr-grey-625) !important;
+  }
+}
+
+.reveal section.slide-h3 {
+
+  display: flex !important;
+  flex-direction: column;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--dsfr-test-title) !important;
+  }
+
+  p {
+    color: var(--dsfr-text-default) !important;
+  }
+
+  header {
+    height: 8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  hgroup {
+    height: 8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+
+    h3 {
+      margin: 0;
+    }
+
+    p {
+      margin: 0.75em 0 0 0;
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--dsfr-text-mention) !important;
+    }
+  }
+
+
+  article {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+.reveal section {
+
+  article {
+    width: 100%;
+  }
+}

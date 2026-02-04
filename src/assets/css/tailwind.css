@@ -1,0 +1,52 @@
+/* 
+ * Tailwind CSS v4 with scoped Preflight.
+ * Preflight is applied only within .tailwind-app (non-presentation pages).
+ * This avoids conflicts with Reveal.js styles on /slides/* routes.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@plugin "daisyui";
+
+/* Scoped Preflight - only applies within .tailwind-app */
+@layer base {
+  :root {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  }
+  .tailwind-app {
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      border: 0 solid;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: inherit;
+    }
+
+    img, video {
+      max-width: 100%;
+      height: auto;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    ul, ol {
+      list-style: none;
+    }
+  }
+}

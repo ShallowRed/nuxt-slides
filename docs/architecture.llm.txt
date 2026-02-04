@@ -1,0 +1,214 @@
+# Nuxt Slides Architecture
+
+## System Overview
+Nuxt 3 presentation system converting MDC markdown to reveal.js slides with SSG support.
+
+## Core Stack
+- Nuxt 3.17.7 (SSR/SSG, file-based routing)
+- @nuxtjs/mdc 0.10.0 (markdown parsing, Vue component support)
+- reveal.js 5.2.1 (presentation framework, client-only)
+- SASS 1.83.2 (theme compilation)
+- pnpm 9.0.0 (package manager)
+
+## Directory Structure
+```
+src/
+├── types/presentation.ts          # Type definitions (Slide, PresentationMetadata, RevealConfig)
+├── config/presentation.ts         # Constants (defaults, MDC component mappings)
+├── composables/                   # Business logic
+│   ├── usePresentation.ts         # Data loading with useAsyncData
+│   ├── useSlideParser.ts          # MDC AST → Slide[] conversion
+│   ├── useReveal.ts               # Reveal.js lifecycle management
+│   └── useTheme.ts                # Dynamic CSS theme loading
+├── components/
+│   ├── RevealPresentation.vue     # Reveal.js wrapper component
+│   └── mdc/                       # Custom MDC components (ThreeColumns, Alert, etc.)
+├── pages/
+│   ├── index.vue                  # Presentation list (useAsyncData)
+│   └── slides/[slug].vue          # Presentation viewer
+├── server/api/
+│   ├── presentations.get.ts       # List all presentations
+│   └── presentations/[slug].get.ts # Get presentation content
+└── public/themes/                 # Compiled CSS themes (generated)
+
+presentations/               # Source markdown files
+themes/                     # SCSS theme source files
+scripts/build-themes.js     # Theme compilation script
+plugins/theme-watcher.js    # Vite plugin for theme hot-reload
+```
+
+## Data Flow
+```
+[.md file] → [API route] → [usePresentation] → [useSlideParser] → [Slide[]]
+                                ↓
+                         [useAsyncData caching]
+                                ↓
+                    [RevealPresentation + MDCRenderer]
+                                ↓
+                     [useReveal + useTheme]
+                                ↓
+                         [Rendered slides]
+```
+
+## Key Patterns
+
+### Separation of Concerns
+- **Types** (`src/types/`): Shared TypeScript interfaces
+- **Config** (`src/config/`): Constants, no logic
+- **Composables** (`src/composables/`): Pure functions, testable business logic
+- **Components**: Presentation only, delegates to composables
+- **Pages**: Composition, no logic
+
+### SSR/SSG Strategy
+- All data fetching uses `useAsyncData` for SSR compatibility
+- Reveal.js dynamically imported client-side only
+- Presentation routes auto-discovered at build time via `nitro:config` hook
+- API routes prerendered as JSON files
+
+### Slide Parsing Rules
+1. **H1**: Title slide (single, keeps content together until first H2)
+2. **H2**: Horizontal slide separator
+3. **H3**: Vertical slide separator (nested under H2)
+4. **HR** (`---`): Alternative horizontal separator
+5. Each slide tagged with `headingLevel` for CSS classes (`slide-h1`, `slide-h2`, etc.)
+
+### Theme System
+- SCSS sources in `themes/[name]/`
+- Compiled to `public/themes/[name].css`
+- Loaded dynamically via `<link>` tag injection
+- Hot-reload in dev via Vite plugin
+- Per-presentation theme selection via frontmatter
+
+## Component Responsibilities
+
+### usePresentation(slug)
+Loads presentation data. Returns `{ data, error, status, refresh }` from useAsyncData.
+- Fetches `/api/presentations/${slug}`
+- Parses MDC via `parseMarkdown`
+- Extracts frontmatter metadata
+- Invokes `useSlideParser().parseSlides()`
+
+### useSlideParser()
+Converts MDC AST to Slide array. Returns `{ parseSlides, getHeadingLevel }`.
+- Detects H1/H2/H3/HR nodes
+- Groups content into horizontal sections
+- Processes H3 for vertical slides
+- Assigns heading levels for styling
+
+### useReveal(container, config)
+Manages Reveal.js instance. Returns `{ initialize, destroy, getInstance }`.
+- Dynamic imports reveal.js
+- Merges config with defaults
+- Handles initialization/cleanup
+
+### useTheme(themeName)
+Theme CSS management. Returns `{ loadTheme, unloadTheme, watchTheme }`.
+- Creates/removes `<link>` elements
+- Watches reactive theme changes
+
+### RevealPresentation.vue
+Thin wrapper component.
+- Props: theme, transition, center, config
+- Uses useTheme + useReveal
+- Lifecycle: onMounted (initialize), onUnmounted (cleanup)
+- Provides slot for slide content
+
+### pages/slides/[slug].vue
+Presentation viewer page.
+- Extracts slug from route
+- Calls usePresentation(slug)
+- Maps MDC components via resolveComponent
+- Renders with RevealPresentation + MDCRenderer
+- Handles loading/error states
+
+## SSG Implementation
+
+### Route Discovery
+`nuxt.config.ts` → `hooks['nitro:config']`:
+- Reads `presentations/` directory
+- Generates routes: `/slides/${slug}` and `/api/presentations/${slug}`
+- Pushes to `nitroConfig.prerender.routes`
+
+### Build Process
+1. `pnpm generate` → runs `build:themes` first
+2. Discovers presentation routes via hook
+3. Prerenders pages as HTML
+4. Prerenders API routes as JSON
+5. Outputs to `.output/public/`
+
+### Client Hydration
+- Initial load: static HTML
+- Hydration: Vue takes over
+- Navigation: client-side routing
+- Data: fetches prerendered JSON
+
+## Configuration Files
+
+### nuxt.config.ts
+- srcDir: 'src/'
+- modules: [@nuxtjs/mdc]
+- vite.plugins: [themeWatcher()] for dev hot-reload
+- nitro.prerender: crawlLinks + discovered routes
+- hooks['nitro:config']: route discovery
+
+### src/config/presentation.ts
+```ts
+DEFAULT_METADATA = { theme: 'dsfr', transition: 'slide', center: true }
+DEFAULT_REVEAL_CONFIG = { hash: true, slideNumber: 'c/t', ... }
+MDC_COMPONENTS = { 'three-columns': 'ThreeColumns', ... }
+```
+
+### src/types/presentation.ts
+```ts
+interface Slide { body: any, verticalSlides?: Slide[], headingLevel?: string }
+interface PresentationMetadata { theme: string, transition: string, center: boolean }
+interface PresentationData { slides: Slide[], metadata: PresentationMetadata }
+interface RevealConfig { hash?: boolean, center?: boolean, ... }
+```
+
+## Scripts
+
+### package.json
+- `dev`: Builds themes → starts dev server
+- `build`: Builds themes → SSR build
+- `generate`: Builds themes → static generation
+- `build:themes`: Compiles all SCSS themes
+- `dev:theme <name>`: Watch-compile specific theme
+
+### scripts/build-themes.js
+- Reads themes/ directory
+- Compiles SCSS → CSS via sass.compile()
+- Outputs to public/themes/
+- Supports --watch flag
+- Accepts theme name argument
+
+### plugins/theme-watcher.js
+Vite plugin for dev mode:
+- Watches themes/ directory
+- Triggers full-reload on SCSS changes
+- Compiles via sass.compile() in buildStart hook
+
+## Extension Points
+
+### New Slide Parser
+Create composable implementing `{ parseSlides }` interface, swap in usePresentation.
+
+### New Theme
+1. Create `themes/[name]/[name].scss`
+2. Run `pnpm build:theme [name]`
+3. Use `theme: [name]` in frontmatter
+
+### New MDC Component
+1. Create `src/components/mdc/Component.vue`
+2. Add to `MDC_COMPONENTS` in config
+3. Use `::component-name` in markdown
+
+### Reveal.js Plugins
+Add to DEFAULT_REVEAL_CONFIG or pass custom config to RevealPresentation.
+
+## Performance Optimizations
+- SSG: All routes prerendered at build time
+- Code splitting: Reveal.js loaded client-side only
+- Lazy loading: Themes loaded on demand
+- Caching: useAsyncData deduplicates by key
+- Tree-shaking: Unused MDC components removed

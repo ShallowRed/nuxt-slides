@@ -1,0 +1,56 @@
+/**
+ * DSFR Design Tokens
+ * Based on Système de Design de l'État Français
+ */
+
+// Primary colors - Bleu France
+$dsfr-blue-france-sun-113: #000091 !default;
+$dsfr-blue-france-main-525: #000091 !default;
+$dsfr-blue-france-850: #e3e3fd !default;
+$dsfr-blue-france-925: #ececfe !default;
+$dsfr-blue-france-950: #f5f5fe !default;
+$dsfr-blue-france-975: #f5f5fe !default;
+
+// Secondary colors - Rouge Marianne
+$dsfr-red-marianne-main-472: #e1000f !default;
+$dsfr-red-marianne-850: #fddde0 !default;
+$dsfr-red-marianne-925: #fee9eb !default;
+
+// Accent colors
+$dsfr-green-emeraude-main-632: #00a95f !default;
+$dsfr-green-emeraude-950: #c3fad5 !default;
+
+// Neutral colors
+$dsfr-grey-950: #f6f6f6 !default;
+$dsfr-grey-1000: #ffffff !default;
+$dsfr-grey-200: #3a3a3a !default;
+$dsfr-grey-425: #666666 !default;
+$dsfr-grey-625: #929292 !default;
+
+// Text colors
+$dsfr-text-title: #161616 !default;
+$dsfr-text-default: #3a3a3a !default;
+$dsfr-text-mention: #666666 !default;
+
+// Backgrounds
+$dsfr-background-default: #ffffff !default;
+$dsfr-background-alt: #f6f6f6 !default;
+$dsfr-background-contrast: #161616 !default;
+
+// Borders
+$dsfr-border-default: #dddddd !default;
+$dsfr-border-action: $dsfr-blue-france-main-525 !default;
+
+// Typography
+$dsfr-font-family: 'Marianne', Arial, sans-serif !default;
+$dsfr-font-size-base: 24px !default;
+$dsfr-line-height-base: 1.4 !default;
+
+// Spacing
+$dsfr-spacing-small: 0.3em !default;
+$dsfr-spacing-medium: 0.5em !default;
+$dsfr-spacing-large: 1em !default;
+$dsfr-spacing-xlarge: 1.5em !default;
+$dsfr-spacing-xxlarge: 2em !default;
+
+$as-contrast-title-em: #FAC5B8 !default;

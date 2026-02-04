@@ -1,0 +1,262 @@
+# Background Images System
+
+## Overview
+Automatically applies `data-background-image` attributes to slides based on theme and heading level.
+
+## Configuration Priority
+1. **Custom frontmatter backgrounds** (highest priority)
+2. **Theme defaults** from `THEME_BACKGROUNDS`
+3. **No background** (undefined)
+
+## Theme Configuration
+
+### Location
+`src/config/presentation.ts`
+
+### Structure
+```ts
+export const THEME_BACKGROUNDS: Record<string, ThemeBackgrounds> = {
+  dsfr: {
+    h1: '/backgrounds/dsfr-title.jpg',      // Title slides
+    h2: '/backgrounds/dsfr-section.jpg',    // Horizontal slides
+    h3: '/backgrounds/dsfr-vertical.jpg',   // Vertical slides (optional)
+    default: '/backgrounds/dsfr-default.jpg' // Fallback (optional)
+  },
+  minimal: {
+    // No backgrounds
+  }
+}
+```
+
+### Fields
+- `h1`: Background for H1 slides (title)
+- `h2`: Background for H2 slides (horizontal)
+- `h3`: Background for H3 slides (vertical)
+- `default`: Fallback if no heading level match
+
+All fields optional. Undefined = no background.
+
+## Custom Backgrounds
+
+### Per-Presentation Override
+Use frontmatter in `.md` file:
+
+```yaml
+---
+title: "My Presentation"
+theme: dsfr
+backgrounds:
+  h1: "/backgrounds/custom-title.jpg"
+  h2: "/backgrounds/custom-section.jpg"
+  h3: "/backgrounds/custom-vertical.jpg"
+  default: "/backgrounds/custom-default.jpg"
+---
+```
+
+### Override Specific Levels
+```yaml
+---
+theme: dsfr
+backgrounds:
+  h1: "/backgrounds/special-title.jpg"
+  # h2, h3 inherit from theme defaults
+---
+```
+
+### Disable Theme Backgrounds
+```yaml
+---
+theme: dsfr
+backgrounds: {}  # Empty object disables all backgrounds
+---
+```
+
+## Image Paths
+
+### Public Directory
+Place images in `public/backgrounds/`:
+```
+public/backgrounds/
+├── dsfr-title.jpg
+├── dsfr-section.jpg
+└── custom-bg.jpg
+```
+
+Reference with absolute path:
+```yaml
+backgrounds:
+  h1: "/backgrounds/dsfr-title.jpg"
+```
+
+### External URLs
+```yaml
+backgrounds:
+  h1: "https://example.com/image.jpg"
+```
+
+## Reveal.js Attributes
+
+### Applied Attributes
+Component adds `data-background-image` to `<section>` elements:
+```html
+<section data-background-image="/backgrounds/dsfr-title.jpg" class="slide-h1">
+  <!-- content -->
+</section>
+```
+
+### Additional Background Options
+Reveal.js supports more attributes (add manually via custom component if needed):
+- `data-background-size`: "cover", "contain", "100px 200px"
+- `data-background-position`: "center", "top left"
+- `data-background-repeat`: "no-repeat", "repeat"
+- `data-background-opacity`: "0.5"
+- `data-background-color`: "#ffffff"
+
+## Implementation
+
+### Type Definition
+`src/types/presentation.ts`:
+```ts
+interface ThemeBackgrounds {
+  h1?: string
+  h2?: string
+  h3?: string
+  default?: string
+}
+
+interface Slide {
+  backgroundImage?: string  // Future: per-slide override
+}
+```
+
+### Helper Function
+`src/config/presentation.ts`:
+```ts
+function getSlideBackground(
+  theme: string,
+  headingLevel?: string,
+  customBackgrounds?: ThemeBackgrounds
+): string | undefined
+```
+
+**Logic**:
+1. Check custom backgrounds first
+2. Fallback to theme defaults
+3. Match heading level (h1, h2, h3)
+4. Fallback to default
+5. Return undefined if no match
+
+### Component Usage
+`src/components/RevealSlides.vue`:
+```vue
+<section
+  :class="section.headingLevel ? `slide-${section.headingLevel}` : ''"
+  :data-background-image="getBackground(section.headingLevel)"
+>
+```
+
+## Examples
+
+### DSFR Theme with Gradient Overlay
+```ts
+// src/config/presentation.ts
+dsfr: {
+  h1: '/backgrounds/dsfr-blue-gradient.jpg',
+  h2: '/backgrounds/dsfr-light-pattern.jpg'
+}
+```
+
+### Minimal Theme (No Backgrounds)
+```ts
+minimal: {
+  // Empty or omit - no backgrounds applied
+}
+```
+
+### Custom Theme
+```ts
+corporate: {
+  h1: '/backgrounds/corporate-title.jpg',
+  h2: '/backgrounds/corporate-section.jpg',
+  h3: '/backgrounds/corporate-detail.jpg',
+  default: '/backgrounds/corporate-default.jpg'
+}
+```
+
+### Per-Presentation Custom
+```yaml
+---
+title: "Special Event"
+theme: minimal
+backgrounds:
+  h1: "/backgrounds/event-logo.jpg"
+  default: "/backgrounds/event-pattern.jpg"
+---
+```
+
+## Best Practices
+
+### Image Selection
+- **H1**: Bold, impactful (logos, gradients)
+- **H2**: Subtle patterns, low contrast
+- **H3**: Even lighter, minimal distraction
+- **Text readability**: Always priority #1
+
+### File Optimization
+- Compress images (< 500KB recommended)
+- Use WebP for modern browsers
+- Provide fallbacks for older browsers
+- Consider lazy loading for many images
+
+### CSS Enhancements
+Combine with theme CSS for overlays:
+```scss
+.reveal section.slide-h1[data-background-image] {
+  // Add overlay for text readability
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  // Ensure text above overlay
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+```
+
+### Accessibility
+- Maintain WCAG AA contrast ratios (4.5:1 for text)
+- Test with screen readers
+- Provide text alternatives if images convey information
+
+## Future Enhancements
+
+### Per-Slide Override
+Planned: MDC component for individual slides
+```markdown
+::slide{background="/custom.jpg"}
+# This Slide Only
+::
+```
+
+### Background Transitions
+Planned: Animate between different backgrounds
+```yaml
+backgrounds:
+  h1:
+    image: "/bg.jpg"
+    transition: "fade"
+```
+
+### Responsive Backgrounds
+Planned: Different images per screen size
+```yaml
+backgrounds:
+  h1:
+    desktop: "/bg-large.jpg"
+    mobile: "/bg-small.jpg"
+```
