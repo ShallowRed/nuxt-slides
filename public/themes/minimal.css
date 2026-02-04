@@ -1,192 +1,450 @@
+@charset "UTF-8";
 /**
  * Minimal Theme for reveal.js
- * Clean and simple design
+ * Swiss/International Typographic Style
+ * 
+ * Principles:
+ * - Strong typographic hierarchy
+ * - Generous white space
+ * - Grid-based layout
+ * - Limited, purposeful color
+ * - Objective, clear communication
  */
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: #ffffff;
+}
+
 .reveal {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 42px;
-  font-weight: normal;
-  color: #333;
+  font-size: 24px;
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  height: 100%;
 }
 
 .reveal ::selection {
-  color: #fff;
-  background: #4a90e2;
+  color: #ffffff;
+  background: #000000;
   text-shadow: none;
 }
 
 .reveal ::-moz-selection {
-  color: #fff;
-  background: #4a90e2;
+  color: #ffffff;
+  background: #000000;
   text-shadow: none;
 }
 
-.reveal .slides section,
-.reveal .slides section > section {
-  line-height: 1.3;
-  font-weight: inherit;
-}
-
-/* HEADERS */
+/* ============================================
+   TYPOGRAPHY - Strong Swiss Hierarchy
+   ============================================ */
 .reveal h1,
 .reveal h2,
 .reveal h3,
 .reveal h4,
 .reveal h5,
 .reveal h6 {
-  margin: 0 0 20px 0;
-  color: #222;
+  margin: 0 0 0.5em 0;
+  color: #000000;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-weight: 300;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
   text-transform: none;
   text-shadow: none;
   word-wrap: break-word;
+  text-align: left;
 }
 
 .reveal h1 {
-  font-size: 2.8em;
-  font-weight: 200;
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5em;
+}
+.reveal h1::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: #e63946;
+  margin-top: 0.4em;
 }
 
 .reveal h2 {
-  font-size: 2em;
+  font-size: 3rem;
+  font-weight: 700;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.5em;
 }
 
 .reveal h3 {
-  font-size: 1.5em;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5em;
 }
 
 .reveal h4 {
-  font-size: 1em;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666666;
+  margin-bottom: 0.5em;
 }
 
-/* LINKS */
+.reveal h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+/* Body text */
+.reveal p {
+  margin: 0 0 1.2em 0;
+  line-height: 1.7;
+}
+
+.reveal strong {
+  font-weight: 700;
+  color: #000000;
+}
+
+.reveal em {
+  font-style: italic;
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
 .reveal a {
-  color: #4a90e2;
-  text-decoration: none;
-  transition: color 0.15s ease;
+  color: #000000;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
 }
 
 .reveal a:hover {
-  color: #6bb8ff;
+  color: #e63946;
   text-shadow: none;
   border: none;
 }
 
-/* LISTS */
+/* ============================================
+   LISTS - Clean, structured
+   ============================================ */
 .reveal ul,
 .reveal ol {
   display: block;
   text-align: left;
-  margin: 0 0 0 1em;
+  margin: 0 0 1.2em 0;
+  padding-left: 1.5em;
 }
 
 .reveal ul {
-  list-style-type: disc;
+  list-style-type: none;
+}
+
+.reveal ul > li {
+  position: relative;
+  padding-left: 0.5em;
+}
+.reveal ul > li::before {
+  content: "—";
+  position: absolute;
+  left: -1.2em;
+  color: #e63946;
+  font-weight: 700;
 }
 
 .reveal ul ul {
-  list-style-type: circle;
+  list-style-type: none;
+  margin-top: 0.5em;
+}
+
+.reveal ul ul > li::before {
+  content: "·";
+  color: #666666;
 }
 
 .reveal ol {
   list-style-type: decimal;
+  padding-left: 2em;
+}
+
+.reveal ol > li {
+  padding-left: 0.3em;
+}
+
+.reveal ol > li::marker {
+  font-weight: 700;
+  color: #e63946;
 }
 
 .reveal li {
-  margin-bottom: 0.4em;
+  margin-bottom: 0.6em;
+  line-height: 1.5;
 }
 
-/* CODE */
+/* ============================================
+   CODE - Monospace, clean boxes
+   ============================================ */
 .reveal pre {
   display: block;
   position: relative;
-  width: 90%;
-  margin: 20px auto;
+  width: 100%;
+  margin: 1.5em 0;
   text-align: left;
-  font-size: 0.55em;
-  font-family: "Courier New", Courier, monospace;
-  line-height: 1.2em;
+  font-size: 0.7em;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  line-height: 1.5;
   word-wrap: break-word;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
+  background: #f0f0f0;
+  border-left: 4px solid #000000;
 }
 
 .reveal code {
-  font-family: "Courier New", Courier, monospace;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
   text-transform: none;
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 3px;
+  background: #f0f0f0;
+  padding: 0.15em 0.4em;
+  font-size: 0.9em;
 }
 
 .reveal pre code {
   display: block;
-  padding: 15px;
+  padding: 1.5em;
   overflow: auto;
-  max-height: 400px;
+  max-height: 500px;
   word-wrap: normal;
+  background: transparent;
 }
 
-/* BLOCKQUOTE */
+/* ============================================
+   BLOCKQUOTE - Bold, Swiss style
+   ============================================ */
 .reveal blockquote {
   display: block;
   position: relative;
-  width: 70%;
-  margin: 20px auto;
-  padding: 15px;
-  font-style: italic;
-  background: rgba(255, 255, 255, 0.05);
-  border-left: 5px solid #4a90e2;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  margin: 1.5em 0;
+  padding: 0 0 0 1.5em;
+  font-style: normal;
+  font-size: 1.3em;
+  font-weight: 500;
+  line-height: 1.5;
+  background: transparent;
+  border-left: 6px solid #e63946;
+  box-shadow: none;
+  color: #1a1a1a;
+}
+.reveal blockquote p {
+  margin: 0;
 }
 
-/* TABLES */
+/* ============================================
+   TABLES - Grid-based, clean
+   ============================================ */
 .reveal table {
-  margin: auto;
+  margin: 1.5em 0;
   border-collapse: collapse;
   border-spacing: 0;
+  width: 100%;
+  font-size: 0.85em;
 }
 
 .reveal table th {
-  font-weight: bold;
-  background: #4a90e2;
-  color: #fff;
+  font-weight: 700;
+  background: #000000;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
 }
 
 .reveal table th,
 .reveal table td {
   text-align: left;
-  padding: 0.5em 1em;
-  border-bottom: 1px solid #ddd;
+  padding: 0.8em 1em;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* CONTROLS */
+.reveal table tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.reveal table tr:hover {
+  background: #f0f0f0;
+}
+
+/* ============================================
+   CONTROLS - Minimal, unobtrusive
+   ============================================ */
 .reveal .controls {
-  color: #4a90e2;
+  color: #000000;
+}
+
+.reveal .controls button {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.reveal .controls button:hover {
+  opacity: 1;
 }
 
 .reveal .progress {
-  background: rgba(0, 0, 0, 0.2);
-  color: #4a90e2;
+  background: #f0f0f0;
+  color: #000000;
+  height: 4px;
 }
 
 .reveal .slide-number {
-  color: #4a90e2;
-  background-color: rgba(255, 255, 255, 0.8);
+  color: #666666;
+  background-color: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* IMAGES */
+/* ============================================
+   IMAGES - Clean, no borders
+   ============================================ */
 .reveal section img {
-  margin: 15px 0px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 4px solid #333;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  margin: 1em 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .reveal section img.plain {
   border: 0;
   box-shadow: none;
   background: transparent;
+}
+
+/* ============================================
+   LAYOUT COMPONENTS
+   ============================================ */
+/* Two columns */
+.reveal .two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3em;
+  align-items: start;
+}
+
+/* Three columns */
+.reveal .three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2em;
+  align-items: start;
+}
+
+/* Centered content */
+.reveal .centered {
+  text-align: center;
+}
+.reveal .centered h1::after {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   SLIDE VERTICAL CENTERING (like DSFR)
+   ============================================ */
+.reveal section.slide-h1,
+.reveal section.slide-h2 {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.reveal section.slide-h3 {
+  display: flex !important;
+  flex-direction: column;
+}
+.reveal section.slide-h3 header {
+  height: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.reveal section.slide-h3 header h3 {
+  margin: 0;
+}
+.reveal section.slide-h3 hgroup {
+  height: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.reveal section.slide-h3 hgroup h3 {
+  margin: 0;
+}
+.reveal section.slide-h3 hgroup p {
+  margin: 0.5em 0 0 0;
+  font-size: 1rem;
+  font-style: italic;
+  color: #666666;
+}
+.reveal section.slide-h3 article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.reveal section article {
+  width: 100%;
+}
+
+/* ============================================
+   SPECIAL ELEMENTS
+   ============================================ */
+/* Horizontal rule */
+.reveal hr {
+  border: none;
+  height: 2px;
+  background: #000000;
+  margin: 1.5em 0;
+}
+
+/* Small text */
+.reveal small {
+  font-size: 0.75em;
+  color: #666666;
+  vertical-align: baseline;
+}
+
+/* Fragments */
+.reveal .fragment {
+  transition: all 0.3s ease;
+}
+
+/* Text utilities */
+.reveal .text-sm {
+  font-size: 0.85em;
+}
+
+.reveal .text-muted {
+  color: #666666;
 }

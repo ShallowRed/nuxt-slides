@@ -1,36 +1,72 @@
 ---
-title: "Example Presentation - Minimal Theme"
+title: "Swiss Design Principles"
 lang: en
 theme: minimal
 reveal:
   slideNumber: true
   width: 1200
   height: 800
+  center: false
 ---
 
-# Minimal Theme Demo
+# Swiss Typography
 
-A clean, simple theme for technical presentations
+The International Typographic Style
 
-## Features
+## Design Principles
 
-### Clean Typography
+### Clarity Through Structure
 
-This theme focuses on readability with minimal distractions.
+The Swiss design movement, born in the 1950s, revolutionized visual communication through:
 
-- Simple color palette
-- Clear hierarchy
-- Focused content
+- **Grid-based layouts** — Mathematical precision in composition
+- **Sans-serif typography** — Helvetica as the ultimate expression
+- **Asymmetric balance** — Dynamic yet harmonious arrangements
+- **Objective photography** — Reality over illustration
 
-### Code Friendly
+> Good design is as little design as possible.
+> — Dieter Rams
+
+### The Grid System
+
+::TwoColumns
+
+#### Purpose
+The grid provides structure without sacrificing creativity. It creates visual rhythm and guides the eye naturally through content.
+
+#### Application
+1. Establish consistent margins
+2. Define column widths
+3. Align all elements to the grid
+4. Use white space intentionally
+
+::
+
+## Code Example
+
+### Clean, Functional Code
 
 ```javascript
-const presentation = {
-  theme: 'minimal',
-  perfect: 'for technical talks'
-}
+const swissDesign = {
+  typography: 'Helvetica Neue',
+  colors: ['#000000', '#ffffff', '#e63946'],
+  principles: [
+    'Clarity',
+    'Objectivity', 
+    'Universality'
+  ]
+};
 ```
 
-## Thank You!
+## Summary
 
-Switch to the DSFR example to see a different theme style.
+| Principle | Implementation |
+|-----------|----------------|
+| Clarity | Strong hierarchy, ample white space |
+| Objectivity | Sans-serif fonts, neutral colors |
+| Grid | Mathematical, consistent layouts |
+| Reduction | Remove unnecessary decoration |
+
+## Thank You
+
+Less is more.
