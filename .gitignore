@@ -38,6 +38,7 @@ presentations/draft/*
 presentations/public/*
 !presentations/public/example.md
 !presentations/public/example-minimal.md
+!presentations/public/simulateurs-opportunites-mutualisation.md
 
 # Other sensitive presentation files
 presentations/*.csv
