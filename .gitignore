@@ -46,3 +46,6 @@ presentations/*.csv
 # Exports (may contain sensitive content)
 export/*
 !export/.gitkeep
+
+# Temporary clone directory for fetching presentations
+.presentations-temp

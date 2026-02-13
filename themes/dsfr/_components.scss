@@ -157,3 +157,17 @@
   border: none;
   box-shadow: none;
 }
+
+// Columns container spacing
+// Increase spacing before columns container
+.reveal p:has(+ .columns-container),
+.reveal p:has(+ .two-columns),
+.reveal p:has(+ .three-columns),
+.reveal p:has(+ table),
+.reveal p:has(+ .mermaid-wrapper) {
+  margin-bottom: $dsfr-spacing-xxlarge;
+}
+
+.reveal p:has(+ ul) {
+  margin-bottom: $dsfr-spacing-large;
+}

@@ -211,6 +211,19 @@ Clean and modern design:
 - Light color scheme
 - Helvetica font family
 
+## Private Presentations
+
+Non-public presentations (private, semi-private, draft) are stored in a separate private repository and synced at build time on Vercel via `scripts/fetch-presentations.js`. The main repository stays fully open source.
+
+| Status | Access | Rendering |
+|--------|--------|-----------|
+| public | open | SSG |
+| semi-private | password/auth | SSR |
+| draft | admin | SSR |
+| private | GitHub OAuth | SSR |
+
+See [docs/private-presentations.md](./docs/private-presentations.md) for setup.
+
 ## Development
 
 ```bash
