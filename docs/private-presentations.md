@@ -38,11 +38,16 @@ git push origin main
 
 ### 2. Créer un GitHub Personal Access Token
 
+**Méthode rapide (classic token):**
 1. Aller sur [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
 2. Créer un nouveau token (classic)
 3. Nom : `Vercel Presentations Sync`
 4. Scopes : cocher `repo` (Full control of private repositories)
 5. Copier le token généré (vous ne pourrez plus le voir après)
+
+**Méthode recommandée (fine-grained token):**
+Pour une meilleure sécurité, utilisez un token à granularité fine limité uniquement au repository privé.
+Voir le guide détaillé : [GITHUB-TOKEN-PERMISSIONS.md](./GITHUB-TOKEN-PERMISSIONS.md)
 
 ### 3. Configurer Vercel
 

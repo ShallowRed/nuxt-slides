@@ -58,12 +58,17 @@ git push
 
 ### 3. Create GitHub Personal Access Token
 
+**Quick method:**
 1. Go to: https://github.com/settings/tokens/new
 2. Token name: `Vercel Presentations Sync`
-3. Expiration: No expiration (or custom)
+3. Expiration: 90 days (recommended)
 4. Scopes: Check **`repo`** (Full control of private repositories)
 5. Click "Generate token"
 6. **Copy the token** (you won't see it again!)
+
+**For production (more secure):**
+Use a fine-grained token limited to the specific repository.
+See detailed guide: [docs/GITHUB-TOKEN-PERMISSIONS.md](./GITHUB-TOKEN-PERMISSIONS.md)
 
 ### 4. Configure Vercel
 

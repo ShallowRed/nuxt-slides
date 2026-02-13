@@ -10,7 +10,7 @@ Use this checklist to ensure your Vercel deployment is properly configured for p
   - Repository name: `___________________________`
   - Format: `owner/repo-name`
   - Visibility: Private ✅
-  
+
 - [ ] Repository structure created:
   ```
   presentations/

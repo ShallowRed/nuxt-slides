@@ -241,7 +241,10 @@ To deploy private presentations on Vercel without publishing them:
 - ✅ No git submodules complexity
 - ✅ Simple token-based authentication
 
-For detailed setup instructions, see [docs/private-presentations.md](./docs/private-presentations.md).
+For detailed setup instructions:
+- [Quick Start Guide](./docs/QUICKSTART-PRIVATE.md) - 5 minute setup
+- [Full Documentation](./docs/private-presentations.md) - Complete guide
+- [Token Permissions](./docs/GITHUB-TOKEN-PERMISSIONS.md) - Security best practices
 
 ## Development
 
