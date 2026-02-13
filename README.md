@@ -211,6 +211,38 @@ Clean and modern design:
 - Light color scheme
 - Helvetica font family
 
+## Private Presentations
+
+This project supports deploying private/protected presentations without exposing them in the public repository.
+
+### Publication Statuses
+
+Presentations are organized by status:
+- **public/** - Open access, SSG pre-rendered, versioned in git
+- **semi-private/** - Password/auth protected, SSR on-demand
+- **draft/** - Admin only, SSR on-demand
+- **private/** - Full GitHub auth required, SSR on-demand
+
+### Deploying Private Content
+
+To deploy private presentations on Vercel without publishing them:
+
+1. Create a private repository (e.g., `nuxt-slides-content`)
+2. Configure Vercel environment variables:
+   ```
+   PRESENTATIONS_REPO=your-org/nuxt-slides-content
+   PRESENTATIONS_REPO_TOKEN=ghp_xxxxxxxxxxxx
+   ```
+3. The build automatically syncs private content before deployment
+
+**Benefits:**
+- ✅ Main repository stays 100% open source
+- ✅ Private presentations deployed to production
+- ✅ No git submodules complexity
+- ✅ Simple token-based authentication
+
+For detailed setup instructions, see [docs/private-presentations.md](./docs/private-presentations.md).
+
 ## Development
 
 ```bash

@@ -73,7 +73,7 @@ body {
   color: var(--dsfr-text-title);
   font-family: "Marianne", Arial, sans-serif;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.5;
   letter-spacing: normal;
   text-transform: none;
   text-shadow: none;
@@ -377,6 +377,18 @@ body {
   background: rgba(255, 255, 255, 0.12);
   border: none;
   box-shadow: none;
+}
+
+.reveal p:has(+ .columns-container),
+.reveal p:has(+ .two-columns),
+.reveal p:has(+ .three-columns),
+.reveal p:has(+ table),
+.reveal p:has(+ .mermaid-wrapper) {
+  margin-bottom: 2em;
+}
+
+.reveal p:has(+ ul) {
+  margin-bottom: 1em;
 }
 
 /**
