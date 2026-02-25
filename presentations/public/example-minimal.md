@@ -52,10 +52,10 @@ const swissDesign = {
   colors: ['#000000', '#ffffff', '#e63946'],
   principles: [
     'Clarity',
-    'Objectivity', 
+    'Objectivity',
     'Universality'
   ]
-};
+}
 ```
 
 ## Summary
