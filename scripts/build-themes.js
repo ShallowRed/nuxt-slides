@@ -24,6 +24,12 @@ const allThemes = [
     watchDir: join(projectRoot, 'themes/dsfr'),
   },
   {
+    name: 'dsfr-standalone',
+    input: join(projectRoot, 'themes/dsfr/dsfr-standalone.scss'),
+    output: join(projectRoot, 'public/themes/dsfr-standalone.css'),
+    watchDir: join(projectRoot, 'themes/dsfr'),
+  },
+  {
     name: 'minimal',
     input: join(projectRoot, 'themes/minimal/minimal.scss'),
     output: join(projectRoot, 'public/themes/minimal.css'),

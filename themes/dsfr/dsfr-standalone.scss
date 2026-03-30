@@ -1,0 +1,403 @@
+/**
+ * DSFR-inspired standalone theme for reveal.js
+ * Based on Système de Design de l'État Français
+ *
+ * Compatible with vanilla Reveal.js and HackMD slide mode.
+ * Does NOT depend on nuxt-slides semantic layer (no .slide-h1/h2/h3, 
+ * no header/hgroup/article wrappers, no MDC components).
+ *
+ * Usage on HackMD: paste the compiled CSS inside <style>...</style>
+ * in your markdown note.
+ *
+ * Usage on vanilla Reveal.js: load as a custom theme CSS file.
+ */
+
+@use 'variables' as *;
+
+// ============================================
+// 1. Standard Reveal.js CSS custom properties
+//    (mapped from DSFR design tokens)
+// ============================================
+
+:root {
+  // --- Reveal.js standard variables (--r-*) ---
+  --r-background: #{$dsfr-background-default};
+  --r-background-color: #{$dsfr-background-default};
+  --r-main-font: #{$dsfr-font-family};
+  --r-main-font-size: #{$dsfr-font-size-base};
+  --r-main-color: #{$dsfr-text-default};
+  --r-block-margin: 20px;
+  --r-heading-margin: 0 0 0.5em 0;
+  --r-heading-font: #{$dsfr-font-family};
+  --r-heading-color: #{$dsfr-text-title};
+  --r-heading-line-height: 1.5;
+  --r-heading-letter-spacing: normal;
+  --r-heading-text-transform: none;
+  --r-heading-text-shadow: none;
+  --r-heading-font-weight: 700;
+  --r-heading1-text-shadow: none;
+  --r-heading1-size: 4rem;
+  --r-heading2-size: 4rem;
+  --r-heading3-size: 2.5rem;
+  --r-heading4-size: 2rem;
+  --r-code-font: 'Courier New', Courier, monospace;
+  --r-link-color: #{$dsfr-blue-france-main-525};
+  --r-link-color-dark: #{$dsfr-blue-france-sun-113};
+  --r-link-color-hover: #{$dsfr-blue-france-sun-113};
+  --r-selection-background-color: #{$dsfr-blue-france-main-525};
+  --r-selection-color: #{$dsfr-grey-1000};
+  --r-overlay-element-bg-color: 246, 246, 246;
+  --r-overlay-element-fg-color: 22, 22, 22;
+
+  // --- DSFR design tokens (for custom overrides below) ---
+  --dsfr-blue-france-sun-113: #{$dsfr-blue-france-sun-113};
+  --dsfr-blue-france-main-525: #{$dsfr-blue-france-main-525};
+  --dsfr-blue-france-850: #{$dsfr-blue-france-850};
+  --dsfr-blue-france-925: #{$dsfr-blue-france-925};
+  --dsfr-blue-france-950: #{$dsfr-blue-france-950};
+  --dsfr-blue-france-975: #{$dsfr-blue-france-975};
+  --dsfr-red-marianne-main-472: #{$dsfr-red-marianne-main-472};
+  --dsfr-red-marianne-850: #{$dsfr-red-marianne-850};
+  --dsfr-red-marianne-925: #{$dsfr-red-marianne-925};
+  --dsfr-green-emeraude-main-632: #{$dsfr-green-emeraude-main-632};
+  --dsfr-green-emeraude-950: #{$dsfr-green-emeraude-950};
+  --dsfr-grey-950: #{$dsfr-grey-950};
+  --dsfr-grey-1000: #{$dsfr-grey-1000};
+  --dsfr-grey-200: #{$dsfr-grey-200};
+  --dsfr-grey-425: #{$dsfr-grey-425};
+  --dsfr-grey-625: #{$dsfr-grey-625};
+  --dsfr-text-title: #{$dsfr-text-title};
+  --dsfr-text-default: #{$dsfr-text-default};
+  --dsfr-text-mention: #{$dsfr-text-mention};
+  --dsfr-background-default: #{$dsfr-background-default};
+  --dsfr-background-alt: #{$dsfr-background-alt};
+  --dsfr-background-contrast: #{$dsfr-background-contrast};
+  --dsfr-border-default: #{$dsfr-border-default};
+  --dsfr-border-action: #{$dsfr-border-action};
+}
+
+// ============================================
+// 2. Global styles
+// ============================================
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: var(--dsfr-background-default);
+}
+
+.reveal {
+  font-family: $dsfr-font-family;
+  font-size: $dsfr-font-size-base;
+  font-weight: 400;
+  color: var(--dsfr-text-default);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal ::selection {
+  color: var(--dsfr-grey-1000) !important;
+  background: var(--dsfr-blue-france-main-525);
+  text-shadow: none;
+}
+
+.reveal ::-moz-selection {
+  color: var(--dsfr-grey-1000) !important;
+  background: var(--dsfr-blue-france-main-525);
+  text-shadow: none;
+}
+
+// ============================================
+// 3. Typography
+// ============================================
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 $dsfr-spacing-medium 0;
+  color: var(--dsfr-text-title);
+  font-family: $dsfr-font-family;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+.reveal h2 em {
+  font-style: normal;
+  color: $as-contrast-title-em;
+}
+
+.reveal h3 em {
+  font-style: normal;
+  color: $dsfr-blue-france-main-525;
+}
+
+.reveal h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--dsfr-blue-france-main-525);
+  margin-bottom: $dsfr-spacing-medium;
+  background: linear-gradient(89deg, #2828b2 30.04%, #8f8ffc 100.41%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--dsfr-text-title);
+  padding-bottom: 0.2em;
+  margin-bottom: $dsfr-spacing-medium;
+}
+
+.reveal h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--dsfr-blue-france-main-525);
+  margin-bottom: 1em;
+}
+
+.reveal h4 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.reveal h5 {
+  font-size: 1.5rem;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+
+.reveal p {
+  margin: $dsfr-spacing-medium 0;
+  line-height: $dsfr-line-height-base;
+  text-align: left;
+}
+
+.reveal strong,
+.reveal b {
+  font-weight: 700;
+  color: var(--dsfr-text-title);
+}
+
+.reveal em {
+  font-style: italic;
+}
+
+.reveal small {
+  font-size: 0.75em;
+  color: var(--dsfr-text-mention);
+}
+
+// ============================================
+// 4. Slide centering (generic, no custom class)
+// ============================================
+
+// Standard Reveal.js centering for all slides
+.reveal .slides section {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+// ============================================
+// 5. Links
+// ============================================
+
+.reveal a {
+  color: var(--dsfr-blue-france-main-525);
+  text-decoration: underline;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--dsfr-blue-france-sun-113);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    border: none;
+  }
+}
+
+// ============================================
+// 6. Lists
+// ============================================
+
+.reveal ul,
+.reveal ol {
+  display: block;
+  margin: 0 0 0.8em 1.2em;
+  text-align: left;
+}
+
+.reveal ul {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+
+  li {
+    position: relative;
+    padding-left: 1.2em;
+    line-height: $dsfr-line-height-base;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6em;
+      width: 0.4em;
+      height: 0.4em;
+      background: var(--dsfr-blue-france-main-525);
+      border-radius: 50%;
+    }
+  }
+}
+
+.reveal ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+
+  li {
+    margin-bottom: $dsfr-spacing-small;
+    line-height: $dsfr-line-height-base;
+  }
+}
+
+// ============================================
+// 7. Tables
+// ============================================
+
+.reveal table {
+  margin: $dsfr-spacing-large 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.7em;
+
+  th {
+    font-weight: 700;
+    background: var(--dsfr-blue-france-main-525);
+    color: var(--dsfr-grey-1000);
+    padding: 0.8em 1em;
+    text-align: left;
+  }
+
+  td {
+    padding: 0.6em 1em;
+    border-bottom: 1px solid var(--dsfr-border-default);
+  }
+
+  tbody tr {
+    &:nth-child(even) {
+      background: var(--dsfr-background-alt);
+    }
+
+    &:hover {
+      background: var(--dsfr-blue-france-950);
+    }
+  }
+}
+
+// ============================================
+// 8. Code
+// ============================================
+
+.reveal pre {
+  display: block;
+  position: relative;
+  width: 90%;
+  margin: 20px auto;
+  text-align: left;
+  font-size: 0.55em;
+  font-family: 'Courier New', Courier, monospace;
+  line-height: 1.5;
+  word-wrap: break-word;
+  background: var(--dsfr-background-alt);
+  border-left: 4px solid var(--dsfr-blue-france-main-525);
+  padding: 1em;
+}
+
+.reveal code {
+  font-family: 'Courier New', Courier, monospace;
+  background: var(--dsfr-background-alt);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.reveal pre code {
+  display: block;
+  padding: 0;
+  overflow: auto;
+  max-height: 400px;
+  word-wrap: normal;
+  background: transparent;
+}
+
+// ============================================
+// 9. Blockquotes
+// ============================================
+
+.reveal blockquote {
+  display: block;
+  position: relative;
+  width: 90%;
+  margin: 20px auto;
+  padding: 1em 1em 1em 2em;
+  font-style: italic;
+  background: var(--dsfr-blue-france-950);
+  border-left: 4px solid var(--dsfr-blue-france-main-525);
+
+  p:first-child,
+  p:last-child {
+    margin: 0;
+  }
+}
+
+// ============================================
+// 10. Images
+// ============================================
+
+.reveal section img {
+  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  box-shadow: none;
+}
+
+// ============================================
+// 11. Controls & progress
+// ============================================
+
+.reveal .controls {
+  color: var(--dsfr-blue-france-main-525);
+}
+
+.reveal .progress {
+  color: var(--dsfr-blue-france-main-525);
+}
+
+// ============================================
+// 12. Print / PDF export
+// ============================================
+
+@media print {
+  .backgrounds {
+    background-color: var(--dsfr-background-default);
+  }
+}
