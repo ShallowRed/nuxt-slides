@@ -67,22 +67,6 @@ Content for slide 2
 
 ## MDC Components
 
-### Alert
-```markdown
-::alert{type="info"}
-This is an informational alert
-::
-
-::alert{type="warning"}
-Warning message
-::
-
-::alert{type="error"}
-Error message
-::
-```
-**Props**: `type` = "info" | "warning" | "error"
-
 ### Three Columns
 ```markdown
 ::three-columns
@@ -104,12 +88,6 @@ Content for third column
 This content will be vertically and horizontally centered
 ::
 ```
-
-### Divider
-```markdown
-::divider
-```
-Visual separator line.
 
 ---
 
@@ -248,9 +226,6 @@ function demo() {
 }
 ```
 
-::alert{type="info"}
-Note: This is important
-::
 ```
 
 ---

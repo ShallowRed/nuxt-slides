@@ -22,7 +22,7 @@ src/
 │   └── useTheme.ts                # Dynamic CSS theme loading
 ├── components/
 │   ├── RevealPresentation.vue     # Reveal.js wrapper component
-│   └── mdc/                       # Custom MDC components (ThreeColumns, Alert, etc.)
+│   └── mdc/                       # Custom MDC components (ThreeColumns, TwoColumns, etc.)
 ├── pages/
 │   ├── index.vue                  # Presentation list (useAsyncData)
 │   └── slides/[slug].vue          # Presentation viewer
@@ -155,7 +155,7 @@ Presentation viewer page.
 ```ts
 DEFAULT_METADATA = { theme: 'dsfr', transition: 'slide', center: true }
 DEFAULT_REVEAL_CONFIG = { hash: true, slideNumber: 'c/t', ... }
-MDC_COMPONENTS = { 'three-columns': 'ThreeColumns', ... }
+MDC_COMPONENTS = { ThreeColumns: 'ThreeColumns', TwoColumns: 'TwoColumns', ... }
 ```
 
 ### src/types/presentation.ts
