@@ -14,10 +14,12 @@ const mdcComponents: Record<string, any> = Object.fromEntries(
 )
 
 // Helper to get background for a slide
-function getBackground(headingLevel?: string) {
+function getBackground(slide: { headingLevel?: string, backgroundImage?: string }) {
+  if (slide.backgroundImage)
+    return slide.backgroundImage
   return getSlideBackground(
     props.presentationData.metadata.theme || 'minimal',
-    headingLevel,
+    slide.headingLevel,
     props.presentationData.metadata.backgrounds,
   )
 }
@@ -32,7 +34,7 @@ function getBackground(headingLevel?: string) {
     <section
       v-if="section.verticalSlides && section.verticalSlides.length > 0"
       :class="section.headingLevel ? `slide-${section.headingLevel}` : ''"
-      :data-background-image="getBackground(section.headingLevel)"
+      :data-background-image="getBackground(section)"
     >
       <section
         v-for="(verticalSlide, vIndex) in section.verticalSlides"
@@ -42,7 +44,7 @@ function getBackground(headingLevel?: string) {
           verticalSlide.headingLevel ? `slide-${verticalSlide.headingLevel}` : '',
           verticalSlide.layout ? `layout-${verticalSlide.layout}` : '',
         ]"
-        :data-background-image="getBackground(verticalSlide.headingLevel)"
+        :data-background-image="getBackground(verticalSlide)"
       >
         <!-- Special layout: single MDCRenderer for full slide content -->
         <template v-if="verticalSlide.layout">
@@ -93,7 +95,7 @@ function getBackground(headingLevel?: string) {
         section.headingLevel ? `slide-${section.headingLevel}` : '',
         section.layout ? `layout-${section.layout}` : '',
       ]"
-      :data-background-image="getBackground(section.headingLevel)"
+      :data-background-image="getBackground(section)"
     >
       <!-- Special layout: single MDCRenderer for full slide content -->
       <template v-if="section.layout">

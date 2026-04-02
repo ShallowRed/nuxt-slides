@@ -3,6 +3,7 @@
 
 PRIVATE_REPO_DIR := ../nuxt-slides-content
 PRESENTATIONS_DIR := presentations
+CODIMD_DIR := ../codimd
 
 # ─── Development ──────────────────────────────────────────────
 
@@ -94,14 +95,22 @@ deploy-all: deploy-content ## Deploy content then app
 
 # ─── CodiMD ──────────────────────────────────────────────────
 
-.PHONY: codimd-push
+.PHONY: codimd-push codimd-status
 
 codimd-push: ## Push CodiMD changes to Scalingo
-	@if [ ! -d "/tmp/codimd" ]; then \
-		echo "❌ /tmp/codimd not found"; \
+	@if [ ! -d "$(CODIMD_DIR)" ]; then \
+		echo "❌ $(CODIMD_DIR) not found — clone ShallowRed/codimd there first"; \
 		exit 1; \
 	fi
-	cd /tmp/codimd && git push scalingo develop:master
+	cd $(CODIMD_DIR) && git push origin develop && git push scalingo develop:master
+
+codimd-status: ## Show our custom commits vs upstream hackmdio/codimd
+	@if [ ! -d "$(CODIMD_DIR)" ]; then \
+		echo "❌ $(CODIMD_DIR) not found"; \
+		exit 1; \
+	fi
+	@echo "═══ Custom commits ahead of upstream ═══"
+	@cd $(CODIMD_DIR) && git fetch upstream --quiet 2>/dev/null; git log upstream/develop..develop --oneline
 
 # ─── Utilities ───────────────────────────────────────────────
 

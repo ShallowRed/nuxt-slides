@@ -58,6 +58,28 @@ export function useSlideParser() {
   }
 
   /**
+   * Extracts background image override from a <!-- background: url --> comment node.
+   * Returns the URL string if found, otherwise undefined.
+   */
+  function extractBackgroundOverride(children: any[]): string | undefined {
+    for (const node of children) {
+      if (node.type === 'element' && node.tag === 'slide-background' && node.props?.image) {
+        return node.props.image
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * Removes :slide-background nodes from children so they don't render
+   */
+  function filterBackgroundNodes(children: any[]): any[] {
+    return children.filter(node =>
+      !(node.type === 'element' && node.tag === 'slide-background'),
+    )
+  }
+
+  /**
    * Creates a slide object from AST nodes
    * Separates the first heading into header, rest into body
    * Detects italic paragraph after heading as subtitle (creates hgroup)
@@ -67,31 +89,36 @@ export function useSlideParser() {
     const level = headingLevel || getHeadingLevel(children)
     const layout = getSlideLayout(children)
 
+    const backgroundImage = extractBackgroundOverride(children)
+    // Remove :slide-background nodes from rendered output
+    const filtered = filterBackgroundNodes(children)
+
     // If the slide has a special layout, keep everything in body
     if (layout) {
       return {
         body: {
           type: 'root',
-          children,
+          children: filtered,
         },
         headingLevel: level,
         layout,
+        backgroundImage,
       }
     }
 
     // Find the first heading element
-    const firstHeadingIndex = children.findIndex((node: any) =>
+    const firstHeadingIndex = filtered.findIndex((node: any) =>
       node.type === 'element' && /^h[1-6]$/.test(node.tag),
     )
 
     // If we have a heading, separate it from the body
     if (firstHeadingIndex !== -1) {
-      const headerChildren = [children[firstHeadingIndex]]
+      const headerChildren = [filtered[firstHeadingIndex]]
       let subtitle: any
       let bodyStartIndex = firstHeadingIndex + 1
 
       // Check if the next element is an italic paragraph (subtitle)
-      const nextElement = children[firstHeadingIndex + 1]
+      const nextElement = filtered[firstHeadingIndex + 1]
       if (nextElement && isItalicParagraph(nextElement)) {
         subtitle = {
           type: 'root',
@@ -101,8 +128,8 @@ export function useSlideParser() {
       }
 
       const bodyChildren = [
-        ...children.slice(0, firstHeadingIndex),
-        ...children.slice(bodyStartIndex),
+        ...filtered.slice(0, firstHeadingIndex),
+        ...filtered.slice(bodyStartIndex),
       ]
 
       return {
@@ -116,6 +143,7 @@ export function useSlideParser() {
           children: bodyChildren,
         },
         headingLevel: level,
+        backgroundImage,
       }
     }
 
@@ -123,9 +151,10 @@ export function useSlideParser() {
     return {
       body: {
         type: 'root',
-        children,
+        children: filtered,
       },
       headingLevel: level,
+      backgroundImage,
     }
   }
 
