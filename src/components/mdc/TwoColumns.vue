@@ -11,6 +11,11 @@ onMounted(() => {
   if (children.length === 0)
     return
 
+  // If children are already wrapped in ::column components, no re-wrapping needed
+  const columnChildren = children.filter(child => child.classList.contains('column'))
+  if (columnChildren.length >= 2)
+    return
+
   // Check if there's an explicit separator (HR element from ---)
   const hrIndex = children.findIndex(child => child.tagName === 'HR')
 
@@ -85,5 +90,21 @@ onMounted(() => {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+}
+
+/* Size variants */
+.size-md {
+  font-size: 1em;
+}
+.size-xs, .size-md.size-xs {
+  font-size: 0.7em;
+}
+
+.size-sm, .size-md.size-sm {
+  font-size: 0.85em;
+}
+
+.size-lg, .size-md.size-lg {
+  font-size: 1.15em;
 }
 </style>

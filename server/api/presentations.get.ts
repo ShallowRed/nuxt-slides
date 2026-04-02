@@ -26,10 +26,10 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
       allPresentations
         // Filter based on auth status
         .filter(({ status }) => {
-          // Public and semi-private are always visible in list
-          if (status === 'public' || status === 'semi-private')
+          // Only public presentations are listed
+          if (status === 'public')
             return true
-          // Draft and private only visible to owner
+          // All other statuses only visible to authenticated owner
           return isOwner
         })
         .map(async ({ slug, status }) => {

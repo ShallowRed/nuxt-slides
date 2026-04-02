@@ -67,26 +67,125 @@ Content for slide 2
 
 ## MDC Components
 
-### Three Columns
+MDC (Markdown Components) uses colons to embed Vue components. The number of colons determines the component type:
+
+| Syntax | Type | Use when… |
+|--------|------|-----------|
+| `:::Component` … `:::` | **Container** (block) | Component **wraps other components** (nesting) |
+| `::Component` … `::` | **Leaf** (block) | Component **wraps text/content only**, no nesting |
+| `:component{props}` | **Inline** | Inside a line of text |
+
+**Nesting rule**: a parent container must use **more colons** than its children.
+
+### Container components (use `:::`)
+
+Containers wrap other MDC components. Always close with `:::`.
+
+#### TwoColumns with explicit columns
 ```markdown
-::three-columns
+:::TwoColumns
+
+::column
+Left content goes here
+::
+
+::column
+Right content goes here
+::
+
+:::
+```
+
+#### TwoColumns with auto-split (heading-based)
+```markdown
+:::TwoColumns
 ### Column 1
 Content for first column
 
 ### Column 2
 Content for second column
+:::
+```
+**Note**: Each H3/H4 starts a new column. Grouped via DOM manipulation in `onMounted`.
 
-### Column 3
-Content for third column
+#### ThreeColumns
+```markdown
+:::ThreeColumns{.size-sm}
+
+::column
+First column
+::
+
+::column
+Second column
+::
+
+::column
+Third column
+::
+
+:::
+```
+
+#### SplitSlide (text + iframe/image)
+```markdown
+:::SplitSlide{src="https://example.com" type="iframe" title="Example" lightbox}
+Description text next to the iframe.
+:::
+```
+
+### Leaf components (use `::`)
+
+Leaves wrap text content but **never** other components.
+
+#### column (inside a container)
+```markdown
+::column
+Content for this column
 ::
 ```
-**Note**: Each H3 starts new column. Grouped via DOM manipulation in `onMounted`.
 
-### Centered Content
+#### column with size
 ```markdown
-::centered
-This content will be vertically and horizontally centered
+::column{.size-xl}
+Larger text content
 ::
+```
+
+#### Centered
+```markdown
+:::Centered
+This content will be vertically and horizontally centered.
+:::
+```
+
+#### Image
+```markdown
+::Image{src="/path/to/image.png" alt="Description" width="60%"}
+```
+
+**Note**: `::Image` is self-closing (no content, no closing `::`).
+
+### Inline components (use `:`)
+
+```markdown
+### :i{name="ri-timer-flash-line"} Title with icon
+```
+
+### Common mistakes to avoid
+
+```markdown
+❌ ::TwoColumns containing ::column  (same colon count = ambiguous nesting)
+✅ :::TwoColumns containing ::column (parent has more colons)
+
+❌ ::Image{...}     ← then a stray :::  (Image is self-closing, no closing tag)
+✅ ::Image{...}     ← nothing after
+
+❌ :::SplitSlide{...}
+   Content without closing  ← missing :::
+✅ :::SplitSlide{...}
+   Content
+   :::
 ```
 
 ---
@@ -140,11 +239,19 @@ export const MDC_COMPONENTS = {
   // ...
 }
 ```
-3. Use in markdown:
+3. Use in markdown (leaf component):
 ```markdown
 ::my-component{prop="value"}
 Content
 ::
+```
+   Or as a container:
+```markdown
+:::my-component{prop="value"}
+::child-component
+Nested content
+::
+:::
 ```
 
 ### Auto-Import
@@ -200,23 +307,28 @@ Second nested slide
 
 ## Another Section
 
-::three-columns
-### Column A
+:::ThreeColumns
+
+::column
 Left content
+::
 
-### Column B
+::column
 Middle content
+::
 
-### Column C
+::column
 Right content
 ::
 
+:::
+
 ---
 
-::centered
+:::Centered
 ## Centered Slide
 Important message
-::
+:::
 
 ## Code Example
 

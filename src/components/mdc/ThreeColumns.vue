@@ -22,6 +22,11 @@ onMounted(() => {
   // Get all children
   const children = Array.from(containerRef.value.children)
 
+  // If children are already wrapped in ::column components, no re-wrapping needed
+  const columnChildren = children.filter(child => child.classList.contains('column'))
+  if (columnChildren.length >= 2)
+    return
+
   // Group children by h3 or h4 headings
   const columns: HTMLElement[][] = []
   let currentColumn: HTMLElement[] = []
@@ -88,19 +93,18 @@ onMounted(() => {
 }
 
 /* Size variants */
-.size-xs {
-  font-size: 0.7em;
-}
-
-.size-sm {
-  font-size: 0.85em;
-}
-
 .size-md {
   font-size: 1em;
 }
+.size-xs, .size-md.size-xs {
+  font-size: 0.7em;
+}
 
-.size-lg {
+.size-sm, .size-md.size-sm {
+  font-size: 0.85em;
+}
+
+.size-lg, .size-md.size-lg {
   font-size: 1.15em;
 }
 </style>
