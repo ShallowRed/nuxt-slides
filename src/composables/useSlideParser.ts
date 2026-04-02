@@ -1,10 +1,12 @@
 /**
  * Composable for parsing MDC content into slide structures
  * Handles the logic of splitting content by H1/H2/H3 headings
+ * or by --- / ---- separators (opt-in via frontmatter)
  */
 
 import type { MDCParserResult } from '@nuxtjs/mdc'
 import type { Slide } from '~/types/presentation'
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 
 export function useSlideParser() {
   /**
@@ -230,8 +232,60 @@ export function useSlideParser() {
     return sections.map(children => processVerticalSlides(children))
   }
 
+  /**
+   * Strip YAML frontmatter from raw markdown content
+   */
+  function stripFrontmatter(content: string): string {
+    const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/)
+    return match ? content.slice(match[0].length) : content
+  }
+
+  /**
+   * Alternative parser: split raw markdown by --- (horizontal) and ---- (vertical) separators.
+   * Parses each chunk independently with MDC.
+   */
+  async function parseSlidesFromSeparators(rawContent: string): Promise<Slide[]> {
+    const body = stripFrontmatter(rawContent)
+
+    // Split by horizontal separator: a line that is exactly "---" (3 dashes)
+    const horizontalSections = body.split(/^---$/m).filter(s => s.trim().length > 0)
+
+    const slides: Slide[] = []
+
+    for (const section of horizontalSections) {
+      // Split by vertical separator: a line that is exactly "----" (4 dashes)
+      const verticalParts = section.split(/^----$/m).filter(s => s.trim().length > 0)
+
+      if (verticalParts.length > 1) {
+        const verticalSlides: Slide[] = []
+        for (const part of verticalParts) {
+          const ast = await parseMarkdown(part.trim())
+          if (ast.body?.children) {
+            verticalSlides.push(createSlide(ast.body.children))
+          }
+        }
+        if (verticalSlides.length > 0) {
+          slides.push({
+            body: { type: 'root', children: [] },
+            verticalSlides,
+            headingLevel: verticalSlides[0]?.headingLevel,
+          })
+        }
+      }
+      else {
+        const ast = await parseMarkdown(section.trim())
+        if (ast.body?.children) {
+          slides.push(createSlide(ast.body.children))
+        }
+      }
+    }
+
+    return slides
+  }
+
   return {
     parseSlides,
+    parseSlidesFromSeparators,
     getHeadingLevel,
   }
 }

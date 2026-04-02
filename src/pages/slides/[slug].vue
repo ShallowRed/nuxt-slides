@@ -9,6 +9,9 @@ const slug = route.params.slug as string
 // Load presentation data
 const { data: presentationData, error } = usePresentation(slug)
 
+// Collaborative edit link (CodiMD or HackMD)
+const editUrl = computed(() => presentationData.value?.editUrl || null)
+
 // Check if error requires password and redirect to unlock page
 const requiresPassword = computed(() => {
   if (!error.value)
@@ -39,6 +42,17 @@ watch(requiresPassword, (needsPassword) => {
         >
           <RevealSlides :presentation-data="presentationData" />
         </RevealPresentation>
+
+        <a
+          v-if="editUrl"
+          :href="editUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="codimd-edit-link"
+          title="Edit collaboratively"
+        >
+          ✏️ Edit
+        </a>
       </template>
 
       <template #fallback>
@@ -101,5 +115,24 @@ watch(requiresPassword, (needsPassword) => {
   height: 100vh;
   font-size: 1.5rem;
   color: #666;
+}
+
+.codimd-edit-link {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 100;
+  padding: 0.4rem 0.8rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 0.4rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.codimd-edit-link:hover {
+  opacity: 1;
 }
 </style>

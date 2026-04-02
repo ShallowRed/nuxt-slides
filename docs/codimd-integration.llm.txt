@@ -1,0 +1,113 @@
+# CodiMD / HackMD Integration
+
+## Overview
+Presentations can source their slide content from a self-hosted [CodiMD](https://github.com/hackmdio/codimd) instance **or** from [HackMD.io](https://hackmd.io), enabling real-time collaborative markdown editing while preserving the existing access control, theming, and metadata system.
+
+## How It Works
+
+```
+[Local stub .md] ─── frontmatter (theme, access, source, noteId) ──┐
+                                                                     ├─→ merged content → parser → slides
+[CodiMD / HackMD] ── live markdown body ────────────────────────────┘
+```
+
+1. A **stub file** in `presentations/{status}/slug.md` declares `source: codimd` or `source: hackmd` and a `noteId` in its frontmatter.
+2. When the presentation is requested, the API reads the stub, performs normal access control, then fetches the latest markdown body from the collaborative editor.
+3. The local frontmatter is preserved (theme, access control, reveal config), while the remote note's body replaces the stub's body content.
+4. The slide viewer shows a discreet **"Edit" link** pointing to the note for live editing.
+
+## Configuration
+
+### Self-hosted CodiMD
+
+```env
+NUXT_CODIMD_URL=https://codimd.example.com
+```
+
+CodiMD uses the unauthenticated `GET /:noteId/download` endpoint. No token needed for public notes.
+
+### HackMD.io
+
+```env
+NUXT_HACKMD_API_TOKEN=your-hackmd-api-token
+```
+
+Generate a token at [HackMD Settings > API](https://hackmd.io/settings#api). The token is **never exposed to the client** — it stays server-side only. HackMD uses `GET https://api.hackmd.io/v1/notes/:noteId` with Bearer authentication.
+
+## Creating a Collaborative Presentation
+
+### 1. Create a note in CodiMD or HackMD
+
+Write your slide content as normal markdown — no frontmatter needed:
+
+```markdown
+# My Collaborative Talk
+
+Introduction content
+
+## First Section
+
+Slide content here
+
+## Second Section
+
+More content
+```
+
+Note the **note ID** from the URL:
+- CodiMD: `https://codimd.example.com/abc123xyz` → note ID is `abc123xyz`
+- HackMD: `https://hackmd.io/@multi/SyxH9T7sZe` → note ID is `SyxH9T7sZe`
+
+### 2. Create a local stub file
+
+For CodiMD:
+```markdown
+---
+title: My Collaborative Talk
+theme: dsfr
+source: codimd
+noteId: abc123xyz
+---
+```
+
+For HackMD:
+```markdown
+---
+title: My Collaborative Talk
+theme: dsfr
+source: hackmd
+noteId: SyxH9T7sZe
+---
+```
+
+The body after frontmatter can be empty or contain fallback content (used when the remote service is unreachable).
+
+### 3. Done
+
+The presentation is now available at `/slides/my-collaborative-talk` and its content updates live as collaborators edit.
+
+## Frontmatter Reference
+
+| Key      | Required | Description                                              |
+|----------|----------|----------------------------------------------------------|
+| `source` | Yes      | `"codimd"` (self-hosted) or `"hackmd"` (hackmd.io)       |
+| `noteId` | Yes      | The note ID or alias from the editor URL                  |
+| `title`  | No       | Display title (falls back to slug)                        |
+| `theme`  | No       | Theme name (default: `minimal`)                           |
+| Others   | No       | Standard presentation frontmatter (see presentation-format)|
+
+## Caching
+
+Fetched content is cached server-side for **10 seconds** to balance freshness with performance. During a live editing session, viewers see updates within ~10s of saving.
+
+## Fallback Behavior
+
+- If the required env var is not configured, the stub's local content is used.
+- If the note cannot be fetched (network error, 404, auth failure), the stub's local content is used with a server warning logged.
+
+## Security Notes
+
+- The HackMD API token is **server-only** — never sent to the browser.
+- Content is fetched server-side; the client never calls CodiMD/HackMD directly for content.
+- Access control (public/private/semi-private/draft) is governed entirely by the local stub file's folder placement and frontmatter — CodiMD/HackMD permissions are orthogonal.
+- The client only receives a pre-built edit URL for the "Edit" button.

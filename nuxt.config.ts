@@ -44,6 +44,17 @@ export default defineNuxtConfig({
     },
   },
 
+  runtimeConfig: {
+    // Self-hosted CodiMD instance URL (server-only for fetching)
+    codimdUrl: process.env.NUXT_CODIMD_URL || '',
+    // HackMD.io API token for Bearer auth (server-only, never exposed to client)
+    hackmdApiToken: process.env.NUXT_HACKMD_API_TOKEN || '',
+    public: {
+      // Exposed to client for building "Edit" links
+      codimdUrl: process.env.NUXT_CODIMD_URL || '',
+    },
+  },
+
   // Hybrid rendering: SSG for public slides, SSR for protected routes
   routeRules: {
     // Index and login are prerendered

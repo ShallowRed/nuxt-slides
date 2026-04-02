@@ -66,6 +66,12 @@ export interface PresentationMeta {
   lang?: string
   theme?: string
   backgrounds?: ThemeBackgrounds
+  /**
+   * Slide parser mode:
+   * - 'heading' (default): splits slides by H1/H2/H3 headings
+   * - 'separator': splits by --- (horizontal) and ---- (vertical)
+   */
+  parser?: 'heading' | 'separator'
 }
 
 /**
@@ -86,6 +92,7 @@ export interface PresentationMetadata extends PresentationMeta {
 export interface PresentationData {
   slides: Slide[]
   metadata: PresentationMetadata
+  editUrl?: string
 }
 
 /**

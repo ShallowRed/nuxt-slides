@@ -8,13 +8,13 @@ import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { DEFAULT_METADATA } from '~/config/presentation'
 
 export function usePresentation(slug: string) {
-  const { parseSlides } = useSlideParser()
+  const { parseSlides, parseSlidesFromSeparators } = useSlideParser()
 
   const { data, error, status, refresh } = useAsyncData(
     `presentation-${slug}`,
     async (): Promise<PresentationData> => {
       // Fetch markdown content
-      const response = await $fetch<{ content: string }>(`/api/presentations/${slug}`)
+      const response = await $fetch<{ content: string, editUrl?: string }>(`/api/presentations/${slug}`)
 
       // Parse MDC
       const ast = await parseMarkdown(response.content)
@@ -25,15 +25,18 @@ export function usePresentation(slug: string) {
         ...(ast.data || {}),
       }
 
-      // Parse slides from AST
-      const slides = parseSlides(ast)
+      // Parse slides: separator mode (--- / ----) or default heading mode (H1/H2/H3)
+      const slides = metadata.parser === 'separator'
+        ? await parseSlidesFromSeparators(response.content)
+        : parseSlides(ast)
 
-      return { slides, metadata }
+      return { slides, metadata, editUrl: response.editUrl }
     },
     {
       default: () => ({
         slides: [],
         metadata: { ...DEFAULT_METADATA },
+        editUrl: undefined,
       }),
     },
   )

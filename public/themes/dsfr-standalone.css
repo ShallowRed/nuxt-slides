@@ -7,7 +7,7 @@
  * Does NOT depend on nuxt-slides semantic layer (no .slide-h1/h2/h3, 
  * no header/hgroup/article wrappers, no MDC components).
  *
- * Usage on HackMD: paste the compiled CSS inside style tags.
+ * Usage on HackMD: paste the compiled CSS inside <style>...</style>
  * in your markdown note.
  *
  * Usage on vanilla Reveal.js: load as a custom theme CSS file.
