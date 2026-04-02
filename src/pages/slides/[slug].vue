@@ -7,7 +7,7 @@ const route = useRoute()
 const slug = route.params.slug as string
 
 // Load presentation data
-const { data: presentationData, error } = usePresentation(slug)
+const { presentationData, error } = usePresentation(slug)
 
 // Collaborative edit link (CodiMD or HackMD)
 const editUrl = computed(() => presentationData.value?.editUrl || null)

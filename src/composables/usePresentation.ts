@@ -42,7 +42,7 @@ export function usePresentation(slug: string, apiUrl?: string) {
   )
 
   return {
-    data,
+    presentationData: data,
     error,
     status,
     refresh,

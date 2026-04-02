@@ -398,7 +398,16 @@ body {
 .reveal section.slide-h3 hgroup h3 {
   margin: 0;
 }
-.reveal section.slide-h3 hgroup p {
+.reveal section.slide-h3 hgroup .slide-pretitle p {
+  margin: 0 0 0.35em 0;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666666;
+}
+.reveal section.slide-h3 hgroup .slide-subtitle p {
   margin: 0.5em 0 0 0;
   font-size: 1rem;
   font-style: italic;

@@ -2,8 +2,37 @@
 import type { PresentationData } from '~/types/presentation'
 import MDCRenderer from '@nuxtjs/mdc/runtime/components/MDCRenderer.vue'
 import { getSlideBackground, MDC_COMPONENTS } from '~/config/presentation'
+import { getTextContent, slugify } from '~/utils/slugify'
 
 const props = defineProps<{ presentationData: PresentationData }>()
+
+/**
+ * Pre-computed deduplicated ids for every slide, indexed by position.
+ * Duplicates get a numeric suffix: "en-resume", "en-resume-1", "en-resume-2", …
+ */
+const slideIdMap = computed(() => {
+  const counts = new Map<string, number>()
+
+  function register(slide: { header?: any }): string | undefined {
+    if (!slide?.header?.children?.length)
+      return undefined
+    const text = getTextContent(slide.header)
+    const base = slugify(text, { lower: true, strict: true })
+    if (!base)
+      return undefined
+    const n = counts.get(base) || 0
+    counts.set(base, n + 1)
+    return n === 0 ? base : `${base}-${n}`
+  }
+
+  return props.presentationData.slides.map((section) => {
+    if (section.verticalSlides?.length) {
+      const verticalIds = section.verticalSlides.map(vs => register(vs))
+      return { sectionId: verticalIds[0], verticalIds }
+    }
+    return { sectionId: register(section) }
+  })
+})
 
 // Map MDC components - using resolveComponent for auto-imported components
 const mdcComponents: Record<string, any> = Object.fromEntries(
@@ -33,11 +62,13 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
     <!-- Horizontal section with vertical slides -->
     <section
       v-if="section.verticalSlides && section.verticalSlides.length > 0"
+      :id="slideIdMap[index]?.sectionId"
       :class="section.headingLevel ? `slide-${section.headingLevel}` : ''"
       :data-background-image="getBackground(section)"
     >
       <section
         v-for="(verticalSlide, vIndex) in section.verticalSlides"
+        :id="slideIdMap[index]?.verticalIds?.[vIndex]"
         :key="`${index}-${vIndex}`"
         :data-markdown="false"
         :class="[
@@ -56,18 +87,35 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
         </template>
         <!-- Default layout: header + article -->
         <template v-else>
-          <!-- Header with optional subtitle (hgroup) -->
-          <hgroup v-if="verticalSlide.header?.children?.length && verticalSlide.subtitle">
-            <MDCRenderer
-              :body="verticalSlide.header"
-              :data="presentationData.metadata"
-              :components="mdcComponents"
-            />
-            <MDCRenderer
-              :body="verticalSlide.subtitle"
-              :data="presentationData.metadata"
-              :components="mdcComponents"
-            />
+          <!-- Header with optional pretitle/subtitle (hgroup) -->
+          <hgroup v-if="verticalSlide.header?.children?.length && (verticalSlide.pretitle || verticalSlide.subtitle)">
+            <div
+              v-if="verticalSlide.pretitle"
+              class="slide-pretitle"
+            >
+              <MDCRenderer
+                :body="verticalSlide.pretitle"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
+            <div class="slide-heading">
+              <MDCRenderer
+                :body="verticalSlide.header"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
+            <div
+              v-if="verticalSlide.subtitle"
+              class="slide-subtitle"
+            >
+              <MDCRenderer
+                :body="verticalSlide.subtitle"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
           </hgroup>
           <header v-else-if="verticalSlide.header?.children?.length">
             <MDCRenderer
@@ -90,6 +138,7 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
     <!-- Single horizontal slide -->
     <section
       v-else
+      :id="slideIdMap[index]?.sectionId"
       :data-markdown="false"
       :class="[
         section.headingLevel ? `slide-${section.headingLevel}` : '',
@@ -107,18 +156,35 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
       </template>
       <!-- Default layout: header + article -->
       <template v-else>
-        <!-- Header with optional subtitle (hgroup) -->
-        <hgroup v-if="section.header?.children?.length && section.subtitle">
-          <MDCRenderer
-            :body="section.header"
-            :data="presentationData.metadata"
-            :components="mdcComponents"
-          />
-          <MDCRenderer
-            :body="section.subtitle"
-            :data="presentationData.metadata"
-            :components="mdcComponents"
-          />
+        <!-- Header with optional pretitle/subtitle (hgroup) -->
+        <hgroup v-if="section.header?.children?.length && (section.pretitle || section.subtitle)">
+          <div
+            v-if="section.pretitle"
+            class="slide-pretitle"
+          >
+            <MDCRenderer
+              :body="section.pretitle"
+              :data="presentationData.metadata"
+              :components="mdcComponents"
+            />
+          </div>
+          <div class="slide-heading">
+            <MDCRenderer
+              :body="section.header"
+              :data="presentationData.metadata"
+              :components="mdcComponents"
+            />
+          </div>
+          <div
+            v-if="section.subtitle"
+            class="slide-subtitle"
+          >
+            <MDCRenderer
+              :body="section.subtitle"
+              :data="presentationData.metadata"
+              :components="mdcComponents"
+            />
+          </div>
         </hgroup>
         <header v-else-if="section.header?.children?.length">
           <MDCRenderer
@@ -144,9 +210,12 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
   * MDC wraps rendered content in divs, which can break semantic structure.
   * This style makes those divs behave like their parent elements.
  */
-:deep(.layout-split>div),
+:deep(.layout-full>div),
 header :deep(> div),
-article :deep(> div) {
+article :deep(> div),
+hgroup :deep(.slide-pretitle > div),
+hgroup :deep(.slide-heading > div),
+hgroup :deep(.slide-subtitle > div) {
   display: contents;
 }
 </style>

@@ -15,7 +15,7 @@ const apiUrl = computed(() => {
 })
 
 // Reuse the same composable with a custom API URL
-const { data: presentationData, error } = usePresentation(
+const { presentationData, error } = usePresentation(
   `codimd-${noteId}`,
   apiUrl.value,
 )

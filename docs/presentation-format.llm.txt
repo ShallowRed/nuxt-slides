@@ -81,9 +81,9 @@ MDC (Markdown Components) uses colons to embed Vue components. The number of col
 
 Containers wrap other MDC components. Always close with `:::`.
 
-#### TwoColumns with explicit columns
+#### Columns (2 or 3) with explicit column children
 ```markdown
-:::TwoColumns
+:::Columns
 
 ::column
 Left content goes here
@@ -96,9 +96,30 @@ Right content goes here
 :::
 ```
 
-#### TwoColumns with auto-split (heading-based)
+For 3 columns, add `count=3`:
 ```markdown
-:::TwoColumns
+:::Columns{count=3 size="sm"}
+
+::column
+First
+::
+
+::column
+Second
+::
+
+::column
+Third
+::
+
+:::
+```
+
+**Backward-compat**: `TwoColumns` and `ThreeColumns` still resolve to `Columns` (aliases in `MDC_COMPONENTS`).
+
+#### Columns with auto-split (heading-based)
+```markdown
+:::Columns
 ### Column 1
 Content for first column
 
@@ -106,26 +127,7 @@ Content for first column
 Content for second column
 :::
 ```
-**Note**: Each H3/H4 starts a new column. Grouped via DOM manipulation in `onMounted`.
-
-#### ThreeColumns
-```markdown
-:::ThreeColumns{.size-sm}
-
-::column
-First column
-::
-
-::column
-Second column
-::
-
-::column
-Third column
-::
-
-:::
-```
+**Note**: Each H3/H4 starts a new column. Grouped via DOM manipulation in `onMounted`. `count` prop is informational only when using auto-split — actual column count is driven by the headings.
 
 #### SplitSlide (text + iframe/image)
 ```markdown
@@ -133,6 +135,15 @@ Third column
 Description text next to the iframe.
 :::
 ```
+
+#### Callout
+```markdown
+::Callout{type="info" title="Optional heading"}
+Body text here.
+::
+```
+Types: `info` (default), `tip`, `warning`, `danger`.
+All colours via CSS custom properties so themes can override (`--callout-info-bg`, `--callout-info-border`, etc.).
 
 ### Leaf components (use `::`)
 
@@ -164,22 +175,71 @@ This content will be vertically and horizontally centered.
 ::Image{src="/path/to/image.png" alt="Description" width="60%"}
 ```
 
-**Note**: `::Image` is self-closing (no content, no closing `::`).
+**Props**:
+- `src` (required)
+- `alt`, `width`, `height`, `fit`, `position`, `rounded`, `shadow`
+- `preview` — enables Reveal.js lightbox. Pass `:preview="true"` to use `src` as the thumbnail, or `preview="/thumb.png"` for a distinct thumbnail URL.
+
+With a caption (use closing `::`):
+```markdown
+::Image{src="/diagram.png" alt="Architecture" width="80%" :preview="true"}
+Figure 1 — System architecture overview
+::
+```
+
+Self-closing (no caption):
+```markdown
+::Image{src="/photo.jpg" alt="Photo"}
+```
 
 ### Inline components (use `:`)
 
+#### Icon
 ```markdown
-### :i{name="ri-timer-flash-line"} Title with icon
+### :i{name="ri:timer-flash-line"} Title with icon
 ```
+Accepts both Iconify format (`ri:home-line`) and Remix CSS class format (`ri-home-line`) — both are normalised automatically.
+
+#### Slide background override
+Overrides the theme-default background for a single slide:
+```markdown
+## Section title
+:slide-background{image="/backgrounds/as-content.png"}
+
+Slide content...
+```
+The `:slide-background` node is extracted and filtered **before** rendering — it never appears in the output. It is intentionally absent from `MDC_COMPONENTS`.
+
+#### Pre-title
+Displays a label above the heading inside an `<hgroup>` (e.g. chapter label, context tag):
+```markdown
+## Section Title
+:pretitle{text="Chapter 3"}
+
+Slide content...
+```
+
+#### Subtitle
+Displays a tagline below the heading inside an `<hgroup>`:
+```markdown
+## Section Title
+:subtitle{text="A deeper look at the data"}
+
+Slide content...
+```
+
+Both `:pretitle` and `:subtitle` markers are extracted and filtered **before** rendering — they never appear in the output and are intentionally absent from `MDC_COMPONENTS`. They can appear anywhere in the slide, not necessarily adjacent to the heading.
+
+**Backward compatibility**: an italic-only paragraph immediately after the heading is still silently promoted to subtitle (e.g. `*tagline text*`). Prefer explicit `:subtitle` for new content.
 
 ### Common mistakes to avoid
 
 ```markdown
-❌ ::TwoColumns containing ::column  (same colon count = ambiguous nesting)
-✅ :::TwoColumns containing ::column (parent has more colons)
+❌ ::Columns containing ::column  (same colon count = ambiguous nesting)
+✅ :::Columns containing ::column (parent has more colons)
 
-❌ ::Image{...}     ← then a stray :::  (Image is self-closing, no closing tag)
-✅ ::Image{...}     ← nothing after
+❌ ::Image{...}  # then a stray :::  (Image is self-closing when no caption)
+✅ ::Image{...}  # nothing after
 
 ❌ :::SplitSlide{...}
    Content without closing  ← missing :::
@@ -307,7 +367,7 @@ Second nested slide
 
 ## Another Section
 
-:::ThreeColumns
+:::Columns{count=3}
 
 ::column
 Left content

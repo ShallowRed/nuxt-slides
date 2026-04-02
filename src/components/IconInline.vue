@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
  * Inline icon component for MDC markdown.
- * Usage in markdown: :icon-inline{name="ri:home-line"}
+ * Usage in markdown: :i{name="ri:home-line"} or :i{name="ri-home-line"}
  *
+ * Accepts both Iconify format (ri:home-line) and Remix CSS class format (ri-home-line).
  * Remix Icons prefix: ri
  * Browse icons at: https://remixicon.com/ or https://icon-sets.iconify.design/ri/
  */
@@ -15,6 +16,15 @@ const props = withDefaults(defineProps<Props>(), {
   size: '1.2em',
 })
 
+// Normalise ri-home-line → ri:home-line for Iconify
+const iconName = computed(() => {
+  // Already in Iconify format (contains ':')
+  if (props.name.includes(':'))
+    return props.name
+  // Convert first hyphen to colon: ri-home-line → ri:home-line
+  return props.name.replace('-', ':')
+})
+
 // Dynamically import Icon component for client-side only
 const IconifyIcon = defineAsyncComponent(() =>
   import('@iconify/vue').then(m => m.Icon),
@@ -24,7 +34,7 @@ const IconifyIcon = defineAsyncComponent(() =>
 <template>
   <ClientOnly>
     <IconifyIcon
-      :icon="props.name"
+      :icon="iconName"
       :width="String(props.size)"
       :height="String(props.size)"
       class="inline-icon"

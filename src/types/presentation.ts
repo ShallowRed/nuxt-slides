@@ -13,6 +13,9 @@ export type PublicationStatus = 'public' | 'draft' | 'private' | 'semi-private'
 
 export interface Slide {
   header?: any
+  /** Text shown above the heading (e.g. chapter label, context tag) */
+  pretitle?: any
+  /** Text shown below the heading in an hgroup (section tagline) */
   subtitle?: any
   body: any
   verticalSlides?: Slide[]

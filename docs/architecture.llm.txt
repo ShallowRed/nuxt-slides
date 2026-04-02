@@ -22,7 +22,18 @@ src/
 │   └── useTheme.ts                # Dynamic CSS theme loading
 ├── components/
 │   ├── RevealPresentation.vue     # Reveal.js wrapper component
-│   └── mdc/                       # Custom MDC components (ThreeColumns, TwoColumns, etc.)
+│   ├── IconInline.vue             # Inline icon (Iconify, accepts ri:name or ri-name)
+│   └── mdc/                       # Custom MDC components
+│       ├── Columns.vue            # 2-or-3 column layout (replaces TwoColumns/ThreeColumns)
+│       ├── Callout.vue            # Info/tip/warning/danger aside block
+│       ├── Centered.vue           # Full-width centered content
+│       ├── Quote.vue              # Blockquote with attribution
+│       ├── Image.vue              # Img with optional caption + Reveal.js lightbox
+│       ├── FullScreenImage.vue    # Full-bleed background image slide
+│       ├── SplitSlide.vue         # Text + iframe/image split layout
+│       ├── Iframe.vue             # Embedded iframe
+│       ├── Mermaid.vue            # Mermaid diagram renderer
+│       └── PreviewLink.vue        # Link with preview thumbnail
 ├── pages/
 │   ├── index.vue                  # Presentation list (useAsyncData)
 │   └── slides/[slug].vue          # Presentation viewer
@@ -54,7 +65,7 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 
 ### Separation of Concerns
 - **Types** (`src/types/`): Shared TypeScript interfaces
-- **Config** (`src/config/`): Constants, no logic
+- **Config** (`src/config/`): Constants, no logic — including `FULL_SLIDE_COMPONENTS` list and `MDC_COMPONENTS` registry
 - **Composables** (`src/composables/`): Pure functions, testable business logic
 - **Components**: Presentation only, delegates to composables
 - **Pages**: Composition, no logic
@@ -71,6 +82,8 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 3. **H3**: Vertical slide separator (nested under H2)
 4. **HR** (`---`): Alternative horizontal separator
 5. Each slide tagged with `headingLevel` for CSS classes (`slide-h1`, `slide-h2`, etc.)
+6. **`:slide-background{image="..."}`**: Inline override for per-slide background image; extracted and removed from rendered output by the parser.
+7. **Full-slide components** (list in `FULL_SLIDE_COMPONENTS`): skip header/body split, render all children in `body`. CSS class `layout-full` applied.
 
 ### Theme System
 - SCSS sources in `themes/[name]/`

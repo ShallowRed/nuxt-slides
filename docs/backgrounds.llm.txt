@@ -4,9 +4,23 @@
 Automatically applies `data-background-image` attributes to slides based on theme and heading level.
 
 ## Configuration Priority
-1. **Custom frontmatter backgrounds** (highest priority)
-2. **Theme defaults** from `THEME_BACKGROUNDS`
-3. **No background** (undefined)
+1. **Per-slide inline override** — `:slide-background{image="..."}` (highest priority)
+2. **Custom frontmatter backgrounds** — `backgrounds:` block in the presentation frontmatter
+3. **Theme defaults** from `THEME_BACKGROUNDS` in `src/config/presentation.ts`
+4. **No background** (undefined)
+
+## Per-Slide Override
+
+Add `:slide-background{image="..."}` anywhere in a slide's content (typically right after the heading). It is extracted by the parser and never rendered in the output:
+
+```markdown
+## Section title
+:slide-background{image="/backgrounds/as-content.png"}
+
+Slide body content here...
+```
+
+This takes precedence over both frontmatter and theme defaults for that specific slide.
 
 ## Theme Configuration
 

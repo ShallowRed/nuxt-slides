@@ -8,8 +8,8 @@ Loads and caches presentation data via useAsyncData.
 **Parameters**:
 - `slug`: Presentation identifier (filename without .md)
 
-**Returns**: `{ data, error, status, refresh }`
-- `data`: Ref<PresentationData> - { slides, metadata }
+**Returns**: `{ presentationData, error, status, refresh }`
+- `presentationData`: Ref<PresentationData> - { slides, metadata, editUrl }
 - `error`: Ref<Error | null>
 - `status`: Ref<'idle' | 'pending' | 'success' | 'error'>
 - `refresh`: () => Promise<void>
@@ -27,9 +27,9 @@ Loads and caches presentation data via useAsyncData.
 
 **Usage**:
 ```ts
-const { data, error } = usePresentation('my-talk')
-// data.value.slides: Slide[]
-// data.value.metadata: { theme, transition, center, ... }
+const { presentationData, error } = usePresentation('my-talk')
+// presentationData.value.slides: Slide[]
+// presentationData.value.metadata: { theme, transition, center, ... }
 ```
 
 ---
@@ -52,6 +52,16 @@ Splits content by heading hierarchy.
 5. **HR detection**: Alternative horizontal separator
 6. **Section creation**: Group nodes, detect heading level, create Slide
 7. **Vertical processing**: Pass each section to `processVerticalSlides()`
+
+**Per-slide background extraction**:
+- `extractBackgroundOverride(children)`: looks for `:slide-background{image="..."}` element nodes, returns the `image` prop value.
+- `filterBackgroundNodes(children)`: removes those nodes from the children before they reach `MDCRenderer`.
+- The resolved value is stored as `slide.backgroundImage` and takes precedence over theme defaults in `RevealSlides.vue`.
+
+**Full-slide layout detection**:
+- `getSlideLayout(children)` checks whether any top-level node tag is in `FULL_SLIDE_COMPONENTS` (config list: `['SplitSlide', 'split-slide', 'FullScreenImage', 'full-screen-image']`).
+- When found, returns canonical `'full'` — the slide keeps all children in `body` (no header/body split), and gets CSS class `layout-full`.
+- Adding new full-slide components only requires updating `FULL_SLIDE_COMPONENTS` in `src/config/presentation.ts`.
 
 **Vertical Slide Logic**:
 - If section contains H3 nodes, split into vertical slides

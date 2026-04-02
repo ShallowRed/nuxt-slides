@@ -67,7 +67,7 @@ Y a-t-il des briques qui gagneraient à être partagées/documentées/mutualisé
 
 ### *Cartographie* des simulateurs d'aides publiques
 
-::Lightbox{src="/panorama-ecosysteme-simulateurs.svg" alt="Architecture système" width="100%"}
+::Image{src="/panorama-ecosysteme-simulateurs.svg" alt="Architecture système" width="100%" :preview="true"}
 ::
 
 ### Des clusters technologiques autour des *moteurs de règles*

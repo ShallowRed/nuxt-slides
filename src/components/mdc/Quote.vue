@@ -39,9 +39,9 @@ const props = defineProps<Props>()
   position: relative;
   margin: 2rem 0;
   padding: 2rem 2rem 2rem 3rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  color: white;
+  background: var(--quote-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  border-radius: var(--quote-radius, 12px);
+  color: var(--quote-color, white);
   font-size: 1.2em;
   line-height: 1.6;
 }

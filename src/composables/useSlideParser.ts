@@ -7,6 +7,7 @@
 import type { MDCParserResult } from '@nuxtjs/mdc'
 import type { Slide } from '~/types/presentation'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
+import { FULL_SLIDE_COMPONENTS } from '~/config/presentation'
 
 export function useSlideParser() {
   /**
@@ -24,14 +25,15 @@ export function useSlideParser() {
   }
 
   /**
-   * Checks if a node or its children contain a layout component (e.g., SplitSlide)
+   * Checks if a node or its children contain a full-slide layout component.
+   * Full-slide components (listed in FULL_SLIDE_COMPONENTS) bypass the
+   * header/body split and keep all children in `body`.
+   * Returns the canonical layout name `'full'` when found.
    */
   function getSlideLayout(children: any[]): string | undefined {
     for (const node of children) {
-      if (node.type === 'element') {
-        if (node.tag === 'SplitSlide' || node.tag === 'split-slide') {
-          return 'split'
-        }
+      if (node.type === 'element' && FULL_SLIDE_COMPONENTS.includes(node.tag)) {
+        return 'full'
       }
       if (node.children) {
         const childLayout = getSlideLayout(node.children)
@@ -80,10 +82,50 @@ export function useSlideParser() {
   }
 
   /**
-   * Creates a slide object from AST nodes
-   * Separates the first heading into header, rest into body
-   * Detects italic paragraph after heading as subtitle (creates hgroup)
-   * Unless the slide has a special layout (then keep all in body)
+   * Extracts :pretitle{text="..."} inline component from children.
+   * Returns a body AST wrapping the text, or undefined if not found.
+   */
+  function extractPretitle(children: any[]): any | undefined {
+    const node = children.find(n => n.type === 'element' && n.tag === 'pretitle' && n.props?.text)
+    if (!node)
+      return undefined
+    return {
+      type: 'root',
+      children: [{ type: 'element', tag: 'p', props: {}, children: [{ type: 'text', value: node.props.text }] }],
+    }
+  }
+
+  /**
+   * Extracts an explicit :subtitle{text="..."} inline component from children.
+   * Returns a body AST wrapping the text, or undefined if not found.
+   * Italic-paragraph fallback is handled separately in createSlide().
+   */
+  function extractExplicitSubtitle(children: any[]): any | undefined {
+    const node = children.find(n => n.type === 'element' && n.tag === 'subtitle' && n.props?.text)
+    if (!node)
+      return undefined
+    return {
+      type: 'root',
+      children: [{ type: 'element', tag: 'p', props: {}, children: [{ type: 'text', value: node.props.text }] }],
+    }
+  }
+
+  /**
+   * Removes :pretitle and :subtitle annotation nodes from children so they don't render.
+   * :slide-background is handled separately by filterBackgroundNodes().
+   */
+  function filterAnnotationNodes(children: any[]): any[] {
+    return children.filter(n =>
+      !(n.type === 'element' && (n.tag === 'pretitle' || n.tag === 'subtitle')),
+    )
+  }
+
+  /**
+   * Creates a slide object from AST nodes.
+   * Separates the first heading into header, rest into body.
+   * Supports explicit :pretitle{text="..."} and :subtitle{text="..."} inline markers.
+   * Falls back to italic paragraph immediately after heading for subtitle (backward compat).
+   * Unless the slide has a special layout (then keep all in body).
    */
   function createSlide(children: any[], headingLevel?: string): Slide {
     const level = headingLevel || getHeadingLevel(children)
@@ -93,12 +135,19 @@ export function useSlideParser() {
     // Remove :slide-background nodes from rendered output
     const filtered = filterBackgroundNodes(children)
 
+    // Extract explicit pretitle / subtitle before filtering their marker nodes
+    const pretitle = extractPretitle(filtered)
+    const explicitSubtitle = extractExplicitSubtitle(filtered)
+
+    // Remove annotation marker nodes (:pretitle, :subtitle) from rendered output
+    const cleaned = filterAnnotationNodes(filtered)
+
     // If the slide has a special layout, keep everything in body
     if (layout) {
       return {
         body: {
           type: 'root',
-          children: filtered,
+          children: cleaned,
         },
         headingLevel: level,
         layout,
@@ -107,29 +156,31 @@ export function useSlideParser() {
     }
 
     // Find the first heading element
-    const firstHeadingIndex = filtered.findIndex((node: any) =>
+    const firstHeadingIndex = cleaned.findIndex((node: any) =>
       node.type === 'element' && /^h[1-6]$/.test(node.tag),
     )
 
     // If we have a heading, separate it from the body
     if (firstHeadingIndex !== -1) {
-      const headerChildren = [filtered[firstHeadingIndex]]
-      let subtitle: any
+      const headerChildren = [cleaned[firstHeadingIndex]]
+      let subtitle: any = explicitSubtitle
       let bodyStartIndex = firstHeadingIndex + 1
 
-      // Check if the next element is an italic paragraph (subtitle)
-      const nextElement = filtered[firstHeadingIndex + 1]
-      if (nextElement && isItalicParagraph(nextElement)) {
-        subtitle = {
-          type: 'root',
-          children: [nextElement],
+      // Fallback: italic paragraph immediately after heading (backward compat)
+      if (!subtitle) {
+        const nextElement = cleaned[firstHeadingIndex + 1]
+        if (nextElement && isItalicParagraph(nextElement)) {
+          subtitle = {
+            type: 'root',
+            children: [nextElement],
+          }
+          bodyStartIndex = firstHeadingIndex + 2
         }
-        bodyStartIndex = firstHeadingIndex + 2
       }
 
       const bodyChildren = [
-        ...filtered.slice(0, firstHeadingIndex),
-        ...filtered.slice(bodyStartIndex),
+        ...cleaned.slice(0, firstHeadingIndex),
+        ...cleaned.slice(bodyStartIndex),
       ]
 
       return {
@@ -137,6 +188,7 @@ export function useSlideParser() {
           type: 'root',
           children: headerChildren,
         },
+        pretitle,
         subtitle,
         body: {
           type: 'root',
@@ -151,7 +203,7 @@ export function useSlideParser() {
     return {
       body: {
         type: 'root',
-        children: filtered,
+        children: cleaned,
       },
       headingLevel: level,
       backgroundImage,

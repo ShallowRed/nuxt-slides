@@ -8,6 +8,8 @@ interface Props {
   position?: string
   rounded?: boolean
   shadow?: boolean
+  /** Enable Reveal.js lightbox. Pass `true` to use `src` as preview, or a URL for a distinct thumbnail. */
+  preview?: boolean | string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,6 +21,13 @@ const props = withDefaults(defineProps<Props>(), {
   rounded: true,
   shadow: true,
 })
+
+// Resolve value for data-preview-image attribute (Reveal.js lightbox trigger)
+const previewSrc = computed(() => {
+  if (!props.preview)
+    return null
+  return typeof props.preview === 'string' ? props.preview : props.src
+})
 </script>
 
 <template>
@@ -26,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
     <img
       :src="props.src"
       :alt="props.alt"
-      data-preview-image
+      v-bind="previewSrc ? { 'data-preview-image': previewSrc } : {}"
       :class="{
         rounded: props.rounded,
         shadow: props.shadow,

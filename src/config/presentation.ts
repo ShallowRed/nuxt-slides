@@ -69,22 +69,38 @@ export const DEFAULT_REVEAL_CONFIG: RevealConfig = {
 }
 
 /**
+ * Components that occupy the full slide content area.
+ * When the parser detects any of these as a top-level node, it keeps all
+ * children in `body` without splitting into header/body.
+ * Add any future full-slide components here to extend parser support.
+ */
+export const FULL_SLIDE_COMPONENTS = ['SplitSlide', 'split-slide', 'FullScreenImage', 'full-screen-image']
+
+/**
  * MDC component mappings
  * Maps markdown component names to Vue components
+ *
+ * Note: `slide-background` is intentionally NOT listed here.
+ * It is intercepted and filtered out in `useSlideParser.ts` before
+ * the MDCRenderer ever sees it, so registering it would have no effect
+ * and could cause unexpected rendering.
  */
 export const MDC_COMPONENTS = {
   ThreeColumns: 'ThreeColumns',
   TwoColumns: 'TwoColumns',
   Centered: 'Centered',
   Quote: 'Quote',
-  ImageWithCaption: 'ImageWithCaption',
   FullScreenImage: 'FullScreenImage',
   Iframe: 'Iframe',
   Image: 'Image',
   SplitSlide: 'SplitSlide',
-  Lightbox: 'Lightbox',
   Mermaid: 'Mermaid',
   PreviewLink: 'PreviewLink',
   IconInline: 'IconInline',
   i: 'IconInline',
+  Callout: 'Callout',
+  Columns: 'Columns',
+  // Backward-compat aliases — resolved to Columns
+  TwoColumns: 'Columns',
+  ThreeColumns: 'Columns',
 } as const
