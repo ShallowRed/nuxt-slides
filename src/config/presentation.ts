@@ -95,6 +95,7 @@ export const MDC_COMPONENTS = {
   IconInline: 'IconInline',
   i: 'IconInline',
   Columns: 'Columns',
+  Highlight: 'Highlight',
   // Backward-compat aliases — resolved to Columns
   TwoColumns: 'Columns',
   ThreeColumns: 'Columns',

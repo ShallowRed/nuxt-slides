@@ -129,6 +129,29 @@ Content for second column
 ```
 **Note**: Each H3/H4 starts a new column. Grouped via DOM manipulation in `onMounted`. `count` prop is informational only when using auto-split — actual column count is driven by the headings.
 
+#### Highlight (key message emphasis)
+Displays text larger than usual for slides with few words but strong messages.
+
+```markdown
+::Highlight
+Un **catalogue de règles** au service de la *transparence algorithmique*
+::
+```
+
+With size and variant:
+```markdown
+::Highlight{size="lg" variant="accent"}
+La mutualisation réduit les coûts de **60%**
+::
+```
+
+**Props**:
+- `size` — text size preset: `sm` (1.3em), `md` (1.6em, default), `lg` (2em), `xl` (2.6em)
+- `variant` — visual style: `default` (no background), `accent` (blue left border + light bg), `contrast` (dark bg, white text)
+- `center` — center text horizontally (default: `true`, set `:center="false"` for left-aligned)
+
+**Styling notes**: `**bold**` text gets blue-france color, `*italic*` text gets an underline accent. In `contrast` variant, accents use lighter blue tones.
+
 #### Slide-level layout: media alongside content
 ```markdown
 ### My slide title
