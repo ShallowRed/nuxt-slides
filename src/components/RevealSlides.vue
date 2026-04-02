@@ -77,60 +77,81 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
         ]"
         :data-background-image="getBackground(verticalSlide)"
       >
-        <!-- Special layout: single MDCRenderer for full slide content -->
-        <template v-if="verticalSlide.layout">
+        <!-- Full-component layout: single MDCRenderer for full slide content -->
+        <template v-if="verticalSlide.layout === 'full'">
           <MDCRenderer
             :body="verticalSlide.body"
             :data="presentationData.metadata"
             :components="mdcComponents"
           />
         </template>
-        <!-- Default layout: header + article -->
+        <!-- Default + media layouts: header/article with optional media pane -->
         <template v-else>
-          <!-- Header with optional pretitle/subtitle (hgroup) -->
-          <hgroup v-if="verticalSlide.header?.children?.length && (verticalSlide.pretitle || verticalSlide.subtitle)">
-            <div
-              v-if="verticalSlide.pretitle"
-              class="slide-pretitle"
-            >
-              <MDCRenderer
-                :body="verticalSlide.pretitle"
-                :data="presentationData.metadata"
-                :components="mdcComponents"
-              />
-            </div>
-            <div class="slide-heading">
+          <div class="slide-content-pane">
+            <hgroup v-if="verticalSlide.header?.children?.length && (verticalSlide.pretitle || verticalSlide.subtitle)">
+              <div
+                v-if="verticalSlide.pretitle"
+                class="slide-pretitle"
+              >
+                <MDCRenderer
+                  :body="verticalSlide.pretitle"
+                  :data="presentationData.metadata"
+                  :components="mdcComponents"
+                />
+              </div>
+              <div class="slide-heading">
+                <MDCRenderer
+                  :body="verticalSlide.header"
+                  :data="presentationData.metadata"
+                  :components="mdcComponents"
+                />
+              </div>
+              <div
+                v-if="verticalSlide.subtitle"
+                class="slide-subtitle"
+              >
+                <MDCRenderer
+                  :body="verticalSlide.subtitle"
+                  :data="presentationData.metadata"
+                  :components="mdcComponents"
+                />
+              </div>
+            </hgroup>
+            <header v-else-if="verticalSlide.header?.children?.length">
               <MDCRenderer
                 :body="verticalSlide.header"
                 :data="presentationData.metadata"
                 :components="mdcComponents"
               />
-            </div>
-            <div
-              v-if="verticalSlide.subtitle"
-              class="slide-subtitle"
-            >
+            </header>
+            <article v-if="verticalSlide.body?.children?.length">
               <MDCRenderer
-                :body="verticalSlide.subtitle"
+                :body="verticalSlide.body"
                 :data="presentationData.metadata"
                 :components="mdcComponents"
               />
-            </div>
-          </hgroup>
-          <header v-else-if="verticalSlide.header?.children?.length">
-            <MDCRenderer
-              :body="verticalSlide.header"
-              :data="presentationData.metadata"
-              :components="mdcComponents"
+            </article>
+          </div>
+          <aside
+            v-if="verticalSlide.layoutProps?.src"
+            class="slide-media-pane"
+            :class="{ 'has-lightbox': verticalSlide.layoutProps.lightbox }"
+            :data-preview-link="(verticalSlide.layoutProps.lightbox && verticalSlide.layoutProps.type === 'iframe') ? verticalSlide.layoutProps.src : undefined"
+            :data-preview-image="(verticalSlide.layoutProps.lightbox && verticalSlide.layoutProps.type !== 'iframe') ? verticalSlide.layoutProps.src : undefined"
+          >
+            <iframe
+              v-if="verticalSlide.layoutProps.type === 'iframe'"
+              :src="verticalSlide.layoutProps.src"
+              :title="verticalSlide.layoutProps.title || ''"
+              frameborder="0"
+              allowfullscreen
             />
-          </header>
-          <article v-if="verticalSlide.body?.children?.length">
-            <MDCRenderer
-              :body="verticalSlide.body"
-              :data="presentationData.metadata"
-              :components="mdcComponents"
-            />
-          </article>
+            <img
+              v-else
+              :src="verticalSlide.layoutProps.src"
+              :alt="verticalSlide.layoutProps.alt || ''"
+            >
+          </aside>
         </template>
       </section>
     </section>
@@ -146,60 +167,81 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
       ]"
       :data-background-image="getBackground(section)"
     >
-      <!-- Special layout: single MDCRenderer for full slide content -->
-      <template v-if="section.layout">
+      <!-- Full-component layout: single MDCRenderer for full slide content -->
+      <template v-if="section.layout === 'full'">
         <MDCRenderer
           :body="section.body"
           :data="presentationData.metadata"
           :components="mdcComponents"
         />
       </template>
-      <!-- Default layout: header + article -->
+      <!-- Default + media layouts: header/article with optional media pane -->
       <template v-else>
-        <!-- Header with optional pretitle/subtitle (hgroup) -->
-        <hgroup v-if="section.header?.children?.length && (section.pretitle || section.subtitle)">
-          <div
-            v-if="section.pretitle"
-            class="slide-pretitle"
-          >
-            <MDCRenderer
-              :body="section.pretitle"
-              :data="presentationData.metadata"
-              :components="mdcComponents"
-            />
-          </div>
-          <div class="slide-heading">
+        <div class="slide-content-pane">
+          <hgroup v-if="section.header?.children?.length && (section.pretitle || section.subtitle)">
+            <div
+              v-if="section.pretitle"
+              class="slide-pretitle"
+            >
+              <MDCRenderer
+                :body="section.pretitle"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
+            <div class="slide-heading">
+              <MDCRenderer
+                :body="section.header"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
+            <div
+              v-if="section.subtitle"
+              class="slide-subtitle"
+            >
+              <MDCRenderer
+                :body="section.subtitle"
+                :data="presentationData.metadata"
+                :components="mdcComponents"
+              />
+            </div>
+          </hgroup>
+          <header v-else-if="section.header?.children?.length">
             <MDCRenderer
               :body="section.header"
               :data="presentationData.metadata"
               :components="mdcComponents"
             />
-          </div>
-          <div
-            v-if="section.subtitle"
-            class="slide-subtitle"
-          >
+          </header>
+          <article v-if="section.body?.children?.length">
             <MDCRenderer
-              :body="section.subtitle"
+              :body="section.body"
               :data="presentationData.metadata"
               :components="mdcComponents"
             />
-          </div>
-        </hgroup>
-        <header v-else-if="section.header?.children?.length">
-          <MDCRenderer
-            :body="section.header"
-            :data="presentationData.metadata"
-            :components="mdcComponents"
+          </article>
+        </div>
+        <aside
+          v-if="section.layoutProps?.src"
+          class="slide-media-pane"
+          :class="{ 'has-lightbox': section.layoutProps.lightbox }"
+          :data-preview-link="(section.layoutProps.lightbox && section.layoutProps.type === 'iframe') ? section.layoutProps.src : undefined"
+          :data-preview-image="(section.layoutProps.lightbox && section.layoutProps.type !== 'iframe') ? section.layoutProps.src : undefined"
+        >
+          <iframe
+            v-if="section.layoutProps.type === 'iframe'"
+            :src="section.layoutProps.src"
+            :title="section.layoutProps.title || ''"
+            frameborder="0"
+            allowfullscreen
           />
-        </header>
-        <article v-if="section.body?.children?.length">
-          <MDCRenderer
-            :body="section.body"
-            :data="presentationData.metadata"
-            :components="mdcComponents"
-          />
-        </article>
+          <img
+            v-else
+            :src="section.layoutProps.src"
+            :alt="section.layoutProps.alt || ''"
+          >
+        </aside>
       </template>
     </section>
   </template>
@@ -217,5 +259,93 @@ hgroup :deep(.slide-pretitle > div),
 hgroup :deep(.slide-heading > div),
 hgroup :deep(.slide-subtitle > div) {
   display: contents;
+}
+
+/**
+ * Wrapper div for header + article.
+ * Transparent (display: contents) for default layouts.
+ * Becomes the content column for media layouts via the global styles below.
+ */
+.slide-content-pane {
+  display: contents;
+}
+</style>
+
+<style>
+/**
+ * Media layout: two-column grid with content on one side and media on the other.
+ * Global (unscoped) to override Reveal.js and theme display:flex.
+ */
+.reveal .slides section[class*="layout-media"] {
+  display: grid !important;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.reveal .slides section.layout-media-left {
+  grid-template-columns: 1.5fr 1fr;
+}
+
+.reveal .slides section.layout-media-left > .slide-content-pane {
+  order: 2;
+}
+
+.reveal .slides section.layout-media-left > .slide-media-pane {
+  order: 1;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-content-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  min-width: 0;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-content-pane > header,
+.reveal .slides section[class*="layout-media"] > .slide-content-pane > hgroup {
+  height: auto;
+  flex-shrink: 0;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-content-pane > article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 0;
+  border: solid 1px var(--fr-border-color, #ccc);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Lightbox: enable click-through and show pointer cursor */
+.reveal .slides section[class*="layout-media"] > .slide-media-pane.has-lightbox {
+  cursor: pointer;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane.has-lightbox iframe {
+  pointer-events: none;
 }
 </style>

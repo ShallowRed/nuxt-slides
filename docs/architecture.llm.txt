@@ -28,7 +28,6 @@ src/
 │       ├── Quote.vue              # Blockquote with attribution
 │       ├── Image.vue              # Img with optional caption + Reveal.js lightbox
 │       ├── FullScreenImage.vue    # Full-bleed background image slide
-│       ├── SplitSlide.vue         # Text + iframe/image split layout
 │       ├── Iframe.vue             # Embedded iframe
 │       ├── Mermaid.vue            # Mermaid diagram renderer
 │       └── PreviewLink.vue        # Link with preview thumbnail
@@ -82,6 +81,7 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 5. Each slide tagged with `headingLevel` for CSS classes (`slide-h1`, `slide-h2`, etc.)
 6. **`:slide-background{image="..."}`**: Inline override for per-slide background image; extracted and removed from rendered output by the parser.
 7. **Full-slide components** (list in `FULL_SLIDE_COMPONENTS`): skip header/body split, render all children in `body`. CSS class `layout-full` applied.
+8. **`:layout{name="..." ...}`**: Slide-level layout annotation. Unlike full-slide components, preserves header/body split. Currently supports `media-right` and `media-left` for two-column layouts with media.
 
 ### Theme System
 - SCSS sources in `themes/[name]/`

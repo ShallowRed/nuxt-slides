@@ -22,6 +22,8 @@ export interface Slide {
   headingLevel?: string
   backgroundImage?: string
   layout?: string
+  /** Extra props for the layout (e.g. media src/type for media-right/media-left) */
+  layoutProps?: Record<string, string>
 }
 
 export interface ThemeBackgrounds {

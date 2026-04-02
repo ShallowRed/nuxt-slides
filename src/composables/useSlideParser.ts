@@ -111,47 +111,65 @@ export function useSlideParser() {
   }
 
   /**
-   * Removes :pretitle and :subtitle annotation nodes from children so they don't render.
+   * Removes :pretitle, :subtitle and :layout annotation nodes from children so they don't render.
    * :slide-background is handled separately by filterBackgroundNodes().
    */
   function filterAnnotationNodes(children: any[]): any[] {
     return children.filter(n =>
-      !(n.type === 'element' && (n.tag === 'pretitle' || n.tag === 'subtitle')),
+      !(n.type === 'element' && (n.tag === 'pretitle' || n.tag === 'subtitle' || n.tag === 'layout')),
     )
+  }
+
+  /**
+   * Extracts :layout{name="..." ...props} inline annotation from children.
+   * Returns the layout name and extra props, or undefined if not found.
+   */
+  function extractLayout(children: any[]): { name: string, props: Record<string, string> } | undefined {
+    const node = children.find(n => n.type === 'element' && n.tag === 'layout' && n.props?.name)
+    if (!node)
+      return undefined
+    const { name, ...rest } = node.props
+    return { name, props: rest }
   }
 
   /**
    * Creates a slide object from AST nodes.
    * Separates the first heading into header, rest into body.
    * Supports explicit :pretitle{text="..."} and :subtitle{text="..."} inline markers.
+   * Supports :layout{name="..." ...} for slide-level layouts (e.g. media-right).
    * Falls back to italic paragraph immediately after heading for subtitle (backward compat).
-   * Unless the slide has a special layout (then keep all in body).
+   * Unless the slide has a FULL_SLIDE_COMPONENT layout (then keep all in body).
    */
   function createSlide(children: any[], headingLevel?: string): Slide {
     const level = headingLevel || getHeadingLevel(children)
-    const layout = getSlideLayout(children)
 
     const backgroundImage = extractBackgroundOverride(children)
     // Remove :slide-background nodes from rendered output
     const filtered = filterBackgroundNodes(children)
 
+    // Extract explicit layout annotation before filtering
+    const layoutInfo = extractLayout(filtered)
+
     // Extract explicit pretitle / subtitle before filtering their marker nodes
     const pretitle = extractPretitle(filtered)
     const explicitSubtitle = extractExplicitSubtitle(filtered)
 
-    // Remove annotation marker nodes (:pretitle, :subtitle) from rendered output
+    // Remove annotation marker nodes (:pretitle, :subtitle, :layout) from rendered output
     const cleaned = filterAnnotationNodes(filtered)
 
-    // If the slide has a special layout, keep everything in body
-    if (layout) {
-      return {
-        body: {
-          type: 'root',
-          children: cleaned,
-        },
-        headingLevel: level,
-        layout,
-        backgroundImage,
+    // FULL_SLIDE_COMPONENT layout — only when no explicit :layout{} annotation
+    if (!layoutInfo) {
+      const fullLayout = getSlideLayout(cleaned)
+      if (fullLayout) {
+        return {
+          body: {
+            type: 'root',
+            children: cleaned,
+          },
+          headingLevel: level,
+          layout: fullLayout,
+          backgroundImage,
+        }
       }
     }
 
@@ -195,6 +213,8 @@ export function useSlideParser() {
           children: bodyChildren,
         },
         headingLevel: level,
+        layout: layoutInfo?.name,
+        layoutProps: layoutInfo?.props,
         backgroundImage,
       }
     }
@@ -206,6 +226,8 @@ export function useSlideParser() {
         children: cleaned,
       },
       headingLevel: level,
+      layout: layoutInfo?.name,
+      layoutProps: layoutInfo?.props,
       backgroundImage,
     }
   }

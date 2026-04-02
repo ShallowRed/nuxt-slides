@@ -129,12 +129,19 @@ Content for second column
 ```
 **Note**: Each H3/H4 starts a new column. Grouped via DOM manipulation in `onMounted`. `count` prop is informational only when using auto-split — actual column count is driven by the headings.
 
-#### SplitSlide (text + iframe/image)
+#### Slide-level layout: media alongside content
 ```markdown
-:::SplitSlide{src="https://example.com" type="iframe" title="Example" lightbox}
+### My slide title
+:layout{name="media-right" src="https://example.com" type="iframe"}
+
 Description text next to the iframe.
-:::
 ```
+The `:layout` annotation is extracted by the parser — the heading + body render in a content column,
+while the media (iframe or image) renders in a sibling column. Supported layouts:
+- `media-right` — content left, media right (default proportions: 1fr / 1.5fr)
+- `media-left` — media left, content right
+
+Props: `src` (required), `type` ("iframe" or "image", default "image"), `alt`, `title`.
 
 ### Leaf components (use `::`)
 
@@ -224,12 +231,6 @@ Both `:pretitle` and `:subtitle` markers are extracted and filtered **before** r
 
 ❌ ::Image{...}  # then a stray :::  (Image is self-closing when no caption)
 ✅ ::Image{...}  # nothing after
-
-❌ :::SplitSlide{...}
-   Content without closing  ← missing :::
-✅ :::SplitSlide{...}
-   Content
-   :::
 ```
 
 ---

@@ -119,13 +119,17 @@ Texte de la citation
 - **preview**: active le zoom au survol
 - **width**, **height**: dimensions optionnelles
 
-### 4. SplitSlide (Diapositive Divisée)
+### 4. Layout média (diapositive à deux colonnes)
 ```markdown
-:::SplitSlide{image="/images/photo.jpg" position="right"}
-Contenu textuel à gauche
-:::
+### Titre de la diapositive
+:layout{name="media-right" src="https://example.com" type="iframe"}
+
+Contenu textuel à gauche, média à droite.
 ```
-- **position**: "left" ou "right" (position de l'image)
+- **name**: "media-right" (média à droite) ou "media-left" (média à gauche)
+- **src**: URL de l'iframe ou chemin de l'image
+- **type**: "iframe" ou "image"
+- **title**, **alt**: attributs optionnels pour iframe/image
 
 ### 5. FullScreenImage (Image Plein Écran)
 ```markdown

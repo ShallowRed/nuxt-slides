@@ -8,7 +8,7 @@ interface Props {
    * (column count is driven by the content itself).
    */
   count?: number
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -118,4 +118,5 @@ onMounted(() => {
 .size-sm { font-size: 0.85em; }
 .size-md { font-size: 1em; }
 .size-lg { font-size: 1.15em; }
+.size-xl { font-size: 1.3em; }
 </style>

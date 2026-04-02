@@ -115,10 +115,8 @@ Y a-t-il des briques qui gagneraient à être partagées/documentées/mutualisé
 - Builders
 ::
 
-###
-
-::SplitSlide{src="https://docs.aides.beta.gouv.fr" type="iframe" height="1200" title="Documentation patterns simulateurs" lightbox}
-#### Pour aller *plus loin*
+### Pour aller *plus loin*
+:layout{name="media-right" src="https://docs.aides.beta.gouv.fr" type="iframe" lightbox="true"}
 
 Une première documentation sur :
 - Méthodologies de conception
@@ -126,20 +124,15 @@ Une première documentation sur :
 - Patterns architecturaux existant
 - Outils open source disponibles
 
-::
-
 ## Présentation d'*aides simplifiées*
 
-###
-
-::SplitSlide{src="https://aides.beta.numerique.gouv.fr" type="iframe" title="Aides simplifiées" lightbox}
-#### La bonne aide, au bon moment, au bon endroit
+### La bonne aide, au bon moment, au bon endroit
+:layout{name="media-right" src="https://aides.beta.numerique.gouv.fr" type="iframe" lightbox="true"}
 
 Des simulateurs en marque blanche, construits autour de paniers d'aides, thématisés par "moment de vie" :
 - Déménagement pour les étudiants
 - Dispositifs d'aide à l'innovation pour les entreprises
 - Tarification sociale des transports
-::
 
 ### Ressources *mutualisables*
 

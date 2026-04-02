@@ -59,9 +59,15 @@ Splits content by heading hierarchy.
 - The resolved value is stored as `slide.backgroundImage` and takes precedence over theme defaults in `RevealSlides.vue`.
 
 **Full-slide layout detection**:
-- `getSlideLayout(children)` checks whether any top-level node tag is in `FULL_SLIDE_COMPONENTS` (config list: `['SplitSlide', 'split-slide', 'FullScreenImage', 'full-screen-image']`).
+- `getSlideLayout(children)` checks whether any top-level node tag is in `FULL_SLIDE_COMPONENTS` (config list: `['FullScreenImage', 'full-screen-image']`).
 - When found, returns canonical `'full'` — the slide keeps all children in `body` (no header/body split), and gets CSS class `layout-full`.
 - Adding new full-slide components only requires updating `FULL_SLIDE_COMPONENTS` in `src/config/presentation.ts`.
+
+**Slide-level layout annotations**:
+- `extractLayout(children)` looks for `:layout{name="..." ...props}` element nodes. Returns `{ name, props }` or undefined.
+- When found, `name` becomes `slide.layout` and remaining props become `slide.layoutProps`.
+- Unlike FULL_SLIDE_COMPONENT layouts, annotation layouts preserve the normal header/body split — the heading is part of the content column.
+- Currently supported: `media-right`, `media-left` — renders content + media in a two-column grid at the section level.
 
 **Vertical Slide Logic**:
 - If section contains H3 nodes, split into vertical slides

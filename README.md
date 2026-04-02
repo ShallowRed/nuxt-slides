@@ -8,7 +8,7 @@ A modern presentation system built with Nuxt 3, MDC, and reveal.js that converts
 - 📝 **MDC Support** - Write presentations in Markdown with Vue components
 - 🎨 **Multiple Themes** - DSFR and Minimal themes included
 - 📊 **reveal.js** - Professional presentation framework
-- 🔧 **Custom Components** - Columns, Quote, Image, SplitSlide, and more
+- 🔧 **Custom Components** - Columns, Quote, Image, media layouts, and more
 - 🎯 **File-based Routing** - Auto-discover presentations from `presentations/` folder
 - ⬇️ **Vertical Slides** - Support for both `----` markers and `###` headings
 - 🎭 **Dynamic Theming** - Per-presentation theme selection
@@ -68,7 +68,6 @@ nuxt-slides/
 │   │       ├── Columns.vue
 │   │       ├── Quote.vue
 │   │       ├── Image.vue
-│   │       ├── SplitSlide.vue
 │   │       ├── FullScreenImage.vue
 │   │       ├── Iframe.vue
 │   │       ├── Mermaid.vue
@@ -173,13 +172,16 @@ Optional caption text
 ::
 ```
 
-### SplitSlide
+### Media Layout
 
 ```markdown
-:::SplitSlide{src="https://example.com" type="iframe" title="Example"}
+### Slide Title
+:layout{name="media-right" src="https://example.com" type="iframe"}
+
 Description text next to the iframe.
-:::
 ```
+
+Supported layouts: `media-right` (default), `media-left`. The heading and body render in a content column alongside the media.
 
 For the full component reference, see [docs/presentation-format.llm.txt](./docs/presentation-format.llm.txt).
 

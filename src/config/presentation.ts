@@ -74,7 +74,7 @@ export const DEFAULT_REVEAL_CONFIG: RevealConfig = {
  * children in `body` without splitting into header/body.
  * Add any future full-slide components here to extend parser support.
  */
-export const FULL_SLIDE_COMPONENTS = ['SplitSlide', 'split-slide', 'FullScreenImage', 'full-screen-image']
+export const FULL_SLIDE_COMPONENTS = ['FullScreenImage', 'full-screen-image']
 
 /**
  * MDC component mappings
@@ -90,7 +90,6 @@ export const MDC_COMPONENTS = {
   FullScreenImage: 'FullScreenImage',
   Iframe: 'Iframe',
   Image: 'Image',
-  SplitSlide: 'SplitSlide',
   Mermaid: 'Mermaid',
   PreviewLink: 'PreviewLink',
   IconInline: 'IconInline',
