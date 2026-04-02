@@ -22,7 +22,7 @@ const config = {
   // Branch to clone
   branch: process.env.PRESENTATIONS_BRANCH || 'main',
   // Folders to sync (comma-separated)
-  folders: (process.env.PRESENTATIONS_FOLDERS || 'private,semi-private,draft').split(','),
+  folders: (process.env.PRESENTATIONS_FOLDERS || 'public,private,semi-private,draft').split(','),
 }
 
 /**
@@ -61,13 +61,17 @@ async function fetchPresentations() {
         continue
       }
 
-      // Remove target folder if exists
-      if (existsSync(targetDir)) {
-        rmSync(targetDir, { recursive: true, force: true })
+      if (folder === 'public') {
+        // Merge into public/ — don't remove existing files (examples tracked in main repo)
+        mkdirSync(targetDir, { recursive: true })
       }
-
-      // Create target directory
-      mkdirSync(targetDir, { recursive: true })
+      else {
+        // Replace entire folder for private/semi-private/draft
+        if (existsSync(targetDir)) {
+          rmSync(targetDir, { recursive: true, force: true })
+        }
+        mkdirSync(targetDir, { recursive: true })
+      }
 
       // Copy files (using cp command for simplicity)
       execSync(`cp -r "${sourceDir}/." "${targetDir}/"`, { stdio: 'inherit' })
