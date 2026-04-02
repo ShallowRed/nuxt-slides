@@ -77,24 +77,9 @@ backgrounds:                               # Images de fond (optionnel)
 
 ## Composants MDC Disponibles
 
-### 1. Alert (Messages d'Alerte)
+### 1. Columns (Colonnes)
 ```markdown
-::alert{type="info"}
-Message informatif
-::
-
-::alert{type="warning"}
-Message d'avertissement
-::
-
-::alert{type="error"}
-Message d'erreur
-::
-```
-
-### 2. TwoColumns (Deux Colonnes)
-```markdown
-::TwoColumns
+::Columns
 ### Colonne Gauche
 Contenu de la première colonne
 
@@ -103,115 +88,46 @@ Contenu de la seconde colonne
 ::
 ```
 
-### 3. Quote (Citation)
+Avec trois colonnes :
 ```markdown
-::Quote{author="Nom Auteur" role="Titre/Rôle" avatar="/chemin/avatar.jpg"}
+:::Columns{cols=3}
+### Colonne 1
+Contenu
+
+### Colonne 2
+Contenu
+
+### Colonne 3
+Contenu
+:::
+```
+- **cols**: nombre de colonnes (2 par défaut, 3 max)
+- Les alias `::TwoColumns` et `::ThreeColumns` fonctionnent aussi
+
+### 2. Quote (Citation)
+```markdown
+::Quote{author="Nom Auteur" role="Titre/Rôle"}
 Texte de la citation
 ::
 ```
 
-### 4. StatCard (Carte Statistique)
+### 3. Image (Image)
 ```markdown
-::StatCard{value="98%" label="Satisfaction" trend="up" icon="⭐" color="#10b981"}
+::Image{src="/images/photo.jpg" alt="Description" preview}
 ::
 ```
-- **trend**: "up", "down", ou "neutral"
-- **icon**: emoji ou symbole
-- **color**: code couleur hexadécimal
+- **preview**: active le zoom au survol
+- **width**, **height**: dimensions optionnelles
 
-### 5. ImageWithCaption (Image avec Légende)
+### 4. SplitSlide (Diapositive Divisée)
 ```markdown
-::ImageWithCaption{src="/chemin/image.jpg" alt="Description" width="80%"}
-Légende de l'image
-::
+:::SplitSlide{image="/images/photo.jpg" position="right"}
+Contenu textuel à gauche
+:::
 ```
+- **position**: "left" ou "right" (position de l'image)
 
-### 6. Timeline (Chronologie)
-```markdown
-::Timeline
-### Étape 1
-Description de la première étape
-
-### Étape 2
-Description de la deuxième étape
-
-### Étape 3
-Description de la troisième étape
-::
-```
-
-### 7. Callout (Mise en Avant)
-```markdown
-::Callout{type="tip" title="Conseil"}
-Contenu du conseil
-::
-
-::Callout{type="info" title="Information"}
-Contenu informatif
-::
-
-::Callout{type="warning" title="Attention"}
-Contenu d'avertissement
-::
-
-::Callout{type="danger" title="Important"}
-Contenu important/dangereux
-::
-```
-
-### 8. StepsList (Liste d'Étapes)
-```markdown
-::StepsList
-### Première étape
-Description détaillée
-
-### Deuxième étape
-Description détaillée
-
-### Troisième étape
-Description détaillée
-::
-```
-
-### 9. ComparisonTable (Tableau Comparatif)
-```markdown
-::ComparisonTable
-| Critère | Option A | Option B | Option C |
-|---------|----------|----------|----------|
-| Prix    | Gratuit  | 10€/mois | 50€/mois |
-| Support | Email    | Chat     | Téléphone|
-::
-```
-
-### 10. Tabs (Onglets)
-```markdown
-::Tabs
-### JavaScript
-Code JavaScript
-
-### Python
-Code Python
-
-### TypeScript
-Code TypeScript
-::
-```
-
-### 11. AccordionList (Accordéon)
-```markdown
-::AccordionList
-### Question 1
-Réponse à la première question
-
-### Question 2
-Réponse à la deuxième question
-
-### Question 3
-Réponse à la troisième question
-::
-```
-
-### 12. FullScreenImage (Image Plein Écran)
+### 5. FullScreenImage (Image Plein Écran)
 ```markdown
 ::FullScreenImage{src="/chemin/image.jpg" overlay="0.4" position="center"}
 # Titre sur l'image
@@ -221,32 +137,42 @@ Contenu avec fond d'image
 - **overlay**: opacité du fond noir (0-1)
 - **position**: "center", "top", "bottom", "left", "right"
 
-### 13. ThreeColumns (Trois Colonnes)
+### 6. Mermaid (Diagrammes)
 ```markdown
-::ThreeColumns
-### Colonne 1
-Contenu de la première colonne
-
-### Colonne 2
-Contenu de la deuxième colonne
-
-### Colonne 3
-Contenu de la troisième colonne
+::Mermaid
+graph TD
+    A[Début] --> B[Étape 1]
+    B --> C[Étape 2]
+    C --> D[Fin]
 ::
 ```
 
-### 14. Centered (Contenu Centré)
+### 7. Iframe (Contenu Intégré)
 ```markdown
-::Centered
-Ce contenu sera centré verticalement et horizontalement
+::Iframe{src="https://example.com" height="500px"}
 ::
 ```
 
-### 15. Divider (Séparateur Visuel)
+### 8. PreviewLink (Aperçu de Lien)
 ```markdown
-::Divider
+::PreviewLink{href="https://example.com" title="Titre du site"}
 ::
 ```
+
+### 9. Icônes Inline
+```markdown
+:i{name="ri-home-line"} Accueil
+:i{name="ri-settings-line"} Paramètres
+```
+
+### 10. Annotations de Diapositive (Inline)
+```markdown
+:slide-background{src="/backgrounds/custom.jpg"}
+:pretitle{text="Chapitre 1"}
+:subtitle{text="Sous-titre de la diapositive"}
+```
+- Placés dans le contenu d'une diapositive, avant le texte principal
+- Ne génèrent pas de contenu visible dans le flux markdown
 
 ## Syntaxe Markdown Standard
 
@@ -398,7 +324,7 @@ Détails sur l'aspect A
 ### Aspect B
 Détails sur l'aspect B
 
-::three-columns
+:::Columns{cols=3}
 ### Avantage 1
 Description
 
@@ -407,7 +333,7 @@ Description
 
 ### Avantage 3
 Description
-::
+:::
 
 ## Deuxième Partie
 
@@ -422,16 +348,12 @@ const code = 'exemple'
 | A        | 85%    |
 | B        | 92%    |
 
-::alert{type="info"}
-Point important à noter
-::
+> **Point important à noter**
 
 ## Conclusion
 
-::centered
 ### Message Principal
 Synthèse en quelques mots
-::
 ```
 
 ### Présentation avec Colonnes
@@ -449,7 +371,7 @@ Introduction aux solutions
 
 ## Critères d'Évaluation
 
-::three-columns
+:::Columns{cols=3}
 ### Performance
 - Rapidité
 - Scalabilité
@@ -464,7 +386,7 @@ Introduction aux solutions
 - Déploiement
 - Utilisation
 - Support
-::
+:::
 
 ## Solution A
 
@@ -488,11 +410,9 @@ Introduction aux solutions
 
 ## Recommandation
 
-::centered
 **Solution recommandée: Solution A**
 
 Justification en une phrase
-::
 ```
 
 ## Checklist de Validation
@@ -519,7 +439,7 @@ Avant de finaliser le contenu, vérifier:
 
 ### Visuel
 - Privilégier les listes à puces aux paragraphes
-- Utiliser `::centered` pour messages clés
+- Mettre en **gras** les messages clés
 - Ajouter des images pour illustrer concepts complexes
 
 ### Narration

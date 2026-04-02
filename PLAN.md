@@ -184,7 +184,8 @@ The CodiMD preview (`extra.js` + `mdc-components.css`) is out of sync with nuxt-
 
 | Component | Decision |
 |-----------|----------|
-| `Callout` | ✅ Implement in nuxt-slides (see N1) |
+| `Callout` | ❌ Drop — removed from project; replaced with blockquotes in presentations |
+| `Centered` | ❌ Drop — removed; content unwrapped in presentations |
 | `ComparisonTable` | ❌ Drop — too app-like, use a regular table |
 | `Timeline` | ❌ Drop — too complex for minimal palette |
 | `StepsList` | ❌ Drop — a styled `<ol>` suffices |
@@ -212,15 +213,15 @@ Documented as self-closing in nuxt-slides (`::Image{src="..."}` — no closing `
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| S1 | Add `Quote`, `Iframe`, `PreviewLink`, `FullScreenImage` to `mdcComponents` array in `extra.js` + `syncscroll.js` | ⬜ | |
-| S2 | Add matching CSS rules in `mdc-components.css` for those components | ⬜ | |
-| S3 | Remove `ComparisonTable`, `Timeline`, `StepsList` from CodiMD list | ⬜ | Wait until N tasks clarify `Callout` |
-| S4 | Add `Callout` CSS + JS rule in CodiMD once N1 finalises the Vue API | ⬜ | Depends on N1 |
-| S5 | Add `Columns` to CodiMD list (alias for `TwoColumns`/`ThreeColumns`) | ⬜ | Depends on C3 |
+| S1 | Add `Quote`, `Iframe`, `PreviewLink`, `FullScreenImage` to `mdcComponents` array in `extra.js` | ✅ | + `Columns` |
+| S2 | Add matching CSS rules in `mdc-components.css` for those components | ✅ | Full rewrite of CSS file |
+| S3 | Remove `ComparisonTable`, `Timeline`, `StepsList`, `Callout`, `Centered`, `Lightbox` from CodiMD | ✅ | All ghost/deleted components |
+| S4 | ~~Add `Callout` CSS + JS rule in CodiMD~~ | N/A | Callout removed from project |
+| S5 | Add `Columns` to CodiMD list (alias for `TwoColumns`/`ThreeColumns`) | ✅ | With aliases |
 | S6 | Standardize icon format: update `IconInline.vue` to accept `ri-name` → translate to `ri:name` | ✅ | |
-| S7 | Update `mdc_icon` renderer in CodiMD to match nuxt-slides icon names | ⬜ | After S6 |
-| S8 | Self-closing `Image` in CodiMD: document or implement optional-closer rule | ⬜ | |
-| S9 | Add `slide-background` CSS hint to CodiMD preview | ⬜ | Not a container, inline |
+| S7 | Update `mdc_icon` renderer in CodiMD: normalise `ri:name` → `ri-name` | ✅ | |
+| S8 | Self-closing `Image` in CodiMD: accepted as-is (always needs `::` closer) | ✅ | Convention documented |
+| S9 | Add `slide-background`/`pretitle`/`subtitle` inline hints to CodiMD preview | ✅ | `mdc_annotation` rule |
 
 ---
 
@@ -264,9 +265,9 @@ Feature X :badge[Stable] vs. Feature Y :badge[Beta]{type="warning"}
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| N1 | Create `Callout.vue` with `type` prop | ✅ | Register in `MDC_COMPONENTS` |
-| N2 | Create `Steps.vue` | ⬜ | Styled `<ol>` with visual step numbers |
-| N3 | Create `Badge.vue` inline component | ⬜ | Low priority |
+| N1 | ~~Create `Callout.vue`~~ | ❌ Dropped | User removed Callout from project |
+| N2 | ~~Create `Steps.vue`~~ | ❌ Dropped | User: "nevermind the new components" |
+| N3 | ~~Create `Badge.vue`~~ | ❌ Dropped | Same |
 
 ---
 

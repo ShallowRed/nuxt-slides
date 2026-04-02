@@ -136,15 +136,6 @@ Description text next to the iframe.
 :::
 ```
 
-#### Callout
-```markdown
-::Callout{type="info" title="Optional heading"}
-Body text here.
-::
-```
-Types: `info` (default), `tip`, `warning`, `danger`.
-All colours via CSS custom properties so themes can override (`--callout-info-bg`, `--callout-info-border`, etc.).
-
 ### Leaf components (use `::`)
 
 Leaves wrap text content but **never** other components.
@@ -161,13 +152,6 @@ Content for this column
 ::column{.size-xl}
 Larger text content
 ::
-```
-
-#### Centered
-```markdown
-:::Centered
-This content will be vertically and horizontally centered.
-:::
 ```
 
 #### Image
@@ -384,11 +368,6 @@ Right content
 :::
 
 ---
-
-:::Centered
-## Centered Slide
-Important message
-:::
 
 ## Code Example
 

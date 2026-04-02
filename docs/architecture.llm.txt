@@ -25,8 +25,6 @@ src/
 │   ├── IconInline.vue             # Inline icon (Iconify, accepts ri:name or ri-name)
 │   └── mdc/                       # Custom MDC components
 │       ├── Columns.vue            # 2-or-3 column layout (replaces TwoColumns/ThreeColumns)
-│       ├── Callout.vue            # Info/tip/warning/danger aside block
-│       ├── Centered.vue           # Full-width centered content
 │       ├── Quote.vue              # Blockquote with attribution
 │       ├── Image.vue              # Img with optional caption + Reveal.js lightbox
 │       ├── FullScreenImage.vue    # Full-bleed background image slide

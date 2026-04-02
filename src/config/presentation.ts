@@ -86,9 +86,6 @@ export const FULL_SLIDE_COMPONENTS = ['SplitSlide', 'split-slide', 'FullScreenIm
  * and could cause unexpected rendering.
  */
 export const MDC_COMPONENTS = {
-  ThreeColumns: 'ThreeColumns',
-  TwoColumns: 'TwoColumns',
-  Centered: 'Centered',
   Quote: 'Quote',
   FullScreenImage: 'FullScreenImage',
   Iframe: 'Iframe',
@@ -98,7 +95,6 @@ export const MDC_COMPONENTS = {
   PreviewLink: 'PreviewLink',
   IconInline: 'IconInline',
   i: 'IconInline',
-  Callout: 'Callout',
   Columns: 'Columns',
   // Backward-compat aliases — resolved to Columns
   TwoColumns: 'Columns',
