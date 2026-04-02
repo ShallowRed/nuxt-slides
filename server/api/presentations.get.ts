@@ -11,6 +11,7 @@ interface PresentationListItem {
   theme: string
   status: PublicationStatus
   filename: string
+  unlisted?: boolean
 }
 
 export default defineEventHandler(async (event): Promise<PresentationListItem[]> => {
@@ -22,7 +23,7 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
     const allPresentations = await listAllPresentations()
     const baseDir = join(process.cwd(), 'presentations')
 
-    const presentations = await Promise.all(
+    const items = await Promise.all(
       allPresentations
         // Filter based on auth status
         .filter(({ status }) => {
@@ -40,6 +41,7 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
           const ast = await parseMarkdown(content)
           const title = ast.data?.title || slug
           const theme = ast.data?.theme || 'dsfr'
+          const unlisted = !!ast.data?.unlisted
 
           return {
             slug,
@@ -47,11 +49,13 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
             theme,
             status,
             filename: `${slug}.md`,
+            unlisted,
           }
         }),
     )
 
-    return presentations
+    // Hide unlisted presentations from non-owners
+    return isOwner ? items : items.filter(p => !p.unlisted)
   }
   catch (error) {
     console.error('Error loading presentations:', error)

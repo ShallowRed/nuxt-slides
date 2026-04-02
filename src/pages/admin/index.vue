@@ -5,6 +5,7 @@ interface Presentation {
   theme: string
   status: 'public' | 'draft' | 'private' | 'semi-private'
   filename: string
+  unlisted?: boolean
 }
 
 interface SessionResponse {
@@ -141,6 +142,12 @@ const statusConfig = {
                     :class="[statusConfig[presentation.status].badge]"
                   >
                     {{ statusConfig[presentation.status].label }}
+                  </span>
+                  <span
+                    v-if="presentation.unlisted"
+                    class="badge badge-ghost"
+                  >
+                    👻 Unlisted
                   </span>
                   <span class="badge badge-outline">
                     {{ presentation.theme }}

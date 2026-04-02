@@ -2,6 +2,7 @@
 title: "Mutualisation des simulateurs d'aides publiques"
 lang: fr
 theme: dsfr
+unlisted: true
 backgrounds:
   h1: "/backgrounds/as-title.png"
   h2: "/backgrounds/as-section.png"

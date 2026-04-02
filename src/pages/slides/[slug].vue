@@ -80,6 +80,9 @@ watch(requiresPassword, (needsPassword) => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .error-message {
