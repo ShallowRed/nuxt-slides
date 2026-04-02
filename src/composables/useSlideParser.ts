@@ -111,12 +111,23 @@ export function useSlideParser() {
   }
 
   /**
-   * Removes :pretitle, :subtitle and :layout annotation nodes from children so they don't render.
+   * Extracts :quicklink{text="..." href="..."} inline annotation from children.
+   * Returns { text, href } or undefined if not found.
+   */
+  function extractQuicklink(children: any[]): { text: string, href: string } | undefined {
+    const node = children.find(n => n.type === 'element' && n.tag === 'quicklink' && n.props?.text && n.props?.href)
+    if (!node)
+      return undefined
+    return { text: node.props.text, href: node.props.href }
+  }
+
+  /**
+   * Removes :pretitle, :subtitle, :layout and :quicklink annotation nodes from children so they don't render.
    * :slide-background is handled separately by filterBackgroundNodes().
    */
   function filterAnnotationNodes(children: any[]): any[] {
     return children.filter(n =>
-      !(n.type === 'element' && (n.tag === 'pretitle' || n.tag === 'subtitle' || n.tag === 'layout')),
+      !(n.type === 'element' && (n.tag === 'pretitle' || n.tag === 'subtitle' || n.tag === 'layout' || n.tag === 'quicklink')),
     )
   }
 
@@ -150,9 +161,10 @@ export function useSlideParser() {
     // Extract explicit layout annotation before filtering
     const layoutInfo = extractLayout(filtered)
 
-    // Extract explicit pretitle / subtitle before filtering their marker nodes
+    // Extract explicit pretitle / subtitle / quicklink before filtering their marker nodes
     const pretitle = extractPretitle(filtered)
     const explicitSubtitle = extractExplicitSubtitle(filtered)
+    const quicklink = extractQuicklink(filtered)
 
     // Remove annotation marker nodes (:pretitle, :subtitle, :layout) from rendered output
     const cleaned = filterAnnotationNodes(filtered)
@@ -169,6 +181,7 @@ export function useSlideParser() {
           headingLevel: level,
           layout: fullLayout,
           backgroundImage,
+          quicklink,
         }
       }
     }
@@ -216,6 +229,7 @@ export function useSlideParser() {
         layout: layoutInfo?.name,
         layoutProps: layoutInfo?.props,
         backgroundImage,
+        quicklink,
       }
     }
 
@@ -229,6 +243,7 @@ export function useSlideParser() {
       layout: layoutInfo?.name,
       layoutProps: layoutInfo?.props,
       backgroundImage,
+      quicklink,
     }
   }
 

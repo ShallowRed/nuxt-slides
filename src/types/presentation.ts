@@ -24,6 +24,8 @@ export interface Slide {
   layout?: string
   /** Extra props for the layout (e.g. media src/type for media-right/media-left) */
   layoutProps?: Record<string, string>
+  /** Quick navigation link pinned to bottom of slide */
+  quicklink?: { text: string, href: string }
 }
 
 export interface ThemeBackgrounds {

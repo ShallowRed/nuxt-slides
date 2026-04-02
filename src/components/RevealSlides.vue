@@ -42,6 +42,33 @@ const mdcComponents: Record<string, any> = Object.fromEntries(
   ]),
 )
 
+/**
+ * Returns the HTML id for a vertical slide within a section.
+ * - inner[0] (H2 intercalaire): no id — not directly hash-navigable
+ * - inner[1] (résumé / first content): gets sectionId (H2 slug, e.g. "ce-qui-a-change")
+ *   → clicking #ce-qui-a-change jumps directly here, bypassing the intercalaire
+ * - inner[2+]: their own heading-based id
+ */
+function getVerticalId(sectionIndex: number, vIndex: number): string | undefined {
+  if (vIndex === 0)
+    return undefined
+  if (vIndex === 1)
+    return slideIdMap.value[sectionIndex]?.sectionId
+  return slideIdMap.value[sectionIndex]?.verticalIds?.[vIndex]
+}
+
+/**
+ * Splits a quicklink text like "Pressé·e ? Ce qui a changé" into
+ * { prefix: "Pressé·e ?", label: "Ce qui a changé" }.
+ * Returns null when no " ? " separator is found.
+ */
+function quicklinkParts(text: string): { prefix: string, label: string } | null {
+  const idx = text.indexOf(' ? ')
+  if (idx === -1)
+    return null
+  return { prefix: text.slice(0, idx + 2), label: text.slice(idx + 3) }
+}
+
 // Helper to get background for a slide
 function getBackground(slide: { headingLevel?: string, backgroundImage?: string }) {
   if (slide.backgroundImage)
@@ -62,13 +89,12 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
     <!-- Horizontal section with vertical slides -->
     <section
       v-if="section.verticalSlides && section.verticalSlides.length > 0"
-      :id="slideIdMap[index]?.sectionId"
       :class="section.headingLevel ? `slide-${section.headingLevel}` : ''"
       :data-background-image="getBackground(section)"
     >
       <section
         v-for="(verticalSlide, vIndex) in section.verticalSlides"
-        :id="slideIdMap[index]?.verticalIds?.[vIndex]"
+        :id="getVerticalId(index, vIndex)"
         :key="`${index}-${vIndex}`"
         :data-markdown="false"
         :class="[
@@ -152,6 +178,23 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
               :alt="verticalSlide.layoutProps.alt || ''"
             >
           </aside>
+          <div
+            v-if="verticalSlide.quicklink"
+            class="slide-quicklink-wrapper"
+          >
+            <template v-if="quicklinkParts(verticalSlide.quicklink.text)">
+              <span class="slide-quicklink-prefix">{{ quicklinkParts(verticalSlide.quicklink.text)!.prefix }}</span>
+              <a
+                :href="verticalSlide.quicklink.href"
+                class="slide-quicklink"
+              >{{ quicklinkParts(verticalSlide.quicklink.text)!.label }} →</a>
+            </template>
+            <a
+              v-else
+              :href="verticalSlide.quicklink.href"
+              class="slide-quicklink"
+            >{{ verticalSlide.quicklink.text }} →</a>
+          </div>
         </template>
       </section>
     </section>
@@ -242,6 +285,23 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
             :alt="section.layoutProps.alt || ''"
           >
         </aside>
+        <div
+          v-if="section.quicklink"
+          class="slide-quicklink-wrapper"
+        >
+          <template v-if="quicklinkParts(section.quicklink.text)">
+            <span class="slide-quicklink-prefix">{{ quicklinkParts(section.quicklink.text)!.prefix }}</span>
+            <a
+              :href="section.quicklink.href"
+              class="slide-quicklink"
+            >{{ quicklinkParts(section.quicklink.text)!.label }} →</a>
+          </template>
+          <a
+            v-else
+            :href="section.quicklink.href"
+            class="slide-quicklink"
+          >{{ section.quicklink.text }} →</a>
+        </div>
       </template>
     </section>
   </template>
@@ -347,5 +407,34 @@ hgroup :deep(.slide-subtitle > div) {
 
 .reveal .slides section[class*="layout-media"] > .slide-media-pane.has-lightbox iframe {
   pointer-events: none;
+}
+
+/**
+ * Quicklink: small navigation hint pinned to the bottom of a slide.
+ * Prefix (e.g. "Pressé·e ?") is plain muted text; the link is styled distinctly.
+ */
+.reveal .slides section > .slide-quicklink-wrapper {
+  position: absolute;
+  bottom: 0.5em;
+  left: 0;
+  font-size: 0.85em;
+  white-space: nowrap;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.reveal .slides section > .slide-quicklink-wrapper:hover {
+  opacity: 1;
+}
+
+.reveal .slides section > .slide-quicklink-wrapper .slide-quicklink-prefix {
+  color: var(--r-main-color, #3a3a3a);
+  margin-right: 0.4em;
+}
+
+.reveal .slides section > .slide-quicklink-wrapper .slide-quicklink {
+  color: var(--r-link-color, #000091);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 </style>
