@@ -51,7 +51,7 @@ watch(requiresPassword, (needsPassword) => {
           class="codimd-edit-link"
           title="Edit collaboratively"
         >
-          ✏️ Edit
+          Edit
         </a>
       </template>
 

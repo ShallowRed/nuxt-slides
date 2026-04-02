@@ -42,7 +42,7 @@ const editUrl = computed(() => presentationData.value?.editUrl || null)
           class="codimd-edit-link"
           title="Edit collaboratively"
         >
-          ✏️ Edit
+          Edit
         </a>
       </template>
 
@@ -99,15 +99,15 @@ const editUrl = computed(() => presentationData.value?.editUrl || null)
 .codimd-edit-link {
   position: fixed;
   bottom: 1rem;
-  right: 1rem;
+  left: 1rem;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   text-decoration: none;
   font-size: 0.85rem;
-  opacity: 0.5;
+  opacity: 0.35;
   transition: opacity 0.2s;
 }
 
