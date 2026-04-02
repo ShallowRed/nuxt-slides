@@ -7,14 +7,14 @@ import type { PresentationData } from '~/types/presentation'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { DEFAULT_METADATA } from '~/config/presentation'
 
-export function usePresentation(slug: string) {
+export function usePresentation(slug: string, apiUrl?: string) {
   const { parseSlides, parseSlidesFromSeparators } = useSlideParser()
 
   const { data, error, status, refresh } = useAsyncData(
     `presentation-${slug}`,
     async (): Promise<PresentationData> => {
       // Fetch markdown content
-      const response = await $fetch<{ content: string, editUrl?: string }>(`/api/presentations/${slug}`)
+      const response = await $fetch<{ content: string, editUrl?: string }>(apiUrl || `/api/presentations/${slug}`)
 
       // Parse MDC
       const ast = await parseMarkdown(response.content)
