@@ -149,7 +149,8 @@
   }
 
   header {
-    height: 8rem;
+    min-height: 8rem;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -160,7 +161,8 @@
   }
 
   hgroup {
-    height: 8rem;
+    min-height: 8rem;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: end;

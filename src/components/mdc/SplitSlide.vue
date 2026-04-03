@@ -43,6 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
         <img
           v-else
           :src="props.src"
+          :class="{ 'fit-media': props.lightbox }"
           :alt="props.alt"
         >
         <div class="expand-hint">
@@ -165,5 +166,9 @@ const props = withDefaults(defineProps<Props>(), {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.split-media img.fit-media {
+  object-fit: contain;
 }
 </style>
