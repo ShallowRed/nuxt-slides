@@ -1,7 +1,6 @@
 # Nuxt Slides — Deploy & Development Commands
 # Usage: make <target>
 
-PRIVATE_REPO_DIR := ../nuxt-slides-content
 PRESENTATIONS_DIR := presentations
 CODIMD_DIR := ../codimd
 
@@ -27,51 +26,46 @@ themes: ## Build themes
 themes-watch: ## Build themes in watch mode
 	pnpm dev:theme
 
-# ─── Content sync ────────────────────────────────────────────
+# ─── Content (submodule) ─────────────────────────────────────
 
-.PHONY: sync-content sync-to-private sync-from-private
+.PHONY: content-init content-pull content-status content-commit content-push
 
-sync-to-private: ## Sync local presentations → private repo (nuxt-slides-content)
-	@echo "📦 Syncing presentations to private repo..."
-	@if [ ! -d "$(PRIVATE_REPO_DIR)" ]; then \
-		echo "📥 Cloning private repo..."; \
-		cd .. && gh repo clone ShallowRed/nuxt-slides-content; \
-	fi
-	@cd "$(PRIVATE_REPO_DIR)" && git pull origin main
-	@# Copy all content folders
-	@for folder in public semi-private private draft; do \
-		if [ -d "$(PRESENTATIONS_DIR)/$$folder" ]; then \
-			count=$$(find "$(PRESENTATIONS_DIR)/$$folder" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' '); \
-			if [ "$$count" -gt 0 ]; then \
-				echo "  → $$folder: $$count file(s)"; \
-				mkdir -p "$(PRIVATE_REPO_DIR)/presentations/$$folder"; \
-				cp $(PRESENTATIONS_DIR)/$$folder/*.md "$(PRIVATE_REPO_DIR)/presentations/$$folder/"; \
-			fi; \
-		fi; \
-	done
+content-init: ## Initialize presentations submodule (first time setup)
+	git submodule update --init --recursive
+
+content-pull: ## Pull latest content from private repo
+	cd $(PRESENTATIONS_DIR) && git pull origin main
+
+content-status: ## Show git status of presentations submodule
+	@echo "═══ Presentations (submodule) ═══"
+	@cd $(PRESENTATIONS_DIR) && git status --short
 	@echo ""
-	@cd "$(PRIVATE_REPO_DIR)" && \
+	@for folder in public semi-private private draft; do \
+		count=$$(find "$(PRESENTATIONS_DIR)/$$folder" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' '); \
+		echo "  $$folder: $$count file(s)"; \
+	done
+
+content-commit: ## Commit content changes in submodule
+	@cd $(PRESENTATIONS_DIR) && \
 		if git status --porcelain | grep -q "^"; then \
-			git add presentations/ && \
-			git commit -m "Sync presentations $$(date +%Y-%m-%d)" && \
-			echo "✅ Changes committed. Run 'make push-private' to push."; \
+			git add -A && \
+			read -p "Commit message: " msg && \
+			git commit -m "$$msg" && \
+			echo "✅ Committed in submodule. Run 'make content-push' to push."; \
 		else \
-			echo "ℹ️  No changes — already in sync"; \
+			echo "ℹ️  No content changes"; \
 		fi
 
-push-private: ## Push private repo to GitHub (triggers Vercel rebuild)
-	@echo "📤 Pushing private repo..."
-	@cd "$(PRIVATE_REPO_DIR)" && git push origin main
-	@echo "✅ Pushed. Vercel will rebuild."
-
-sync-from-private: ## Fetch private content locally (same as prebuild)
-	node scripts/fetch-presentations.js
+content-push: ## Push content submodule to GitHub (triggers Vercel rebuild)
+	@echo "📤 Pushing content..."
+	@cd $(PRESENTATIONS_DIR) && git push origin main
+	@echo "✅ Content pushed. Vercel will rebuild."
 
 # ─── Deploy ──────────────────────────────────────────────────
 
-.PHONY: deploy deploy-app deploy-content deploy-all
+.PHONY: deploy-app push-app deploy-content deploy-all
 
-deploy-app: ## Push app code to GitHub (triggers Vercel deploy)
+deploy-app: ## Commit app changes
 	@echo "🚀 Deploying app..."
 	@git add -A
 	@if git diff --cached --quiet; then \
@@ -82,16 +76,17 @@ deploy-app: ## Push app code to GitHub (triggers Vercel deploy)
 		echo "✅ Committed. Run 'make push-app' to push."; \
 	fi
 
-push-app: ## Push app to GitHub
+push-app: ## Push app to GitHub (triggers Vercel deploy)
 	git push origin main
 	@echo "✅ App pushed. Vercel will deploy."
 
-deploy-content: sync-to-private push-private ## Sync content + push private repo
+deploy-content: content-commit content-push ## Commit + push content
 	@echo "✅ Content deployed."
+	@echo "   Updating submodule ref in app repo..."
+	@git add $(PRESENTATIONS_DIR)
+	@git commit -m "Update presentations submodule" 2>/dev/null || true
 
-deploy-all: deploy-content ## Deploy content then app
-	@echo ""
-	@$(MAKE) deploy-app
+deploy-all: deploy-content deploy-app push-app ## Deploy content then app
 
 # ─── CodiMD ──────────────────────────────────────────────────
 
@@ -119,22 +114,11 @@ codimd-status: ## Show our custom commits vs upstream hackmdio/codimd
 hash-password: ## Generate a bcrypt password hash for semi-private presentations
 	pnpm hash-password
 
-status: ## Show status of app repo, private repo, and local content
+status: ## Show status of app and content
 	@echo "═══ App repo (nuxt-slides) ═══"
 	@git status --short
 	@echo ""
-	@echo "═══ Private repo (nuxt-slides-content) ═══"
-	@if [ -d "$(PRIVATE_REPO_DIR)" ]; then \
-		cd "$(PRIVATE_REPO_DIR)" && git status --short; \
-	else \
-		echo "  Not cloned. Run 'make sync-to-private' first."; \
-	fi
-	@echo ""
-	@echo "═══ Local presentations ═══"
-	@for folder in public semi-private private draft; do \
-		count=$$(find "$(PRESENTATIONS_DIR)/$$folder" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' '); \
-		echo "  $$folder: $$count file(s)"; \
-	done
+	@$(MAKE) --no-print-directory content-status
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
