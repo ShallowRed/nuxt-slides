@@ -6,6 +6,8 @@ interface Props {
   title?: string
   reverse?: boolean
   lightbox?: boolean
+  ratio?: '1:1' | '1:2' | '2:1' | '1:3' | '3:1'
+  fit?: 'cover' | 'contain'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -14,13 +16,15 @@ const props = withDefaults(defineProps<Props>(), {
   title: '',
   reverse: false,
   lightbox: false,
+  ratio: '1:2',
+  fit: 'cover',
 })
 </script>
 
 <template>
   <div
     class="split-slide-wrapper"
-    :class="{ reverse: props.reverse }"
+    :class="[{ reverse: props.reverse }, `ratio-${props.ratio.replace(':', '-')}`]"
   >
     <div class="split-content">
       <slot />
@@ -43,7 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
         <img
           v-else
           :src="props.src"
-          :class="{ 'fit-media': props.lightbox }"
+          :class="`fit-${props.fit}`"
           :alt="props.alt"
         >
         <div class="expand-hint">
@@ -62,6 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
         <img
           v-else
           :src="props.src"
+          :class="`fit-${props.fit}`"
           :alt="props.alt"
         >
       </template>
@@ -72,7 +77,6 @@ const props = withDefaults(defineProps<Props>(), {
 <style scoped>
 .split-slide-wrapper {
   display: grid;
-  grid-template-columns: 1fr 2fr;
   gap: 2rem;
   width: 100%;
   align-items: stretch;
@@ -80,9 +84,19 @@ const props = withDefaults(defineProps<Props>(), {
   height: 100%;
 }
 
-.split-slide-wrapper.reverse {
-  grid-template-columns: 2fr 1fr;
-}
+/* Ratios without reverse (content left, media right) */
+.split-slide-wrapper.ratio-1-1 { grid-template-columns: 1fr 1fr; }
+.split-slide-wrapper.ratio-1-2 { grid-template-columns: 1fr 2fr; }
+.split-slide-wrapper.ratio-2-1 { grid-template-columns: 2fr 1fr; }
+.split-slide-wrapper.ratio-1-3 { grid-template-columns: 1fr 3fr; }
+.split-slide-wrapper.ratio-3-1 { grid-template-columns: 3fr 1fr; }
+
+/* Ratios with reverse (media left, content right) */
+.split-slide-wrapper.reverse.ratio-1-1 { grid-template-columns: 1fr 1fr; }
+.split-slide-wrapper.reverse.ratio-1-2 { grid-template-columns: 2fr 1fr; }
+.split-slide-wrapper.reverse.ratio-2-1 { grid-template-columns: 1fr 2fr; }
+.split-slide-wrapper.reverse.ratio-1-3 { grid-template-columns: 3fr 1fr; }
+.split-slide-wrapper.reverse.ratio-3-1 { grid-template-columns: 1fr 3fr; }
 
 .split-slide-wrapper.reverse .split-content {
   order: 2;
@@ -165,10 +179,13 @@ const props = withDefaults(defineProps<Props>(), {
 .split-media img {
   width: 100%;
   height: 100%;
+}
+
+.split-media img.fit-cover {
   object-fit: cover;
 }
 
-.split-media img.fit-media {
+.split-media img.fit-contain {
   object-fit: contain;
 }
 </style>
