@@ -97,7 +97,7 @@ onMounted(() => {
 }
 
 .columns :deep(.column) {
-  flex: 1;
+  flex: var(--column-grow, 1) 1 0;
   min-width: 0;
 }
 

@@ -1,5 +1,61 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface Props {
+  /**
+   * Relative weight in the columns row (e.g. span=2 vs span=1 => 2/3 + 1/3).
+   */
+  span?: number | string
+  /**
+   * Explicit width ratio for this column (e.g. "2/3", "1/4").
+   */
+  ratio?: string
+}
+
+const props = defineProps<Props>()
+
+const parsedSpan = computed(() => {
+  if (props.span === undefined || props.span === null || props.span === '')
+    return undefined
+  const value = typeof props.span === 'number' ? props.span : Number.parseFloat(props.span)
+  if (!Number.isFinite(value) || value <= 0)
+    return undefined
+  return value
+})
+
+const ratioBasis = computed(() => {
+  if (!props.ratio)
+    return undefined
+  const match = props.ratio.trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/)
+  if (!match)
+    return undefined
+  const numerator = Number.parseFloat(match[1])
+  const denominator = Number.parseFloat(match[2])
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || numerator <= 0 || denominator <= 0)
+    return undefined
+  return `${(numerator / denominator) * 100}%`
+})
+
+const columnStyle = computed(() => {
+  const style: Record<string, string> = {}
+
+  if (parsedSpan.value !== undefined)
+    style['--column-grow'] = String(parsedSpan.value)
+
+  if (ratioBasis.value) {
+    style.flex = `0 0 ${ratioBasis.value}`
+    style.maxWidth = ratioBasis.value
+  }
+
+  return style
+})
+</script>
+
 <template>
-  <div class="column">
+  <div
+    class="column"
+    :style="columnStyle"
+  >
     <slot />
   </div>
 </template>
