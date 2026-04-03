@@ -132,6 +132,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 .split-media {
   display: flex;
+  background: white;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
