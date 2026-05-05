@@ -79,6 +79,10 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
     props.presentationData.metadata.backgrounds,
   )
 }
+
+function getMediaFit(layoutProps?: Record<string, string>) {
+  return layoutProps?.fit === 'contain' ? 'contain' : 'cover'
+}
 </script>
 
 <template>
@@ -161,7 +165,10 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
           <aside
             v-if="verticalSlide.layoutProps?.src"
             class="slide-media-pane"
-            :class="{ 'has-lightbox': verticalSlide.layoutProps.lightbox }"
+            :class="[
+              `fit-${getMediaFit(verticalSlide.layoutProps)}`,
+              { 'has-lightbox': verticalSlide.layoutProps.lightbox },
+            ]"
             :data-preview-link="(verticalSlide.layoutProps.lightbox && verticalSlide.layoutProps.type === 'iframe') ? verticalSlide.layoutProps.src : undefined"
             :data-preview-image="(verticalSlide.layoutProps.lightbox && verticalSlide.layoutProps.type !== 'iframe') ? verticalSlide.layoutProps.src : undefined"
           >
@@ -175,6 +182,7 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
             <img
               v-else
               :src="verticalSlide.layoutProps.src"
+              :class="`fit-${getMediaFit(verticalSlide.layoutProps)}`"
               :alt="verticalSlide.layoutProps.alt || ''"
             >
           </aside>
@@ -268,7 +276,10 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
         <aside
           v-if="section.layoutProps?.src"
           class="slide-media-pane"
-          :class="{ 'has-lightbox': section.layoutProps.lightbox }"
+          :class="[
+            `fit-${getMediaFit(section.layoutProps)}`,
+            { 'has-lightbox': section.layoutProps.lightbox },
+          ]"
           :data-preview-link="(section.layoutProps.lightbox && section.layoutProps.type === 'iframe') ? section.layoutProps.src : undefined"
           :data-preview-image="(section.layoutProps.lightbox && section.layoutProps.type !== 'iframe') ? section.layoutProps.src : undefined"
         >
@@ -282,6 +293,7 @@ function getBackground(slide: { headingLevel?: string, backgroundImage?: string 
           <img
             v-else
             :src="section.layoutProps.src"
+            :class="`fit-${getMediaFit(section.layoutProps)}`"
             :alt="section.layoutProps.alt || ''"
           >
         </aside>
@@ -347,11 +359,19 @@ hgroup :deep(.slide-subtitle > div) {
   grid-template-columns: 1.5fr 1fr;
 }
 
-.reveal .slides section.layout-media-left > .slide-content-pane {
+.reveal .slides section.layout-media-right-wide {
+  grid-template-columns: 0.8fr 1.7fr;
+}
+
+.reveal .slides section.layout-media-left-wide {
+  grid-template-columns: 1.7fr 0.8fr;
+}
+
+.reveal .slides section[class*="layout-media-left"] > .slide-content-pane {
   order: 2;
 }
 
-.reveal .slides section.layout-media-left > .slide-media-pane {
+.reveal .slides section[class*="layout-media-left"] > .slide-media-pane {
   order: 1;
 }
 
@@ -361,6 +381,15 @@ hgroup :deep(.slide-subtitle > div) {
   justify-content: center;
   text-align: left;
   min-width: 0;
+}
+
+.reveal .slides section[class*="layout-media"][class*="-wide"] > .slide-content-pane {
+  font-size: 0.75em;
+}
+
+.reveal .slides section[class*="layout-media"][class*="-wide"] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
+.reveal .slides section[class*="layout-media"][class*="-wide"] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 1.75em;
 }
 
 .reveal .slides section[class*="layout-media"] > .slide-content-pane > header,
@@ -382,8 +411,19 @@ hgroup :deep(.slide-subtitle > div) {
   justify-content: center;
   overflow: hidden;
   min-width: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane:not(.fit-contain) {
   border: solid 1px var(--fr-border-color, #ccc);
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane.fit-contain {
+  overflow: visible;
+  background: transparent;
 }
 
 .reveal .slides section[class*="layout-media"] > .slide-media-pane iframe {
@@ -396,8 +436,24 @@ hgroup :deep(.slide-subtitle > div) {
 .reveal .slides section[class*="layout-media"] > .slide-media-pane img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border-radius: 8px;
+  background: transparent;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane img.fit-cover {
+  object-fit: cover;
+}
+
+.reveal .slides section[class*="layout-media"] > .slide-media-pane img.fit-contain {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  border: solid 1px var(--fr-border-color, #ccc);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
 }
 
 /* Lightbox: enable click-through and show pointer cursor */

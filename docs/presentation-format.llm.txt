@@ -163,8 +163,10 @@ The `:layout` annotation is extracted by the parser — the heading + body rende
 while the media (iframe or image) renders in a sibling column. Supported layouts:
 - `media-right` — content left, media right (default proportions: 1fr / 1.5fr)
 - `media-left` — media left, content right
+- `media-right-wide` — content left, wider media right (0.8fr / 1.7fr)
+- `media-left-wide` — wider media left, content right (1.7fr / 0.8fr)
 
-Props: `src` (required), `type` ("iframe" or "image", default "image"), `alt`, `title`.
+Props: `src` (required), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background).
 
 ### Leaf components (use `::`)
 

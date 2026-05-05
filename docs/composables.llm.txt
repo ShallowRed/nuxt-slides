@@ -67,7 +67,7 @@ Splits content by heading hierarchy.
 - `extractLayout(children)` looks for `:layout{name="..." ...props}` element nodes. Returns `{ name, props }` or undefined.
 - When found, `name` becomes `slide.layout` and remaining props become `slide.layoutProps`.
 - Unlike FULL_SLIDE_COMPONENT layouts, annotation layouts preserve the normal header/body split — the heading is part of the content column.
-- Currently supported: `media-right`, `media-left` — renders content + media in a two-column grid at the section level.
+- Currently supported: `media-right`, `media-left`, `media-right-wide`, `media-left-wide` — renders content + media in a two-column grid at the section level.
 
 **Vertical Slide Logic**:
 - If section contains H3 nodes, split into vertical slides

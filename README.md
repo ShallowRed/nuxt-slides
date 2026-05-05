@@ -181,7 +181,9 @@ Optional caption text
 Description text next to the iframe.
 ```
 
-Supported layouts: `media-right` (default), `media-left`. The heading and body render in a content column alongside the media.
+Supported layouts: `media-right`, `media-left`, `media-right-wide`, `media-left-wide`. The heading and body render in a content column alongside the media.
+
+Supported props: `src` (required), `type` (`iframe` or `image`), `alt`, `title`, `lightbox`, `fit` (`cover` by default, or `contain` for a floating image without container chrome).
 
 For the full component reference, see [docs/presentation-format.llm.txt](./docs/presentation-format.llm.txt).
 

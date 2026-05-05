@@ -380,7 +380,7 @@ body {
   margin: 0;
 }
 
-.reveal section img {
+.reveal section img:not(.has-lightbox img) {
   margin: 15px 0px;
   background: rgba(255, 255, 255, 0.12);
   border: none;
