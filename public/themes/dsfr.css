@@ -192,7 +192,7 @@ body {
 .reveal section.slide-h3 h4,
 .reveal section.slide-h3 h5,
 .reveal section.slide-h3 h6 {
-  color: var(--dsfr-test-title) !important;
+  color: var(--dsfr-text-title) !important;
 }
 .reveal section.slide-h3 p {
   color: var(--dsfr-text-default) !important;

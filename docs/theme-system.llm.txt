@@ -7,19 +7,19 @@ SCSS themes compiled to CSS, loaded dynamically per presentation.
 ```
 themes/
 ├── dsfr/
-│   ├── dsfr.scss           # Main entry (imports all partials)
-│   ├── _variables.scss     # Colors, fonts, spacing
-│   ├── _base.scss          # Reset, body, html
-│   ├── _typography.scss    # Headings, text styles
-│   ├── _components.scss    # Buttons, alerts, etc.
-│   ├── _layouts.scss       # Slide layouts
-│   ├── _utilities.scss     # Helper classes
-│   └── _responsive.scss    # Media queries
+│   ├── dsfr.scss              # Main entry (imports all partials)
+│   ├── dsfr-standalone.scss   # Standalone variant for HackMD/vanilla Reveal
+│   ├── _variables.scss        # DSFR design tokens (Sass)
+│   ├── _base.scss             # Reset, body, html, ::selection
+│   ├── _typography.scss       # Headings, text, slide-h1/h2/h3 structure
+│   ├── _components.scss       # Links, lists, tables, code, blockquote, images
+│   └── _utilities.scss        # Callouts (.fr-callout), badges (.fr-badge)
 └── minimal/
-    └── minimal.scss        # Single-file theme
+    └── minimal.scss           # Single-file theme
 
-public/themes/              # Compiled output (git-ignored)
+public/themes/                # Compiled output (committed alongside sources)
 ├── dsfr.css
+├── dsfr-standalone.css
 └── minimal.css
 ```
 
@@ -202,12 +202,11 @@ Based on French Government Design System (Système de Design de l'État).
 - **Accessibility**: WCAG AA compliant
 
 ### Files
-- `_variables.scss`: DSFR color palette, spacing scale
-- `_base.scss`: Reset, body defaults
-- `_typography.scss`: Font sizes, line heights
-- `_components.scss`: Button, alert, badge styles
-- `_layouts.scss`: Grid, flex utilities
-- `_responsive.scss`: Breakpoints, mobile adjustments
+- `_variables.scss`: DSFR color palette, typography, spacing scale (Sass tokens)
+- `_base.scss`: Reset, body defaults, viewport background, ::selection
+- `_typography.scss`: Heading sizes, body text, plus slide-h1/h2/h3 structural rules (centering, hgroup heights)
+- `_components.scss`: Links, lists, tables, code, blockquotes, images
+- `_utilities.scss`: `.fr-callout`, `.fr-badge` utility classes
 
 ---
 

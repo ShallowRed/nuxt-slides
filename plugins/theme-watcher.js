@@ -10,6 +10,12 @@ export default function themeWatcherPlugin() {
       watchDir: 'themes/dsfr',
     },
     {
+      name: 'dsfr-standalone',
+      input: 'themes/dsfr/dsfr-standalone.scss',
+      output: 'public/themes/dsfr-standalone.css',
+      watchDir: 'themes/dsfr',
+    },
+    {
       name: 'minimal',
       input: 'themes/minimal/minimal.scss',
       output: 'public/themes/minimal.css',
