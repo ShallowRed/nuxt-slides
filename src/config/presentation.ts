@@ -81,7 +81,7 @@ export const FULL_SLIDE_COMPONENTS = ['FullScreenImage', 'full-screen-image']
  * Maps markdown component names to Vue components
  *
  * Note: `slide-background` is intentionally NOT listed here.
- * It is intercepted and filtered out in `useSlideParser.ts` before
+ * It is intercepted and filtered out in `utils/slide-ast.ts` before
  * the MDCRenderer ever sees it, so registering it would have no effect
  * and could cause unexpected rendering.
  */

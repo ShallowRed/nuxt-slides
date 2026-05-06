@@ -34,15 +34,14 @@ const { presentationData, error } = usePresentation('my-talk')
 
 ---
 
-## useSlideParser()
-**Location**: `src/composables/useSlideParser.ts`
+## Slide AST utilities
+**Location**: `src/utils/slide-ast.ts`
 
-Converts MDC AST to structured slide array.
-
-**Returns**: `{ parseSlides, getHeadingLevel }`
+Pure, stateless functions for parsing MDC AST into slide structures.
+Not a composable — no Vue reactivity. Imported directly wherever needed.
 
 ### parseSlides(ast: MDCParserResult): Slide[]
-Splits content by heading hierarchy.
+Heading-based parser. Splits an MDC AST by H1 (title), H2 (horizontal), and HR boundaries, then handles H3 vertical splits via `processVerticalSlides()`.
 
 **Algorithm**:
 1. Iterate `ast.body.children` nodes
@@ -56,18 +55,17 @@ Splits content by heading hierarchy.
 **Per-slide background extraction**:
 - `extractBackgroundOverride(children)`: looks for `:slide-background{image="..."}` element nodes, returns the `image` prop value.
 - `filterBackgroundNodes(children)`: removes those nodes from the children before they reach `MDCRenderer`.
-- The resolved value is stored as `slide.backgroundImage` and takes precedence over theme defaults in `RevealSlides.vue`.
+- The resolved value is stored as `slide.backgroundImage` and takes precedence over theme defaults in `SlideContent.vue`.
 
 **Full-slide layout detection**:
 - `getSlideLayout(children)` checks whether any top-level node tag is in `FULL_SLIDE_COMPONENTS` (config list: `['FullScreenImage', 'full-screen-image']`).
-- When found, returns canonical `'full'` — the slide keeps all children in `body` (no header/body split), and gets CSS class `layout-full`.
+- When found, returns canonical `'full'` — the slide keeps all children in `body` (no header/body split).
 - Adding new full-slide components only requires updating `FULL_SLIDE_COMPONENTS` in `src/config/presentation.ts`.
 
 **Slide-level layout annotations**:
 - `extractLayout(children)` looks for `:layout{name="..." ...props}` element nodes. Returns `{ name, props }` or undefined.
 - When found, `name` becomes `slide.layout` and remaining props become `slide.layoutProps`.
-- Unlike FULL_SLIDE_COMPONENT layouts, annotation layouts preserve the normal header/body split — the heading is part of the content column.
-- Currently supported: `media-right`, `media-left`, `media-right-wide`, `media-left-wide` — renders content + media in a two-column grid at the section level.
+- The rendering strategy for the layout is resolved separately via `getLayoutStrategy()` in `src/config/layouts.ts`.
 
 **Vertical Slide Logic**:
 - If section contains H3 nodes, split into vertical slides
@@ -87,12 +85,18 @@ Slide[] = [
 ]
 ```
 
+### parseSlidesFromSeparators(rawContent: string): Promise<Slide[]>
+Separator-based parser. Splits raw markdown by `---` (horizontal) and `----` (vertical). Parses each chunk independently with MDC.
+
+### createSlide(children: any[], headingLevel?: string): Slide
+Builds a single `Slide` from a flat list of AST nodes. Used internally and by `parseSlidesFromSeparators`.
+
 ### getHeadingLevel(children: any[]): string | undefined
-Finds first element node with tag matching `/^h[1-6]$/`, returns tag name.
+Finds the first element node with tag matching `/^h[1-6]$/`, returns the tag name.
 
 **Usage**:
 ```ts
-const { parseSlides } = useSlideParser()
+import { parseSlides, parseSlidesFromSeparators } from '~/utils/slide-ast'
 const slides = parseSlides(ast)
 ```
 

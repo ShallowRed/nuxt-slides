@@ -19,13 +19,13 @@ src/
 │   ├── layouts.ts                 # Layout registry & strategy dispatch
 │   └── presets.ts                 # Named CodiMD presets
 ├── utils/
+│   ├── slide-ast.ts               # MDC AST → Slide[] (pure, stateless)
 │   ├── slide-rendering.ts         # Pure helpers: quicklinkParts, getMediaFit, getSlideClasses, resolveSlideBackground
 │   ├── slugify.ts                 # slugify + getTextContent
 │   ├── french-typography.ts       # French spacing rules
 │   └── dom-text-transformer.ts    # DOM text utilities
 ├── composables/                   # Reactive state & business logic
 │   ├── usePresentation.ts         # Data loading with useAsyncData
-│   ├── useSlideParser.ts          # MDC AST → Slide[] conversion
 │   ├── useSlideIds.ts             # Deduplicated HTML ids for slides
 │   ├── useReveal.ts               # Reveal.js lifecycle management
 │   ├── useRevealSync.ts           # Inject sync/instance in child components
@@ -59,8 +59,8 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 
 ## Data Flow
 ```
-[.md file] → [API route] → [usePresentation] → [useSlideParser] → [Slide[]]
-                                ↓
+[.md file] → [API route] → [usePresentation] → [parseSlides / parseSlidesFromSeparators] → [Slide[]]
+                                ↓                         (src/utils/slide-ast.ts)
                          [useAsyncData caching]
                                 ↓
                     [RevealPresentation + MDCRenderer]
@@ -75,8 +75,8 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 ### Separation of Concerns
 - **Types** (`src/types/`): Shared TypeScript interfaces
 - **Config** (`src/config/`): Constants and registries, no reactive state — `presentation.ts` (MDC mappings, backgrounds), `layouts.ts` (layout strategy registry), `presets.ts`
-- **Utils** (`src/utils/`): Pure, stateless functions — `slide-rendering.ts` (class/background/media helpers), `slugify.ts`, etc.
-- **Composables** (`src/composables/`): Reactive derived state and business logic — `useSlideIds.ts`, `useSlideParser.ts`, etc.
+- **Utils** (`src/utils/`): Pure, stateless functions — `slide-ast.ts` (MDC AST → Slide[] conversion), `slide-rendering.ts` (class/background/media helpers), `slugify.ts`, etc.
+- **Composables** (`src/composables/`): Reactive derived state and business logic — `useSlideIds.ts`, `usePresentation.ts`, etc.
 - **Components**: Presentation only; `SlideContent.vue` owns inner rendering, `RevealSlides.vue` owns section scaffolding
 - **Pages**: Composition, no logic
 
@@ -106,18 +106,18 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 ## Component Responsibilities
 
 ### usePresentation(slug)
-Loads presentation data. Returns `{ data, error, status, refresh }` from useAsyncData.
+Loads presentation data. Returns `{ presentationData, error, status, refresh }` from useAsyncData.
 - Fetches `/api/presentations/${slug}`
 - Parses MDC via `parseMarkdown`
 - Extracts frontmatter metadata
-- Invokes `useSlideParser().parseSlides()`
+- Calls `parseSlides()` or `parseSlidesFromSeparators()` from `src/utils/slide-ast.ts`
 
-### useSlideParser()
-Converts MDC AST to Slide array. Returns `{ parseSlides, getHeadingLevel }`.
-- Detects H1/H2/H3/HR nodes
-- Groups content into horizontal sections
-- Processes H3 for vertical slides
-- Assigns heading levels for styling
+### src/utils/slide-ast.ts
+Pure MDC AST → Slide[] conversion. Not a composable — no Vue reactivity.
+- `parseSlides(ast)`: heading-based parser (H1/H2/H3)
+- `parseSlidesFromSeparators(rawContent)`: separator-based parser (--- / ----)
+- `createSlide(children)`: builds a single Slide from AST nodes
+- `getHeadingLevel(children)`: finds first heading tag in children
 
 ### useReveal(container, config)
 Manages Reveal.js instance. Returns `{ initialize, destroy, getInstance }`.

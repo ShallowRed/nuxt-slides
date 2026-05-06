@@ -6,9 +6,9 @@
 import type { PresentationData } from '~/types/presentation'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { DEFAULT_METADATA } from '~/config/presentation'
+import { parseSlides, parseSlidesFromSeparators } from '~/utils/slide-ast'
 
 export function usePresentation(slug: string, apiUrl?: string) {
-  const { parseSlides, parseSlidesFromSeparators } = useSlideParser()
 
   const { data, error, status, refresh } = useAsyncData(
     `presentation-${slug}`,
