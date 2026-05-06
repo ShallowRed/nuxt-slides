@@ -1,0 +1,13 @@
+/**
+ * DSFR-layout preset.
+ *
+ * Reusable positioning + scale package extracted from the DSFR theme.
+ * A skin theme can compose it with its own colors and font-family:
+ *
+ *   @use '../shared';
+ *   @use '../presets/dsfr-layout';
+ *   // ...skin partials...
+ */
+
+@forward 'scale';
+@forward 'slide-rhythm';

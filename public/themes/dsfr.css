@@ -264,6 +264,119 @@
 }
 
 /**
+ * DSFR-layout preset.
+ *
+ * Reusable positioning + scale package extracted from the DSFR theme.
+ * A skin theme can compose it with its own colors and font-family:
+ *
+ *   @use '../shared';
+ *   @use '../presets/dsfr-layout';
+ *   // ...skin partials...
+ */
+/**
+ * DSFR-layout preset — Scale.
+ *
+ * Heading sizes, weights, paragraph rhythm and small text utilities.
+ * No colors, no font-family decisions — those belong to the skin.
+ *
+ * This preset can be reused by any skin that wants the DSFR scale
+ * (e.g. a `dsfr-alt` skin with different colors but same rhythm).
+ */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 0.5em 0;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  word-wrap: break-word;
+  text-align: left;
+}
+.reveal h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 0.5em;
+}
+.reveal h2 {
+  font-size: 4rem;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.5em;
+}
+.reveal h3 {
+  font-size: 2.5rem;
+  margin-bottom: 1em;
+}
+.reveal h4 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+.reveal h5 {
+  font-size: 1.5rem;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+.reveal p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+  text-align: left;
+}
+.reveal strong,
+.reveal b {
+  font-weight: 700;
+}
+.reveal em {
+  font-style: italic;
+}
+.reveal small {
+  font-size: 0.75em;
+}
+.reveal .text-sm {
+  font-size: 0.85em;
+}
+.reveal .text-xs {
+  font-size: 0.75em;
+}
+.reveal .text-lg {
+  font-size: 1.15em;
+}
+
+/**
+ * DSFR-layout preset — Slide rhythm.
+ *
+ * Sizes and paddings for the `slide-h3` content slides:
+ * fixed header/hgroup minimum height, article inner padding, pretitle and
+ * subtitle margins. No colors here — those belong to the skin.
+ *
+ * Pairs with themes/shared/_slide-structure.scss (which provides the flex
+ * skeleton). Together they describe the DSFR-style slide layout.
+ */
+.reveal section.slide-h3 header,
+.reveal section.slide-h3 hgroup {
+  min-height: 8rem;
+  height: auto;
+}
+.reveal section.slide-h3 hgroup .slide-pretitle p {
+  margin: 0 0 0.65em 0;
+  font-size: 0.9em;
+  font-style: normal;
+}
+.reveal section.slide-h3 hgroup .slide-subtitle p {
+  margin: 0.75em 0 0 0;
+  font-size: 1.25rem;
+  font-style: italic;
+}
+.reveal section.slide-h3 article {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/**
  * DSFR-inspired theme for reveal.js presentations
  * Based on Système de Design de l'État Français
  * 
@@ -315,7 +428,11 @@ body {
  * This is the main entry point that imports all partial files.
  */
 /**
- * Typography styles for headers, text, and inline elements
+ * DSFR skin — Typography (colors, gradients, font-family).
+ *
+ * Sizes, weights, margins, line-heights, text-align and slide-h3 rhythm live
+ * in `themes/presets/dsfr-layout/`. This file holds only the *visual*
+ * decisions specific to DSFR.
  */
 .reveal h1,
 .reveal h2,
@@ -323,16 +440,8 @@ body {
 .reveal h4,
 .reveal h5,
 .reveal h6 {
-  margin: 0 0 0.5em 0;
   color: var(--dsfr-text-title);
   font-family: "Marianne", Arial, sans-serif;
-  font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: normal;
-  text-transform: none;
-  text-shadow: none;
-  word-wrap: break-word;
-  text-align: left;
 }
 
 .reveal h2 em {
@@ -346,10 +455,7 @@ body {
 }
 
 .reveal h1 {
-  font-size: 4rem;
-  font-weight: 800;
   color: var(--dsfr-blue-france-main-525);
-  margin-bottom: 0.5em;
   background: linear-gradient(89deg, #2828B2 30.04%, #8F8FFC 100.41%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -357,63 +463,20 @@ body {
 }
 
 .reveal h2 {
-  font-size: 4rem;
-  font-weight: 700;
   color: var(--dsfr-text-title);
-  padding-bottom: 0.2em;
-  margin-bottom: 0.5em;
 }
 
 .reveal h3 {
-  font-size: 2.5rem;
-  font-weight: 700;
   color: var(--dsfr-blue-france-main-525);
-  margin-bottom: 1em;
-}
-
-.reveal h4 {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1em;
-}
-
-.reveal h5 {
-  font-size: 1.5rem;
-  margin-bottom: 1em;
-  font-weight: 600;
-}
-
-.reveal p {
-  margin: 0.5em 0;
-  line-height: 1.4;
-  text-align: left;
 }
 
 .reveal strong,
 .reveal b {
-  font-weight: 700;
   color: var(--dsfr-text-title);
 }
 
-.reveal em {
-  font-style: italic;
-}
-
 .reveal small {
-  font-size: 0.75em;
   color: var(--dsfr-text-mention);
-}
-
-.reveal .text-sm {
-  font-size: 0.85em;
-}
-
-.reveal .text-xs {
-  font-size: 0.75em;
-}
-
-.reveal .text-lg {
-  font-size: 1.15em;
 }
 
 .reveal section.slide-h2 h1,
@@ -439,29 +502,11 @@ body {
 .reveal section.slide-h3 p {
   color: var(--dsfr-text-default) !important;
 }
-.reveal section.slide-h3 header {
-  min-height: 8rem;
-  height: auto;
-}
-.reveal section.slide-h3 hgroup {
-  min-height: 8rem;
-  height: auto;
-}
 .reveal section.slide-h3 hgroup .slide-pretitle p {
-  margin: 0 0 0.65em 0;
-  font-size: 0.9em;
-  font-style: normal;
   color: var(--dsfr-text-mention) !important;
 }
 .reveal section.slide-h3 hgroup .slide-subtitle p {
-  margin: 0.75em 0 0 0;
-  font-size: 1.25rem;
-  font-style: italic;
   color: var(--dsfr-text-mention) !important;
-}
-.reveal section.slide-h3 article {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
 }
 
 /**

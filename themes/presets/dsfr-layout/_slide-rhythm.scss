@@ -1,0 +1,35 @@
+/**
+ * DSFR-layout preset — Slide rhythm.
+ *
+ * Sizes and paddings for the `slide-h3` content slides:
+ * fixed header/hgroup minimum height, article inner padding, pretitle and
+ * subtitle margins. No colors here — those belong to the skin.
+ *
+ * Pairs with themes/shared/_slide-structure.scss (which provides the flex
+ * skeleton). Together they describe the DSFR-style slide layout.
+ */
+
+.reveal section.slide-h3 {
+  header,
+  hgroup {
+    min-height: 8rem;
+    height: auto;
+  }
+
+  hgroup .slide-pretitle p {
+    margin: 0 0 .65em 0;
+    font-size: 0.9em;
+    font-style: normal;
+  }
+
+  hgroup .slide-subtitle p {
+    margin: 0.75em 0 0 0;
+    font-size: 1.25rem;
+    font-style: italic;
+  }
+
+  article {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}

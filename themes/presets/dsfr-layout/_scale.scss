@@ -1,0 +1,88 @@
+/**
+ * DSFR-layout preset — Scale.
+ *
+ * Heading sizes, weights, paragraph rhythm and small text utilities.
+ * No colors, no font-family decisions — those belong to the skin.
+ *
+ * This preset can be reused by any skin that wants the DSFR scale
+ * (e.g. a `dsfr-alt` skin with different colors but same rhythm).
+ */
+
+.reveal {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0 0 0.5em 0;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-transform: none;
+    text-shadow: none;
+    word-wrap: break-word;
+    text-align: left;
+  }
+
+  h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-size: 4rem;
+    padding-bottom: 0.2em;
+    margin-bottom: 0.5em;
+  }
+
+  h3 {
+    font-size: 2.5rem;
+    margin-bottom: 1em;
+  }
+
+  h4 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1em;
+  }
+
+  h5 {
+    font-size: 1.5rem;
+    margin-bottom: 1em;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.5em 0;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  strong,
+  b {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  small {
+    font-size: 0.75em;
+  }
+
+  // Text size utilities
+  .text-sm {
+    font-size: 0.85em;
+  }
+
+  .text-xs {
+    font-size: 0.75em;
+  }
+
+  .text-lg {
+    font-size: 1.15em;
+  }
+}
