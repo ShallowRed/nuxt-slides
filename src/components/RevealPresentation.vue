@@ -32,16 +32,19 @@ provide('revealInstance', getInstance)
  */
 function handleAnchorClick(event: MouseEvent) {
   const link = (event.target as Element).closest('a[href^="#"]')
-  if (!link) return
+  if (!link)
+    return
   const href = link.getAttribute('href')
-  if (!href || href === '#') return
+  if (!href || href === '#')
+    return
   const slug = href.slice(1) // strip leading #
   // Only intercept if there is a matching slide section
   const target = revealContainer.value?.querySelector(`section[id="${CSS.escape(slug)}"]`)
-  if (!target) return
+  if (!target)
+    return
   event.preventDefault()
   // Reveal.js (hash: true) navigates to a named slide via the #/id hash format
-  window.location.hash = '/' + slug
+  window.location.hash = `/${slug}`
 }
 
 onMounted(async () => {

@@ -14,14 +14,26 @@ Nuxt 3 presentation system converting MDC markdown to reveal.js slides with SSG 
 ```
 src/
 ├── types/presentation.ts          # Type definitions (Slide, PresentationMetadata, RevealConfig)
-├── config/presentation.ts         # Constants (defaults, MDC component mappings)
-├── composables/                   # Business logic
+├── config/
+│   ├── presentation.ts            # Constants (defaults, MDC component mappings)
+│   ├── layouts.ts                 # Layout registry & strategy dispatch
+│   └── presets.ts                 # Named CodiMD presets
+├── utils/
+│   ├── slide-rendering.ts         # Pure helpers: quicklinkParts, getMediaFit, getSlideClasses, resolveSlideBackground
+│   ├── slugify.ts                 # slugify + getTextContent
+│   ├── french-typography.ts       # French spacing rules
+│   └── dom-text-transformer.ts    # DOM text utilities
+├── composables/                   # Reactive state & business logic
 │   ├── usePresentation.ts         # Data loading with useAsyncData
 │   ├── useSlideParser.ts          # MDC AST → Slide[] conversion
+│   ├── useSlideIds.ts             # Deduplicated HTML ids for slides
 │   ├── useReveal.ts               # Reveal.js lifecycle management
+│   ├── useRevealSync.ts           # Inject sync/instance in child components
 │   └── useTheme.ts                # Dynamic CSS theme loading
 ├── components/
 │   ├── RevealPresentation.vue     # Reveal.js wrapper component
+│   ├── RevealSlides.vue           # Section scaffolding (iterates Slide[])
+│   ├── SlideContent.vue           # Inner slide rendering (layout strategy dispatch)
 │   ├── IconInline.vue             # Inline icon (Iconify, accepts ri:name or ri-name)
 │   └── mdc/                       # Custom MDC components
 │       ├── Columns.vue            # 2-or-3 column layout (replaces TwoColumns/ThreeColumns)
@@ -62,9 +74,10 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 
 ### Separation of Concerns
 - **Types** (`src/types/`): Shared TypeScript interfaces
-- **Config** (`src/config/`): Constants, no logic — including `FULL_SLIDE_COMPONENTS` list and `MDC_COMPONENTS` registry
-- **Composables** (`src/composables/`): Pure functions, testable business logic
-- **Components**: Presentation only, delegates to composables
+- **Config** (`src/config/`): Constants and registries, no reactive state — `presentation.ts` (MDC mappings, backgrounds), `layouts.ts` (layout strategy registry), `presets.ts`
+- **Utils** (`src/utils/`): Pure, stateless functions — `slide-rendering.ts` (class/background/media helpers), `slugify.ts`, etc.
+- **Composables** (`src/composables/`): Reactive derived state and business logic — `useSlideIds.ts`, `useSlideParser.ts`, etc.
+- **Components**: Presentation only; `SlideContent.vue` owns inner rendering, `RevealSlides.vue` owns section scaffolding
 - **Pages**: Composition, no logic
 
 ### SSR/SSG Strategy
@@ -81,7 +94,7 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 5. Each slide tagged with `headingLevel` for CSS classes (`slide-h1`, `slide-h2`, etc.)
 6. **`:slide-background{image="..."}`**: Inline override for per-slide background image; extracted and removed from rendered output by the parser.
 7. **Full-slide components** (list in `FULL_SLIDE_COMPONENTS`): skip header/body split, render all children in `body`. CSS class `layout-full` applied.
-8. **`:layout{name="..." ...}`**: Slide-level layout annotation. Unlike full-slide components, preserves header/body split. Supports `media-right`, `media-left`, `media-right-wide`, and `media-left-wide` for two-column layouts with media, plus extra props such as `fit="contain|cover"`.
+8. **`:layout{name="..." ...}`**: Slide-level layout annotation. Unlike full-slide components, preserves header/body split. Supports `media-right`, `media-left`, `media-right-wide`, and `media-left-wide` for two-column layouts with media, plus extra props such as `fit="contain|cover"`. The layout name is resolved to a `LayoutStrategy` via `getLayoutStrategy()` in `src/config/layouts.ts` — add a new entry there to extend without touching the template.
 
 ### Theme System
 - SCSS sources in `themes/[name]/`
@@ -123,6 +136,21 @@ Thin wrapper component.
 - Uses useTheme + useReveal
 - Lifecycle: onMounted (initialize), onUnmounted (cleanup)
 - Provides slot for slide content
+
+### RevealSlides.vue
+Iterates `PresentationData.slides` and emits Reveal.js `<section>` scaffolding.
+- Uses `useSlideIds` for deduplicated HTML ids
+- Uses `getSlideClasses` / `resolveSlideBackground` from `utils/slide-rendering`
+- Delegates inner rendering entirely to `<SlideContent>`
+- No layout branching — purely structural
+
+### SlideContent.vue
+Renders the content of a single slide according to its layout strategy.
+- Calls `getLayoutStrategy(slide.layout)` from `src/config/layouts.ts`
+- `'full'` strategy: single `MDCRenderer` for the whole slide
+- `'default'` strategy: hgroup/header + article + optional media pane + quicklink
+- Uses `getMediaFit`, `quicklinkParts` from `utils/slide-rendering`
+- Adding a new layout that changes the component tree: add a strategy to `config/layouts.ts` and a branch here
 
 ### pages/slides/[slug].vue
 Presentation viewer page.
@@ -168,6 +196,14 @@ DEFAULT_METADATA = { theme: 'dsfr', transition: 'slide', center: true }
 DEFAULT_REVEAL_CONFIG = { hash: true, slideNumber: 'c/t', ... }
 MDC_COMPONENTS = { ThreeColumns: 'ThreeColumns', TwoColumns: 'TwoColumns', ... }
 ```
+
+### src/config/layouts.ts
+```ts
+type LayoutStrategy = 'full' | 'default'
+SLIDE_LAYOUT_REGISTRY: Record<string, LayoutStrategy> // maps layout names to rendering strategy
+getLayoutStrategy(layout?: string): LayoutStrategy    // falls back to 'default'
+```
+Extend here to add new layout strategies without touching component templates.
 
 ### src/types/presentation.ts
 ```ts

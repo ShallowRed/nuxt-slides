@@ -98,6 +98,35 @@ const slides = parseSlides(ast)
 
 ---
 
+## useSlideIds(slides: Ref<Slide[]>)
+**Location**: `src/composables/useSlideIds.ts`
+
+Manages deduplicated HTML ids for every slide in a presentation.
+IDs are derived from heading text and deduplicated with a numeric suffix: `"en-resume"`, `"en-resume-1"`, …
+
+**Parameters**:
+- `slides`: Reactive array of slides
+
+**Returns**: `{ slideIdMap, getVerticalId }`
+
+### slideIdMap: ComputedRef
+Index-aligned map of `{ sectionId, verticalIds? }` for each top-level slide.
+
+### getVerticalId(sectionIndex: number, vIndex: number): string | undefined
+Returns the HTML id for a vertical slide within a section:
+- `vIndex === 0` → `undefined` (intercalaire, not directly hash-navigable)
+- `vIndex === 1` → `sectionId` (first content slide gets the section's slug)
+- `vIndex >= 2` → own heading-based id
+
+**Usage**:
+```ts
+const { slideIdMap, getVerticalId } = useSlideIds(
+  computed(() => presentationData.value.slides)
+)
+```
+
+---
+
 ## useReveal(container: Ref<HTMLElement | null>, config: Partial<RevealConfig>)
 **Location**: `src/composables/useReveal.ts`
 
