@@ -95,7 +95,7 @@ body {
 
 // --- Slide-h1 (title, dark contrast background) ----------------------------
 .reveal section.slide-h1 {
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2 {
     // Reset the transparent gradient so text is visible on dark background
     background: none;
     -webkit-text-fill-color: #ffffff;
