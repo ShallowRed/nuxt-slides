@@ -1,27 +1,91 @@
 # Theme System Reference
 
 ## Overview
-SCSS themes compiled to CSS, loaded dynamically per presentation.
+Layered SCSS architecture compiled to CSS, loaded dynamically per presentation.
+Three layers, from low to high specificity of intent:
+
+1. **Foundation (`themes/shared/`)** — engine-level CSS that ships with every
+   theme: Reveal patches, the MDC `display: contents` bridge, the
+   `slide-content-pane` wrapper, the media-layout grid (`layout-media-*`),
+   the slide-section flex skeleton (`slide-h1/h2/h3`), and the quicklink
+   positioning. Themes never override this layer; it forms the contract
+   between `RevealSlides.vue` / `SlideContent.vue` and the visual styles.
+2. **Preset (`themes/presets/<name>/`)** — a reusable family of layout/scale
+   decisions: heading sizes, paragraph rhythm, slide-h3 header heights, etc.
+   A preset is theme-agnostic on colors and font-family. Currently shipped:
+   `presets/dsfr-layout/`.
+3. **Skin (`themes/<name>/`)** — colors, gradients, font-family, typography
+   peculiarities. A skin imports the foundation, optionally a preset, and
+   sets the neutral semantic tokens (the contract — see below).
+
+This separation is what lets a "DSFR-derivative" theme reuse all of DSFR's
+positioning while swapping just colors and typography (see `themes/dsfr-alt/`).
 
 ## File Structure
 ```
 themes/
-├── dsfr/
-│   ├── dsfr.scss              # Main entry (imports all partials)
-│   ├── dsfr-standalone.scss   # Standalone variant for HackMD/vanilla Reveal
-│   ├── _variables.scss        # DSFR design tokens (Sass)
-│   ├── _base.scss             # Reset, body, html, ::selection
-│   ├── _typography.scss       # Headings, text, slide-h1/h2/h3 structure
-│   ├── _components.scss       # Links, lists, tables, code, blockquote, images
-│   └── _utilities.scss        # Callouts (.fr-callout), badges (.fr-badge)
-└── minimal/
-    └── minimal.scss           # Single-file theme
+├── themes.config.js              # Single source of truth (build + watcher)
+│
+├── shared/                       # Foundation (engine layer)
+│   ├── _index.scss               # Barrel
+│   ├── _semantic-tokens.scss     # Theme contract: --accent, --surface, ...
+│   ├── _reveal-patches.scss      # MDC bridge + .slide-content-pane
+│   ├── _media-layouts.scss       # [class*="layout-media"] grid rules
+│   ├── _slide-structure.scss     # slide-h1/h2/h3 flex skeleton
+│   └── _quicklinks.scss          # .slide-quicklink-wrapper positioning
+│
+├── presets/                      # Reusable layout/scale packages
+│   └── dsfr-layout/
+│       ├── _index.scss           # Barrel
+│       ├── _scale.scss           # Heading sizes, weights, paragraph rhythm
+│       └── _slide-rhythm.scss    # slide-h3 sizes, pretitle/subtitle margins
+│
+├── dsfr/                         # DSFR skin
+│   ├── dsfr.scss                 # Entry: imports shared + dsfr-layout + skin
+│   ├── dsfr-standalone.scss      # HackMD/vanilla Reveal variant (no shared)
+│   ├── _variables.scss           # DSFR Sass tokens
+│   ├── _base.scss                # Body, viewport, ::selection
+│   ├── _typography.scss          # Colors / gradients / font-family only
+│   ├── _components.scss          # Links, lists, tables, code, blockquote
+│   └── _utilities.scss           # .fr-callout, .fr-badge
+│
+├── dsfr-alt/                     # DSFR-derivative skin (proof of architecture)
+│   └── dsfr-alt.scss             # Imports shared + dsfr-layout, swaps colors
+│
+└── minimal/                      # Swiss-style skin
+    └── minimal.scss              # Imports shared, declares own scale
 
-public/themes/                # Compiled output (committed alongside sources)
+public/themes/                    # Compiled output (committed alongside sources)
 ├── dsfr.css
 ├── dsfr-standalone.css
+├── dsfr-alt.css
 └── minimal.css
 ```
+
+---
+
+## The semantic token contract
+
+Any code that should not care which theme is active (the foundation layer,
+MDC components like `Highlight.vue`) MUST reference these CSS custom
+properties only. Each skin is responsible for setting them.
+
+| Token                | Purpose                                      |
+|----------------------|----------------------------------------------|
+| `--accent`           | Primary brand color (links, dividers, accents) |
+| `--accent-soft`      | Lighter accent variant (hover tints)         |
+| `--accent-bg`        | Very light tint (callout backgrounds)        |
+| `--surface`          | Default surface / page background            |
+| `--surface-contrast` | Inverse surface (dark blocks, code panels)   |
+| `--on-contrast`      | Text color on `--surface-contrast`           |
+| `--text-default`     | Body text                                    |
+| `--text-title`       | Headings, strong text                        |
+| `--text-mention`     | Muted text (small, captions)                 |
+
+`themes/shared/_semantic-tokens.scss` provides conservative defaults so a
+brand-new skin still renders if it forgets to override one.
+
+---
 
 ## Compilation
 
@@ -36,44 +100,31 @@ node scripts/build-themes.js --watch  # Watch mode
 node scripts/build-themes.js dsfr     # Specific + watch
 ```
 
-**Process**:
-1. Reads `themes/` directory
-2. Finds `*.scss` files (non-partials, no `_` prefix)
-3. Compiles via `sass.compile(path, { style: 'expanded' })`
-4. Writes to `public/themes/[name].css`
-5. In watch mode: uses `fs.watch(dir, { recursive: true })`
+**Source of truth**: `themes/themes.config.js` lists all themes (consumed
+by both this script and `plugins/theme-watcher.js`).
 
-**Configuration**:
-- Input: `themes/[name]/[name].scss`
-- Output: `public/themes/[name].css`
-- Style: `expanded` (readable, not minified)
-- Source maps: Not generated
+**Process**:
+1. Loads the theme list from `themes/themes.config.js`.
+2. Resolves each theme's `input` / `output` against the project root.
+3. Compiles via `sass.compile(input, { style: 'expanded' })`.
+4. Writes to `public/themes/[name].css`.
+5. In watch mode: watches `watchDir` plus any `watchExtraDirs`
+   (typically `themes/shared`, `themes/presets`).
 
 ---
 
 ## Hot-Reload Plugin
 
 ### plugins/theme-watcher.js
-**Type**: Vite plugin
+**Type**: Vite plugin, used by Nuxt during dev.
 
 **Purpose**: Auto-recompile themes during dev, trigger page reload.
 
 **Hooks**:
-- `buildStart()`: Compiles all themes on server start
-- `configureServer(server)`: Sets up file watchers
-  - Watches `themes/dsfr/` and `themes/minimal/` recursively
-  - On change: Compiles theme, calls `server.ws.send({ type: 'full-reload' })`
-
-**Integration**: Added to `nuxt.config.ts`:
-```ts
-vite: {
-  plugins: [themeWatcher()]
-}
-```
-
-**Behavior**:
-- Dev mode: Changes to SCSS → instant browser reload
-- Build mode: Compiles once in `buildStart`
+- `buildStart()`: Compiles all themes from `themes.config.js` on start.
+- `configureServer(server)`: For each theme, watches its `watchDir` plus
+  all `watchExtraDirs`. On `.scss` change: recompile, then send a
+  Vite `full-reload` over the WS.
 
 ---
 
@@ -86,141 +137,98 @@ const { loadTheme } = useTheme(themeName)
 loadTheme('dsfr') // Creates <link href="/themes/dsfr.css">
 ```
 
-### Component Integration
-RevealPresentation.vue:
-```ts
-const { loadTheme, unloadTheme, watchTheme } = useTheme(toRef(props, 'theme'))
-
-onMounted(() => {
-  loadTheme(props.theme)
-  watchTheme() // Auto-reload if theme prop changes
-})
-
-onUnmounted(() => {
-  unloadTheme() // Cleanup <link> tag
-})
-```
-
 ### Per-Presentation Selection
 Frontmatter in `.md` file:
 ```yaml
 ---
-theme: dsfr  # or minimal, or custom
+theme: dsfr  # or minimal, dsfr-alt, or your custom theme
 ---
-```
-
-Loaded via metadata:
-```ts
-const { data } = usePresentation(slug)
-// data.value.metadata.theme = 'dsfr'
 ```
 
 ---
 
-## Creating New Theme
+## Creating a new theme
 
-### Steps
-1. **Create directory**: `themes/mytheme/`
-2. **Create main file**: `themes/mytheme/mytheme.scss`
-3. **Write styles**:
+### Recipe A — DSFR-style skin (reuse the dsfr-layout preset)
+Best when you want to keep DSFR positioning/sizing but change colors / fonts.
+See `themes/dsfr-alt/dsfr-alt.scss` for the canonical example.
+
 ```scss
-// mytheme.scss
-.reveal {
-  background: #fff;
-  
-  h1 { color: #333; font-size: 3em; }
-  h2 { color: #666; font-size: 2em; }
-  
-  section { padding: 2rem; }
+@use '../shared';
+@use '../presets/dsfr-layout';
+
+:root {
+  --accent: #169b62;
+  --accent-soft: #c3fad5;
+  --accent-bg: #e8fdf0;
+  --surface: #ffffff;
+  --surface-contrast: #0a3a2e;
+  --on-contrast: #ffffff;
+  --text-default: #1f2937;
+  --text-title: #0a3a2e;
+  --text-mention: #6b7280;
+}
+
+.reveal-viewport { background: var(--surface); }
+.reveal { font-family: 'Inter', system-ui, sans-serif; color: var(--text-default); }
+
+// override only what you want from the preset; sizes are already set
+.reveal h1 { color: var(--accent); }
+.reveal a { color: var(--accent); }
+```
+
+### Recipe B — Independent skin (no preset)
+Best when you want a totally different scale (e.g. minimal/Swiss). See
+`themes/minimal/minimal.scss`.
+
+```scss
+@use '../shared';
+
+:root {
+  --accent: #e63946;
+  // ... map the rest of the contract
+}
+
+// declare your own heading sizes, paragraph rhythm, slide-h3 paddings, etc.
+.reveal h1 { font-size: 3em; }
+```
+
+### Register the theme
+Add it to `themes/themes.config.js`:
+```js
+{
+  name: 'mytheme',
+  input: 'themes/mytheme/mytheme.scss',
+  output: 'public/themes/mytheme.css',
+  watchDir: 'themes/mytheme',
+  watchExtraDirs: ['themes/shared', 'themes/presets'],
 }
 ```
 
-4. **Compile**: `pnpm build:theme mytheme`
-5. **Use in presentation**:
-```yaml
----
-theme: mytheme
----
-```
-
-### Advanced: Multi-File Theme
-```
-themes/mytheme/
-├── mytheme.scss           # @import './variables'; @import './base';
-├── _variables.scss        # $primary: #007bff;
-├── _base.scss             # .reveal { ... }
-└── _components.scss       # .alert { ... }
-```
-
-Main file:
-```scss
-@import './variables';
-@import './base';
-@import './components';
-```
+Then `pnpm build:themes` and use `theme: mytheme` in your presentation
+frontmatter.
 
 ---
 
 ## Styling Slides by Heading Level
 
-### CSS Classes
-Parser adds classes to sections:
-- `slide-h1`: Title slides
-- `slide-h2`: Horizontal slides
-- `slide-h3`: Vertical slides
+The slide engine adds classes to `<section>` elements based on what the slide
+contains:
+- `slide-h1` — slide whose only content is an `<h1>` (title slide)
+- `slide-h2` — slide whose only content is an `<h2>` (section divider)
+- `slide-h3` — slide containing an `<h3>` heading + body content
 
-### Example Usage
-```scss
-.reveal {
-  section.slide-h1 {
-    background: linear-gradient(to bottom, #667eea, #764ba2);
-    color: white;
-    text-align: center;
-  }
-  
-  section.slide-h2 {
-    h2 { border-bottom: 2px solid #007bff; }
-  }
-  
-  section.slide-h3 {
-    background: #f8f9fa;
-  }
-}
-```
+The flex skeleton (centering for h1/h2; header-on-top + flex-grow article for
+h3) is provided by `themes/shared/_slide-structure.scss`. Themes only need
+to set sizes (header `min-height`, article `padding`) and colors.
 
 ---
 
-## DSFR Theme Structure
+## Standalone DSFR (`dsfr-standalone.scss`)
 
-### Design System
-Based on French Government Design System (Système de Design de l'État).
-
-### Key Features
-- **Colors**: Blue primary (#000091), greys
-- **Typography**: Marianne font family
-- **Components**: Buttons, alerts with official styles
-- **Accessibility**: WCAG AA compliant
-
-### Files
-- `_variables.scss`: DSFR color palette, typography, spacing scale (Sass tokens)
-- `_base.scss`: Reset, body defaults, viewport background, ::selection
-- `_typography.scss`: Heading sizes, body text, plus slide-h1/h2/h3 structural rules (centering, hgroup heights)
-- `_components.scss`: Links, lists, tables, code, blockquotes, images
-- `_utilities.scss`: `.fr-callout`, `.fr-badge` utility classes
-
----
-
-## Minimal Theme
-
-### Characteristics
-- Single file: `themes/minimal/minimal.scss`
-- Helvetica font stack
-- Light background, dark text
-- Simple, clean aesthetic
-- No design system dependencies
-
-### Use Case
-Default/fallback theme for simple presentations.
+Used for HackMD / vanilla Reveal where the nuxt-slides Vue components are
+absent. It deliberately does NOT import `themes/shared/` (which depends on
+`.slide-content-pane`, `.slide-media-pane`, etc. produced by the Vue layer).
 
 ---
 
@@ -235,36 +243,29 @@ Default/fallback theme for simple presentations.
 }
 ```
 
-All build commands compile themes first.
-
-### SSG Output
-Compiled CSS copied to `.output/public/themes/`:
-```
-.output/public/
-├── themes/
-│   ├── dsfr.css
-│   └── minimal.css
-```
-
-Static hosting serves these directly.
+All build commands compile themes first. Compiled CSS is copied to
+`.output/public/themes/` for SSG hosting.
 
 ---
 
 ## Troubleshooting
 
 ### Theme not loading
-1. Check file exists: `public/themes/[name].css`
-2. Compile: `pnpm build:theme [name]`
-3. Check frontmatter: `theme: [name]`
-4. Check browser network tab for 404s
+1. Check file exists: `public/themes/[name].css`.
+2. Compile: `pnpm build:theme [name]`.
+3. Check frontmatter: `theme: [name]`.
+4. Check browser network tab for 404s.
 
 ### Changes not appearing
-1. Dev mode: Should auto-reload (Vite plugin)
-2. Manual: `pnpm build:themes`
-3. Hard refresh: Cmd+Shift+R (Mac) / Ctrl+Shift+R (Windows)
+1. Dev mode auto-reloads via `plugins/theme-watcher.js`.
+2. Manual: `pnpm build:themes`.
+3. Hard refresh: Cmd+Shift+R (macOS) / Ctrl+Shift+R (Windows).
+
+### Watcher misses changes in `themes/shared/` or `themes/presets/`
+Add the directory to `watchExtraDirs` for the relevant theme entry in
+`themes/themes.config.js`.
 
 ### Compilation errors
-1. Check SCSS syntax
-2. Ensure partials start with `_`
-3. Check import paths (relative)
-4. Run: `node scripts/build-themes.js [theme]` to see errors
+1. Check SCSS syntax (especially `@use` rules at the top).
+2. Partials must start with `_`.
+3. Run `pnpm build:theme [name]` to see the precise error.

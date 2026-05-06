@@ -97,11 +97,23 @@ plugins/theme-watcher.js    # Vite plugin for theme hot-reload
 8. **`:layout{name="..." ...}`**: Slide-level layout annotation. Unlike full-slide components, preserves header/body split. Supports `media-right`, `media-left`, `media-right-wide`, and `media-left-wide` for two-column layouts with media, plus extra props such as `fit="contain|cover"`. The layout name is resolved to a `LayoutStrategy` via `getLayoutStrategy()` in `src/config/layouts.ts` — add a new entry there to extend without touching the template.
 
 ### Theme System
-- SCSS sources in `themes/[name]/`
-- Compiled to `public/themes/[name].css`
-- Loaded dynamically via `<link>` tag injection
-- Hot-reload in dev via Vite plugin
-- Per-presentation theme selection via frontmatter
+Layered SCSS architecture (foundation → preset → skin):
+- `themes/shared/` — engine-level CSS shipped with every theme (Reveal patches,
+  MDC `display: contents` bridge, media-layout grid, slide-h1/h2/h3 flex
+  skeleton, quicklinks, neutral semantic tokens).
+- `themes/presets/<name>/` — reusable layout/scale packages (heading sizes,
+  rhythm). Skin-agnostic on colors and font-family. Currently: `dsfr-layout`.
+- `themes/<name>/` — skins (colors, gradients, font-family). A skin imports
+  the foundation, optionally a preset, and sets the `--accent`, `--surface`,
+  ... semantic tokens.
+- `themes/themes.config.js` — single source of truth for the build pipeline
+  (consumed by `scripts/build-themes.js` and `plugins/theme-watcher.js`).
+- Compiled to `public/themes/[name].css`, loaded dynamically via `<link>`.
+- Per-presentation selection via frontmatter (`theme: <name>`).
+- Hot-reload in dev via Vite plugin (watches own dir + `watchExtraDirs`).
+
+See `docs/theme-system.llm.txt` for the full reference and the recipe to
+create a new theme.
 
 ## Component Responsibilities
 
