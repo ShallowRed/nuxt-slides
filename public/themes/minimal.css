@@ -26,6 +26,38 @@
  *   @use '../shared' as *;
  */
 /**
+ * Neutral semantic tokens (the theme contract).
+ *
+ * This file defines the palette of CSS custom properties that every theme
+ * MUST provide and that all theme-agnostic code (MDC components, the foundation
+ * layer) references. A new theme is created by overriding these tokens.
+ *
+ * Defaults below are deliberately conservative (mostly DSFR-leaning blues) so
+ * that any consumer of these variables degrades to a sensible look even if the
+ * active theme forgets to set them.
+ *
+ * Naming conventions:
+ *   --accent / --accent-soft / --accent-bg
+ *       the brand/primary color and its lighter companions used for tints,
+ *       borders, link highlighting, etc.
+ *   --surface / --surface-contrast / --on-contrast
+ *       background colors and the matching text color on dark backgrounds.
+ *   --text-default / --text-title / --text-mention
+ *       the three text intensities used by the typography system.
+ */
+:root {
+  --accent: #000091;
+  --accent-soft: #e3e3fd;
+  --accent-bg: #f5f5fe;
+  --surface: #ffffff;
+  --surface-contrast: #161616;
+  --on-contrast: #ffffff;
+  --text-default: #161616;
+  --text-title: #161616;
+  --text-mention: #666666;
+}
+
+/**
  * Reveal patches & MDC structural bridge.
  *
  * MDCRenderer wraps rendered Markdown in extra <div>s, which would otherwise
@@ -230,6 +262,18 @@
   color: var(--r-link-color, #000091);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+:root {
+  --accent: #e63946;
+  --accent-soft: #f0f0f0;
+  --accent-bg: #f0f0f0;
+  --surface: #ffffff;
+  --surface-contrast: #000000;
+  --on-contrast: #ffffff;
+  --text-default: #1a1a1a;
+  --text-title: #000000;
+  --text-mention: #666666;
 }
 
 body {

@@ -52,4 +52,19 @@
   // Borders
   --dsfr-border-default: #{$dsfr-border-default};
   --dsfr-border-action: #{$dsfr-border-action};
+
+  // ---------------------------------------------------------------------------
+  // Neutral semantic tokens (theme contract — defined in themes/shared/)
+  // Map them to DSFR's palette so theme-agnostic code can reference --accent,
+  // --surface-contrast, etc. without coupling to --dsfr-* variables.
+  // ---------------------------------------------------------------------------
+  --accent: var(--dsfr-blue-france-main-525);
+  --accent-soft: var(--dsfr-blue-france-850);
+  --accent-bg: var(--dsfr-blue-france-950);
+  --surface: var(--dsfr-background-default);
+  --surface-contrast: var(--dsfr-background-contrast);
+  --on-contrast: var(--dsfr-grey-1000);
+  --text-default: var(--dsfr-text-default);
+  --text-title: var(--dsfr-text-title);
+  --text-mention: var(--dsfr-text-mention);
 }

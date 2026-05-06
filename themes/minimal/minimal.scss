@@ -20,6 +20,23 @@ $light-grey: #f0f0f0;
 $white: #ffffff;
 $accent: #e63946; // Classic Swiss red accent
 
+// ---------------------------------------------------------------------------
+// Neutral semantic tokens (theme contract — defined in themes/shared/)
+// Map them to the Swiss palette so MDC components and the foundation layer
+// pick up the right colors without referencing $-Sass variables.
+// ---------------------------------------------------------------------------
+:root {
+  --accent: #{$accent};
+  --accent-soft: #{$light-grey};
+  --accent-bg: #{$light-grey};
+  --surface: #{$white};
+  --surface-contrast: #{$black};
+  --on-contrast: #{$white};
+  --text-default: #{$dark-grey};
+  --text-title: #{$black};
+  --text-mention: #{$grey};
+}
+
 // Base styles matching DSFR structure
 body {
   padding: 0;

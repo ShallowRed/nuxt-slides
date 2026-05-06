@@ -89,8 +89,8 @@ withDefaults(defineProps<Props>(), {
 
 /* Variant: accent */
 .highlight--accent {
-  border-left: 4px solid var(--dsfr-blue-france-main-525, #000091);
-  background: var(--dsfr-blue-france-950, #f5f5fe);
+  border-left: 4px solid var(--accent, #000091);
+  background: var(--accent-bg, #f5f5fe);
   padding: 1em 1.4em;
   border-radius: 0 8px 8px 0;
   text-align: left;
@@ -102,30 +102,30 @@ withDefaults(defineProps<Props>(), {
 
 /* Variant: contrast */
 .highlight--contrast {
-  background: var(--dsfr-background-contrast, #161616);
-  color: var(--dsfr-grey-1000, #ffffff);
+  background: var(--surface-contrast, #161616);
+  color: var(--on-contrast, #ffffff);
   padding: 1.2em 1.6em;
   border-radius: 8px;
 }
 
 /* Emphasis on strong/em within highlight */
 .highlight :deep(strong) {
-  color: var(--dsfr-blue-france-main-525, #000091);
+  color: var(--accent, #000091);
 }
 
 .highlight--contrast :deep(strong) {
-  color: var(--dsfr-blue-france-850, #e3e3fd);
+  color: var(--accent-soft, #e3e3fd);
 }
 
 .highlight :deep(em) {
   font-style: normal;
   text-decoration: underline;
-  text-decoration-color: var(--dsfr-blue-france-main-525, #000091);
+  text-decoration-color: var(--accent, #000091);
   text-underline-offset: 4px;
   text-decoration-thickness: 2px;
 }
 
 .highlight--contrast :deep(em) {
-  text-decoration-color: var(--dsfr-blue-france-850, #e3e3fd);
+  text-decoration-color: var(--accent-soft, #e3e3fd);
 }
 </style>

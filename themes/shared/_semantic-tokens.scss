@@ -1,0 +1,37 @@
+/**
+ * Neutral semantic tokens (the theme contract).
+ *
+ * This file defines the palette of CSS custom properties that every theme
+ * MUST provide and that all theme-agnostic code (MDC components, the foundation
+ * layer) references. A new theme is created by overriding these tokens.
+ *
+ * Defaults below are deliberately conservative (mostly DSFR-leaning blues) so
+ * that any consumer of these variables degrades to a sensible look even if the
+ * active theme forgets to set them.
+ *
+ * Naming conventions:
+ *   --accent / --accent-soft / --accent-bg
+ *       the brand/primary color and its lighter companions used for tints,
+ *       borders, link highlighting, etc.
+ *   --surface / --surface-contrast / --on-contrast
+ *       background colors and the matching text color on dark backgrounds.
+ *   --text-default / --text-title / --text-mention
+ *       the three text intensities used by the typography system.
+ */
+
+:root {
+  // Accent (primary brand color) and its variants
+  --accent: #000091;
+  --accent-soft: #e3e3fd;
+  --accent-bg: #f5f5fe;
+
+  // Surfaces
+  --surface: #ffffff;
+  --surface-contrast: #161616;
+  --on-contrast: #ffffff;
+
+  // Text intensities
+  --text-default: #161616;
+  --text-title: #161616;
+  --text-mention: #666666;
+}
