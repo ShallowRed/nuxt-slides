@@ -1,28 +1,8 @@
 import { mkdirSync, watch, writeFileSync } from 'node:fs'
 import * as sass from 'sass'
+import { themes } from '../themes/themes.config.js'
 
 export default function themeWatcherPlugin() {
-  const themes = [
-    {
-      name: 'dsfr',
-      input: 'themes/dsfr/dsfr.scss',
-      output: 'public/themes/dsfr.css',
-      watchDir: 'themes/dsfr',
-    },
-    {
-      name: 'dsfr-standalone',
-      input: 'themes/dsfr/dsfr-standalone.scss',
-      output: 'public/themes/dsfr-standalone.css',
-      watchDir: 'themes/dsfr',
-    },
-    {
-      name: 'minimal',
-      input: 'themes/minimal/minimal.scss',
-      output: 'public/themes/minimal.css',
-      watchDir: 'themes/minimal',
-    },
-  ]
-
   function compileTheme({ name, input, output }) {
     try {
       const result = sass.compile(input, {
@@ -48,19 +28,23 @@ export default function themeWatcherPlugin() {
     },
 
     configureServer(server) {
-      // Watch theme files in dev mode
-      themes.forEach(({ name, input, output, watchDir }) => {
-        watch(watchDir, { recursive: true }, (eventType, filename) => {
-          if (filename && filename.endsWith('.scss')) {
-            console.log(`\n📝 ${name} theme changed, recompiling...`)
-            compileTheme({ name, input, output })
+      // Watch theme files in dev mode (own folder + any extra shared/preset dirs)
+      themes.forEach(({ name, input, output, watchDir, watchExtraDirs }) => {
+        const dirs = [watchDir, ...(watchExtraDirs ?? [])]
 
-            // Trigger HMR for any pages using this theme
-            server.ws.send({
-              type: 'full-reload',
-              path: '*',
-            })
-          }
+        dirs.forEach((dir) => {
+          watch(dir, { recursive: true }, (eventType, filename) => {
+            if (filename && filename.endsWith('.scss')) {
+              console.log(`\n📝 ${name} theme changed, recompiling...`)
+              compileTheme({ name, input, output })
+
+              // Trigger HMR for any pages using this theme
+              server.ws.send({
+                type: 'full-reload',
+                path: '*',
+              })
+            }
+          })
         })
       })
     },

@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import * as sass from 'sass'
+import { themes as themesConfig } from '../themes/themes.config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -15,27 +16,14 @@ const args = process.argv.slice(2)
 const watchMode = args.includes('--watch') || args.includes('-w')
 const themeName = args.find(arg => !arg.startsWith('-'))
 
-// Themes to compile
-const allThemes = [
-  {
-    name: 'dsfr',
-    input: join(projectRoot, 'themes/dsfr/dsfr.scss'),
-    output: join(projectRoot, 'public/themes/dsfr.css'),
-    watchDir: join(projectRoot, 'themes/dsfr'),
-  },
-  {
-    name: 'dsfr-standalone',
-    input: join(projectRoot, 'themes/dsfr/dsfr-standalone.scss'),
-    output: join(projectRoot, 'public/themes/dsfr-standalone.css'),
-    watchDir: join(projectRoot, 'themes/dsfr'),
-  },
-  {
-    name: 'minimal',
-    input: join(projectRoot, 'themes/minimal/minimal.scss'),
-    output: join(projectRoot, 'public/themes/minimal.css'),
-    watchDir: join(projectRoot, 'themes/minimal'),
-  },
-]
+// Resolve theme paths against the project root
+const allThemes = themesConfig.map(theme => ({
+  ...theme,
+  input: join(projectRoot, theme.input),
+  output: join(projectRoot, theme.output),
+  watchDir: join(projectRoot, theme.watchDir),
+  watchExtraDirs: (theme.watchExtraDirs ?? []).map(d => join(projectRoot, d)),
+}))
 
 // Filter themes if specific theme requested
 const themes = themeName
@@ -83,14 +71,17 @@ themes.forEach(compileTheme)
 if (watchMode) {
   console.log('\n👀 Watching for changes...\n')
 
-  themes.forEach(({ name, input, output, watchDir }) => {
-    console.log(`Watching ${name} theme at ${watchDir}`)
+  themes.forEach(({ name, input, output, watchDir, watchExtraDirs }) => {
+    const dirs = [watchDir, ...(watchExtraDirs ?? [])]
+    console.log(`Watching ${name} theme at ${dirs.join(', ')}`)
 
-    watch(watchDir, { recursive: true }, (eventType, filename) => {
-      if (filename && filename.endsWith('.scss')) {
-        console.log(`\n📝 Change detected in ${name}/${filename}`)
-        compileTheme({ name, input, output })
-      }
+    dirs.forEach((dir) => {
+      watch(dir, { recursive: true }, (eventType, filename) => {
+        if (filename && filename.endsWith('.scss')) {
+          console.log(`\n📝 Change detected in ${name} (${filename})`)
+          compileTheme({ name, input, output })
+        }
+      })
     })
   })
 
