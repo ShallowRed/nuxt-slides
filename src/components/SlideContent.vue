@@ -149,25 +149,13 @@ const parsedQuicklink = computed(() => {
 </template>
 
 <style scoped>
-/**
- * MDC wraps rendered content in divs, which can break semantic structure.
- * This style makes those divs behave like their parent elements.
+/*
+ * No styles here on purpose.
+ *
+ * The MDC structural bridge (display: contents on wrapper divs) and the
+ * `.slide-content-pane` declaration are now part of the engine layer:
+ * `themes/shared/_reveal-patches.scss`. They had to be promoted out of this
+ * scoped block because they form a contract shared with media-layout rules
+ * and can no longer rely on Vue's :deep() tunnel without duplication.
  */
-:deep(.layout-full > div),
-header :deep(> div),
-article :deep(> div),
-hgroup :deep(.slide-pretitle > div),
-hgroup :deep(.slide-heading > div),
-hgroup :deep(.slide-subtitle > div) {
-  display: contents;
-}
-
-/**
- * Wrapper div for header + article.
- * Transparent (display: contents) for default layouts.
- * Becomes the content column for media layouts via the global styles below.
- */
-.slide-content-pane {
-  display: contents;
-}
 </style>

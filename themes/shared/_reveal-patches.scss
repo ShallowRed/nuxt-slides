@@ -1,0 +1,32 @@
+/**
+ * Reveal patches & MDC structural bridge.
+ *
+ * MDCRenderer wraps rendered Markdown in extra <div>s, which would otherwise
+ * break the semantic flow of header/hgroup/article and full-layout slides.
+ * `display: contents` makes those wrapper divs transparent in the box tree.
+ *
+ * These rules belong to the engine layer (nuxt-slides component contract),
+ * not to any individual theme. They were previously inside SlideContent.vue
+ * <style scoped> but had to be promoted here because:
+ *   - the ":deep(...)" tunnel only works while we keep the Vue component,
+ *   - duplicating the same rules across every theme would be brittle.
+ */
+
+.reveal .slides {
+  // MDC bridge: make wrapper divs transparent
+  section .layout-full > div,
+  .slide-content-pane > header > div,
+  .slide-content-pane > article > div,
+  .slide-content-pane > hgroup .slide-pretitle > div,
+  .slide-content-pane > hgroup .slide-heading > div,
+  .slide-content-pane > hgroup .slide-subtitle > div {
+    display: contents;
+  }
+
+  // The content pane is a structural wrapper. For default layouts it must be
+  // transparent so the inner header/article behave as direct children of the
+  // <section>. For media layouts it is overridden in _media-layouts.scss.
+  .slide-content-pane {
+    display: contents;
+  }
+}

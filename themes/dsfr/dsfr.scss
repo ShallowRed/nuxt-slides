@@ -7,6 +7,7 @@
 
 // Import all modules first - @use rules must come before any other rules
 @use 'variables' as *;
+@use '../shared';
 @use 'base';
 @use 'typography';
 @use 'components';

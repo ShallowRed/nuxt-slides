@@ -1,0 +1,133 @@
+/**
+ * Media layout: two-column grid.
+ *
+ * Activated when a slide carries any `layout-media*` class (left/right and
+ * narrow/wide variants). Promoted from `RevealSlides.vue` global <style> block
+ * because these selectors form a contract between the slide engine and any
+ * theme: themes only paint, the layout grid is invariant.
+ */
+
+.reveal .slides {
+  section[class*="layout-media"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    align-items: stretch;
+  }
+
+  section.layout-media-left {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  section.layout-media-right-wide {
+    grid-template-columns: 0.8fr 1.7fr;
+  }
+
+  section.layout-media-left-wide {
+    grid-template-columns: 1.7fr 0.8fr;
+  }
+
+  // Reorder panes when media is on the left
+  section[class*="layout-media-left"] > .slide-content-pane {
+    order: 2;
+  }
+
+  section[class*="layout-media-left"] > .slide-media-pane {
+    order: 1;
+  }
+
+  // Content pane: vertical column layout
+  section[class*="layout-media"] > .slide-content-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    min-width: 0;
+  }
+
+  // Wide variants: shrink content text to compensate for the narrower column
+  section[class*="layout-media"][class*="-wide"] > .slide-content-pane {
+    font-size: 0.75em;
+  }
+
+  section[class*="layout-media"][class*="-wide"] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
+  section[class*="layout-media"][class*="-wide"] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 1.75em;
+  }
+
+  // Heading area sticks to the top, article fills the rest
+  section[class*="layout-media"] > .slide-content-pane > header,
+  section[class*="layout-media"] > .slide-content-pane > hgroup {
+    height: auto;
+    flex-shrink: 0;
+  }
+
+  section[class*="layout-media"] > .slide-content-pane > article {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  // Media pane: centered, no decoration by default
+  section[class*="layout-media"] > .slide-media-pane {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  // Default (cover) variant gets a frame
+  section[class*="layout-media"] > .slide-media-pane:not(.fit-contain) {
+    border: solid 1px var(--fr-border-color, #ccc);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+  }
+
+  section[class*="layout-media"] > .slide-media-pane.fit-contain {
+    overflow: visible;
+    background: transparent;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    pointer-events: none;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane img.fit-cover {
+    object-fit: cover;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane img.fit-contain {
+    display: block;
+    width: auto;
+    object-fit: contain;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: solid 1px var(--fr-border-color, #ccc);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+  }
+
+  // Lightbox: enable click-through and show pointer cursor
+  section[class*="layout-media"] > .slide-media-pane.has-lightbox {
+    cursor: pointer;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane.has-lightbox iframe {
+    pointer-events: none;
+  }
+}

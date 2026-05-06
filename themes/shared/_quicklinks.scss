@@ -1,0 +1,34 @@
+/**
+ * Quicklink: small navigation hint pinned to the bottom of a slide.
+ * Prefix (e.g. "Pressé·e ?") is muted text; the link is styled distinctly.
+ *
+ * Promoted from `RevealSlides.vue` global <style> block.
+ * Colors are intentionally read from Reveal CSS variables (with literal
+ * fallbacks) so the rule is theme-neutral; individual themes can override
+ * `--r-main-color` and `--r-link-color` if they want a custom palette.
+ */
+
+.reveal .slides section > .slide-quicklink-wrapper {
+  position: absolute;
+  bottom: 0.5em;
+  left: 0;
+  font-size: 0.85em;
+  white-space: nowrap;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .slide-quicklink-prefix {
+    color: var(--r-main-color, #3a3a3a);
+    margin-right: 0.4em;
+  }
+
+  .slide-quicklink {
+    color: var(--r-link-color, #000091);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
