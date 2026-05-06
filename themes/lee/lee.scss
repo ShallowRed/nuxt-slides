@@ -1,0 +1,179 @@
+/**
+ * lee theme — skin for LEE-branded presentations.
+ *
+ * Uses the dsfr-layout preset for the same scale/rhythm as DSFR slides.
+ * Brand color: deep electric blue matching the background images.
+ *
+ * Slide backgrounds (declared in src/config/presentation.ts):
+ *   h1 / h2 → lee-slide-contrast.png  (deep navy, text forced white)
+ *   h3      → lee-slide-subtle.png    (light lavender, text stays dark)
+ */
+
+@use '../shared';
+@use '../presets/dsfr-layout';
+
+// --- Semantic token contract -----------------------------------------------
+:root {
+  --accent: #0000cc;           // Deep electric blue (LEE brand)
+  --accent-soft: #d0d0ff;      // Light lavender tint
+  --accent-bg: #f0f0ff;        // Very light lavender surface
+  --surface: #ffffff;
+  --surface-contrast: #0000a0; // Deep navy
+  --on-contrast: #ffffff;
+  --text-default: #1a1a3a;
+  --text-title: #0000a0;
+  --text-mention: #6b6b9a;
+}
+
+// --- Base & viewport -------------------------------------------------------
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: var(--surface);
+}
+
+.reveal {
+  font-family: 'Marianne', arial, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text-default);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  height: 100%;
+}
+
+.reveal ::selection {
+  color: var(--on-contrast);
+  background: var(--accent);
+  text-shadow: none;
+}
+
+// --- Headings --------------------------------------------------------------
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  color: var(--text-title);
+  font-family: inherit;
+}
+
+.reveal h1 {
+  background: linear-gradient(89deg, #0000cc 0%, #6666ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal h3 {
+  color: var(--accent);
+}
+
+.reveal h2 em,
+.reveal h3 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.reveal strong,
+.reveal b {
+  color: var(--text-title);
+}
+
+.reveal small {
+  color: var(--text-mention);
+}
+
+// --- Slide-h1 (title, dark contrast background) ----------------------------
+.reveal section.slide-h1 {
+  h1, h2, h3, h4, h5, h6 {
+    // Reset the transparent gradient so text is visible on dark background
+    background: none;
+    -webkit-text-fill-color: #ffffff;
+    color: #ffffff !important;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+}
+
+// --- Slide-h2 (section dividers, dark contrast background) -----------------
+.reveal section.slide-h2 {
+  h1, h2 {
+    background: none;
+    -webkit-text-fill-color: #ffffff;
+    color: #ffffff !important;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+}
+
+// --- Slide-h3 (content slides, light subtle background) --------------------
+.reveal section.slide-h3 {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-title) !important;
+
+  }
+
+  p {
+    color: var(--text-default) !important;
+  }
+
+  hgroup {
+    .slide-pretitle p,
+    .slide-subtitle p {
+      color: var(--text-mention) !important;
+    }
+  }
+}
+
+// --- Links -----------------------------------------------------------------
+.reveal a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reveal a:hover {
+  color: var(--surface-contrast);
+  text-decoration: none;
+}
+
+// --- Lists -----------------------------------------------------------------
+.reveal ul,
+.reveal ol {
+  display: block;
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.reveal li {
+  margin-bottom: 0.35em;
+}
+
+// --- Code ------------------------------------------------------------------
+.reveal code {
+  background: var(--accent-bg);
+  color: var(--surface-contrast);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  font-size: 0.85em;
+}
+
+.reveal pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}

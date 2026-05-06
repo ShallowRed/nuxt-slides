@@ -57,32 +57,32 @@ withDefaults(defineProps<Props>(), {
 /* Size presets */
 .highlight--sm {
   font-size: 1.3em;
-  &:deep(p) {
-    max-width: 60ch;
+  max-width: 50ch;
+  &:deep(p, ul) {
     line-height: 1.5;
   }
 }
 
 .highlight--md {
   font-size: 1.6em;
-  &:deep(p) {
-    max-width: 50ch;
+  max-width: 45ch;
+  &:deep(p, ul) {
     line-height: 1.7;
   }
 }
 
 .highlight--lg {
   font-size: 2em;
-  &:deep(p) {
-    max-width: 40ch;
+  max-width: 40ch;
+  &:deep(p, ul) {
     line-height: 1.7;
   }
 }
 
 .highlight--xl {
   font-size: 2.6em;
-  &:deep(p) {
-    max-width: 30ch;
+  max-width: 30ch;
+  &:deep(p, ul) {
     line-height: 1.7;
   }
 }

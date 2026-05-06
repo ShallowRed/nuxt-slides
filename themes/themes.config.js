@@ -41,4 +41,11 @@ export const themes = [
     watchDir: 'themes/dsfr-alt',
     watchExtraDirs: ['themes/shared', 'themes/presets'],
   },
+  {
+    name: 'lee',
+    input: 'themes/lee/lee.scss',
+    output: 'public/themes/lee.css',
+    watchDir: 'themes/lee',
+    watchExtraDirs: ['themes/shared', 'themes/presets'],
+  },
 ]

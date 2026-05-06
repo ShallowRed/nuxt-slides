@@ -118,3 +118,32 @@ export function stripFrontmatter(markdown: string): string {
     return markdown
   return markdown.slice(match[0].length)
 }
+
+/**
+ * Parse flat (non-nested) key: value pairs from a YAML frontmatter block.
+ * Handles quoted and unquoted string values. Ignores nested objects/arrays.
+ * Returns an empty object when there is no frontmatter.
+ */
+export function parseFlatFrontmatter(markdown: string): Record<string, string> {
+  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/)
+  if (!match)
+    return {}
+  const result: Record<string, string> = {}
+  for (const line of match[1]!.split(/\r?\n/)) {
+    // Match `key: value` or `key: "value"` — skip indented (nested) lines.
+    // Regex is deliberately non-backtracking: key segment, literal ': ',
+    // then an optional opening quote, a run of non-quote/non-newline chars,
+    // and an optional closing quote.
+    const colonIdx = line.indexOf(': ')
+    if (colonIdx < 1)
+      continue
+    const key = line.slice(0, colonIdx)
+    if (!/^\w[\w-]*$/.test(key))
+      continue
+    let val = line.slice(colonIdx + 2).trim()
+    if (val.startsWith('"') && val.endsWith('"'))
+      val = val.slice(1, -1)
+    result[key] = val
+  }
+  return result
+}

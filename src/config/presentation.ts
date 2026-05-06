@@ -26,7 +26,11 @@ export const THEME_BACKGROUNDS: Record<string, ThemeBackgrounds> = {
   minimal: {
     // No backgrounds by default
   },
-  // Add more themes as needed
+  lee: {
+    h1: '/backgrounds/lee-slide-contrast.png',
+    h2: '/backgrounds/lee-slide-contrast.png',
+    h3: '/backgrounds/lee-slide-subtle.png',
+  },
 }
 
 /**
