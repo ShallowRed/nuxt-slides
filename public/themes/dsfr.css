@@ -155,6 +155,52 @@
 }
 
 /**
+ * Slide section structural skeleton.
+ *
+ * The `slide-h1`, `slide-h2`, `slide-h3` classes are produced by the slide
+ * engine when a slide consists only of a heading at the matching level (used
+ * as section dividers). The flex skeleton here is identical in every theme
+ * we ship (DSFR, minimal). Each theme is still free to set its own
+ * `header { min-height }`, `article { padding }`, colors, and typography.
+ *
+ * What stays in this layer: positioning primitives (display: flex, ordering,
+ * `width: 100%`).
+ * What belongs in a theme/preset: sizes, paddings, colors, typography.
+ */
+.reveal section.slide-h1,
+.reveal section.slide-h2 {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.reveal section.slide-h3 {
+  display: flex !important;
+  flex-direction: column;
+}
+.reveal section.slide-h3 header,
+.reveal section.slide-h3 hgroup {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.reveal section.slide-h3 header h3,
+.reveal section.slide-h3 hgroup h3 {
+  margin: 0;
+}
+.reveal section.slide-h3 article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reveal section article {
+  width: 100%;
+}
+
+/**
  * Quicklink: small navigation hint pinned to the bottom of a slide.
  * Prefix (e.g. "Pressé·e ?") is muted text; the link is styled distinctly.
  *
@@ -338,14 +384,6 @@ body {
   font-size: 1.15em;
 }
 
-.reveal section.slide-h1,
-.reveal section.slide-h2 {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  align-items: start;
-}
-
 .reveal section.slide-h2 h1,
 .reveal section.slide-h2 h2,
 .reveal section.slide-h2 h3,
@@ -358,10 +396,6 @@ body {
   color: var(--dsfr-grey-625) !important;
 }
 
-.reveal section.slide-h3 {
-  display: flex !important;
-  flex-direction: column;
-}
 .reveal section.slide-h3 h1,
 .reveal section.slide-h3 h2,
 .reveal section.slide-h3 h3,
@@ -376,22 +410,10 @@ body {
 .reveal section.slide-h3 header {
   min-height: 8rem;
   height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-}
-.reveal section.slide-h3 header h3 {
-  margin: 0;
 }
 .reveal section.slide-h3 hgroup {
   min-height: 8rem;
   height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-}
-.reveal section.slide-h3 hgroup h3 {
-  margin: 0;
 }
 .reveal section.slide-h3 hgroup .slide-pretitle p {
   margin: 0 0 0.65em 0;
@@ -406,16 +428,8 @@ body {
   color: var(--dsfr-text-mention) !important;
 }
 .reveal section.slide-h3 article {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   padding-top: 2rem;
   padding-bottom: 2rem;
-}
-
-.reveal section article {
-  width: 100%;
 }
 
 /**

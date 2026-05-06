@@ -398,40 +398,16 @@ body {
    SLIDE VERTICAL CENTERING (like DSFR)
    ============================================ */
 
-// Title slides (h1, h2) - vertically centered
-.reveal section.slide-h1,
-.reveal section.slide-h2 {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  align-items: start;
-}
+// Title slides (h1, h2) — flex skeleton lives in themes/shared/_slide-structure.scss
 
-// Content slides (h3) - header at top, content centered
+// Content slides (h3) — flex skeleton lives in themes/shared/_slide-structure.scss
 .reveal section.slide-h3 {
-  display: flex !important;
-  flex-direction: column;
-
   header {
     height: 6rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-
-    h3 {
-      margin: 0;
-    }
   }
 
   hgroup {
     height: 6rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-
-    h3 {
-      margin: 0;
-    }
 
     .slide-pretitle p {
       margin: 0 0 0.35em 0;
@@ -452,10 +428,6 @@ body {
   }
 
   article {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
   }

@@ -1,0 +1,49 @@
+/**
+ * Slide section structural skeleton.
+ *
+ * The `slide-h1`, `slide-h2`, `slide-h3` classes are produced by the slide
+ * engine when a slide consists only of a heading at the matching level (used
+ * as section dividers). The flex skeleton here is identical in every theme
+ * we ship (DSFR, minimal). Each theme is still free to set its own
+ * `header { min-height }`, `article { padding }`, colors, and typography.
+ *
+ * What stays in this layer: positioning primitives (display: flex, ordering,
+ * `width: 100%`).
+ * What belongs in a theme/preset: sizes, paddings, colors, typography.
+ */
+
+.reveal section.slide-h1,
+.reveal section.slide-h2 {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.reveal section.slide-h3 {
+  display: flex !important;
+  flex-direction: column;
+
+  header,
+  hgroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+
+  header h3,
+  hgroup h3 {
+    margin: 0;
+  }
+
+  article {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+.reveal section article {
+  width: 100%;
+}

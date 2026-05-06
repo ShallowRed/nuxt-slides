@@ -108,10 +108,7 @@
 
 .reveal section.slide-h1,
 .reveal section.slide-h2 {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  align-items: start;
+  // Structural flex skeleton lives in themes/shared/_slide-structure.scss
 }
 
 .reveal section.slide-h2 {
@@ -131,9 +128,7 @@
 }
 
 .reveal section.slide-h3 {
-
-  display: flex !important;
-  flex-direction: column;
+  // Structural flex skeleton lives in themes/shared/_slide-structure.scss
 
   h1,
   h2,
@@ -151,25 +146,11 @@
   header {
     min-height: 8rem;
     height: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-
-    h3 {
-      margin: 0;
-    }
   }
 
   hgroup {
     min-height: 8rem;
     height: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-
-    h3 {
-      margin: 0;
-    }
 
     .slide-pretitle p {
       margin: 0 0 .65em 0;
@@ -188,18 +169,11 @@
 
 
   article {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     padding-top: 2rem;
     padding-bottom: 2rem;
   }
 }
 
 .reveal section {
-
-  article {
-    width: 100%;
-  }
+  // `article { width: 100% }` is provided by themes/shared/_slide-structure.scss
 }
