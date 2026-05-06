@@ -11,7 +11,7 @@
   section[class*="layout-media"] {
     display: grid !important;
     grid-template-columns: 1fr 1.5fr;
-    gap: 2rem;
+    gap: 4rem;
     align-items: stretch;
   }
 
@@ -20,7 +20,7 @@
   }
 
   section.layout-media-right-wide {
-    grid-template-columns: 0.8fr 1.7fr;
+    grid-template-columns: 1fr 1.7fr;
   }
 
   section.layout-media-left-wide {
@@ -63,7 +63,8 @@
   }
 
   section[class*="layout-media"] > .slide-content-pane > article {
-    flex: 1;
+    // flex: 1;
+    flex: none; // those should be attribute options
     display: flex;
     flex-direction: column;
     justify-content: center;

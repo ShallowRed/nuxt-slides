@@ -92,14 +92,14 @@
 .reveal .slides section[class*=layout-media] {
   display: grid !important;
   grid-template-columns: 1fr 1.5fr;
-  gap: 2rem;
+  gap: 4rem;
   align-items: stretch;
 }
 .reveal .slides section.layout-media-left {
   grid-template-columns: 1.5fr 1fr;
 }
 .reveal .slides section.layout-media-right-wide {
-  grid-template-columns: 0.8fr 1.7fr;
+  grid-template-columns: 1fr 1.7fr;
 }
 .reveal .slides section.layout-media-left-wide {
   grid-template-columns: 1.7fr 0.8fr;
@@ -130,7 +130,7 @@
   flex-shrink: 0;
 }
 .reveal .slides section[class*=layout-media] > .slide-content-pane > article {
-  flex: 1;
+  flex: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
