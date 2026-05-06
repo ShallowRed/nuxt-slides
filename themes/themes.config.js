@@ -34,4 +34,11 @@ export const themes = [
     watchDir: 'themes/minimal',
     watchExtraDirs: ['themes/shared'],
   },
+  {
+    name: 'dsfr-alt',
+    input: 'themes/dsfr-alt/dsfr-alt.scss',
+    output: 'public/themes/dsfr-alt.css',
+    watchDir: 'themes/dsfr-alt',
+    watchExtraDirs: ['themes/shared', 'themes/presets'],
+  },
 ]

@@ -1,0 +1,495 @@
+@charset "UTF-8";
+/**
+ * dsfr-alt theme — a "DSFR-derivative" skin.
+ *
+ * PURPOSE OF THIS FILE
+ * --------------------
+ * Demonstrates how the new layered architecture (shared + preset + skin) lets
+ * a new theme reuse the entire DSFR layout/scale while swapping just colors
+ * and typography. The point of contact with the rest of the system is the
+ * neutral semantic token contract (--accent, --surface, etc.) plus a few
+ * theme-specific overrides.
+ *
+ * DELTA WITH DSFR
+ * ---------------
+ * - Brand color: emerald instead of bleu France.
+ * - Title color: same emerald (not blue).
+ * - Heading gradient: a different emerald-leaning gradient on h1.
+ * - Font family: system stack (no Marianne) for a cleaner, modern feel.
+ */
+/**
+ * Shared foundation barrel.
+ *
+ * The "engine" CSS layer: rules that depend on the nuxt-slides Vue components
+ * (SlideContent, RevealSlides, MDC bridge) and on Reveal.js conventions.
+ * Themes (skins) build on top of this layer, never replace it.
+ *
+ * IMPORTANT: this barrel must NOT be imported by `dsfr-standalone` because
+ * standalone targets HackMD / vanilla Reveal where these structural classes
+ * (.slide-content-pane, .slide-media-pane, .slide-quicklink-wrapper) do not
+ * exist.
+ *
+ * Usage from a theme entry:
+ *   @use '../shared' as *;
+ */
+/**
+ * Neutral semantic tokens (the theme contract).
+ *
+ * This file defines the palette of CSS custom properties that every theme
+ * MUST provide and that all theme-agnostic code (MDC components, the foundation
+ * layer) references. A new theme is created by overriding these tokens.
+ *
+ * Defaults below are deliberately conservative (mostly DSFR-leaning blues) so
+ * that any consumer of these variables degrades to a sensible look even if the
+ * active theme forgets to set them.
+ *
+ * Naming conventions:
+ *   --accent / --accent-soft / --accent-bg
+ *       the brand/primary color and its lighter companions used for tints,
+ *       borders, link highlighting, etc.
+ *   --surface / --surface-contrast / --on-contrast
+ *       background colors and the matching text color on dark backgrounds.
+ *   --text-default / --text-title / --text-mention
+ *       the three text intensities used by the typography system.
+ */
+:root {
+  --accent: #000091;
+  --accent-soft: #e3e3fd;
+  --accent-bg: #f5f5fe;
+  --surface: #ffffff;
+  --surface-contrast: #161616;
+  --on-contrast: #ffffff;
+  --text-default: #161616;
+  --text-title: #161616;
+  --text-mention: #666666;
+}
+
+/**
+ * Reveal patches & MDC structural bridge.
+ *
+ * MDCRenderer wraps rendered Markdown in extra <div>s, which would otherwise
+ * break the semantic flow of header/hgroup/article and full-layout slides.
+ * `display: contents` makes those wrapper divs transparent in the box tree.
+ *
+ * These rules belong to the engine layer (nuxt-slides component contract),
+ * not to any individual theme. They were previously inside SlideContent.vue
+ * <style scoped> but had to be promoted here because:
+ *   - the ":deep(...)" tunnel only works while we keep the Vue component,
+ *   - duplicating the same rules across every theme would be brittle.
+ */
+.reveal .slides section .layout-full > div,
+.reveal .slides .slide-content-pane > header > div,
+.reveal .slides .slide-content-pane > article > div,
+.reveal .slides .slide-content-pane > hgroup .slide-pretitle > div,
+.reveal .slides .slide-content-pane > hgroup .slide-heading > div,
+.reveal .slides .slide-content-pane > hgroup .slide-subtitle > div {
+  display: contents;
+}
+.reveal .slides .slide-content-pane {
+  display: contents;
+}
+
+/**
+ * Media layout: two-column grid.
+ *
+ * Activated when a slide carries any `layout-media*` class (left/right and
+ * narrow/wide variants). Promoted from `RevealSlides.vue` global <style> block
+ * because these selectors form a contract between the slide engine and any
+ * theme: themes only paint, the layout grid is invariant.
+ */
+.reveal .slides section[class*=layout-media] {
+  display: grid !important;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+.reveal .slides section.layout-media-left {
+  grid-template-columns: 1.5fr 1fr;
+}
+.reveal .slides section.layout-media-right-wide {
+  grid-template-columns: 0.8fr 1.7fr;
+}
+.reveal .slides section.layout-media-left-wide {
+  grid-template-columns: 1.7fr 0.8fr;
+}
+.reveal .slides section[class*=layout-media-left] > .slide-content-pane {
+  order: 2;
+}
+.reveal .slides section[class*=layout-media-left] > .slide-media-pane {
+  order: 1;
+}
+.reveal .slides section[class*=layout-media] > .slide-content-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  min-width: 0;
+}
+.reveal .slides section[class*=layout-media][class*=-wide] > .slide-content-pane {
+  font-size: 0.75em;
+}
+.reveal .slides section[class*=layout-media][class*=-wide] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
+.reveal .slides section[class*=layout-media][class*=-wide] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 1.75em;
+}
+.reveal .slides section[class*=layout-media] > .slide-content-pane > header,
+.reveal .slides section[class*=layout-media] > .slide-content-pane > hgroup {
+  height: auto;
+  flex-shrink: 0;
+}
+.reveal .slides section[class*=layout-media] > .slide-content-pane > article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane:not(.fit-contain) {
+  border: solid 1px var(--fr-border-color, #ccc);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane.fit-contain {
+  overflow: visible;
+  background: transparent;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: transparent;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane img.fit-cover {
+  object-fit: cover;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane img.fit-contain {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  border: solid 1px var(--fr-border-color, #ccc);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane.has-lightbox {
+  cursor: pointer;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane.has-lightbox iframe {
+  pointer-events: none;
+}
+
+/**
+ * Slide section structural skeleton.
+ *
+ * The `slide-h1`, `slide-h2`, `slide-h3` classes are produced by the slide
+ * engine when a slide consists only of a heading at the matching level (used
+ * as section dividers). The flex skeleton here is identical in every theme
+ * we ship (DSFR, minimal). Each theme is still free to set its own
+ * `header { min-height }`, `article { padding }`, colors, and typography.
+ *
+ * What stays in this layer: positioning primitives (display: flex, ordering,
+ * `width: 100%`).
+ * What belongs in a theme/preset: sizes, paddings, colors, typography.
+ */
+.reveal section.slide-h1,
+.reveal section.slide-h2 {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.reveal section.slide-h3 {
+  display: flex !important;
+  flex-direction: column;
+}
+.reveal section.slide-h3 header,
+.reveal section.slide-h3 hgroup {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.reveal section.slide-h3 header h3,
+.reveal section.slide-h3 hgroup h3 {
+  margin: 0;
+}
+.reveal section.slide-h3 article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reveal section article {
+  width: 100%;
+}
+
+/**
+ * Quicklink: small navigation hint pinned to the bottom of a slide.
+ * Prefix (e.g. "Pressé·e ?") is muted text; the link is styled distinctly.
+ *
+ * Promoted from `RevealSlides.vue` global <style> block.
+ * Colors are intentionally read from Reveal CSS variables (with literal
+ * fallbacks) so the rule is theme-neutral; individual themes can override
+ * `--r-main-color` and `--r-link-color` if they want a custom palette.
+ */
+.reveal .slides section > .slide-quicklink-wrapper {
+  position: absolute;
+  bottom: 0.5em;
+  left: 0;
+  font-size: 0.85em;
+  white-space: nowrap;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+.reveal .slides section > .slide-quicklink-wrapper:hover {
+  opacity: 1;
+}
+.reveal .slides section > .slide-quicklink-wrapper .slide-quicklink-prefix {
+  color: var(--r-main-color, #3a3a3a);
+  margin-right: 0.4em;
+}
+.reveal .slides section > .slide-quicklink-wrapper .slide-quicklink {
+  color: var(--r-link-color, #000091);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/**
+ * DSFR-layout preset.
+ *
+ * Reusable positioning + scale package extracted from the DSFR theme.
+ * A skin theme can compose it with its own colors and font-family:
+ *
+ *   @use '../shared';
+ *   @use '../presets/dsfr-layout';
+ *   // ...skin partials...
+ */
+/**
+ * DSFR-layout preset — Scale.
+ *
+ * Heading sizes, weights, paragraph rhythm and small text utilities.
+ * No colors, no font-family decisions — those belong to the skin.
+ *
+ * This preset can be reused by any skin that wants the DSFR scale
+ * (e.g. a `dsfr-alt` skin with different colors but same rhythm).
+ */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 0.5em 0;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  word-wrap: break-word;
+  text-align: left;
+}
+.reveal h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 0.5em;
+}
+.reveal h2 {
+  font-size: 4rem;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.5em;
+}
+.reveal h3 {
+  font-size: 2.5rem;
+  margin-bottom: 1em;
+}
+.reveal h4 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+.reveal h5 {
+  font-size: 1.5rem;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+.reveal p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+  text-align: left;
+}
+.reveal strong,
+.reveal b {
+  font-weight: 700;
+}
+.reveal em {
+  font-style: italic;
+}
+.reveal small {
+  font-size: 0.75em;
+}
+.reveal .text-sm {
+  font-size: 0.85em;
+}
+.reveal .text-xs {
+  font-size: 0.75em;
+}
+.reveal .text-lg {
+  font-size: 1.15em;
+}
+
+/**
+ * DSFR-layout preset — Slide rhythm.
+ *
+ * Sizes and paddings for the `slide-h3` content slides:
+ * fixed header/hgroup minimum height, article inner padding, pretitle and
+ * subtitle margins. No colors here — those belong to the skin.
+ *
+ * Pairs with themes/shared/_slide-structure.scss (which provides the flex
+ * skeleton). Together they describe the DSFR-style slide layout.
+ */
+.reveal section.slide-h3 header,
+.reveal section.slide-h3 hgroup {
+  min-height: 8rem;
+  height: auto;
+}
+.reveal section.slide-h3 hgroup .slide-pretitle p {
+  margin: 0 0 0.65em 0;
+  font-size: 0.9em;
+  font-style: normal;
+}
+.reveal section.slide-h3 hgroup .slide-subtitle p {
+  margin: 0.75em 0 0 0;
+  font-size: 1.25rem;
+  font-style: italic;
+}
+.reveal section.slide-h3 article {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+:root {
+  --accent: #169b62;
+  --accent-soft: #c3fad5;
+  --accent-bg: #e8fdf0;
+  --surface: #ffffff;
+  --surface-contrast: #0a3a2e;
+  --on-contrast: #ffffff;
+  --text-default: #1f2937;
+  --text-title: #0a3a2e;
+  --text-mention: #6b7280;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: var(--surface);
+}
+
+.reveal {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text-default);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  height: 100%;
+}
+
+.reveal ::selection {
+  color: var(--on-contrast);
+  background: var(--accent);
+  text-shadow: none;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  color: var(--text-title);
+  font-family: inherit;
+}
+
+.reveal h1 {
+  color: var(--accent);
+  background: linear-gradient(89deg, #169b62 0%, #6dd9a3 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal h2 {
+  color: var(--text-title);
+}
+
+.reveal h3 {
+  color: var(--accent);
+}
+
+.reveal h2 em,
+.reveal h3 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.reveal strong,
+.reveal b {
+  color: var(--text-title);
+}
+
+.reveal small {
+  color: var(--text-mention);
+}
+
+.reveal section.slide-h2 h1, .reveal section.slide-h2 h2, .reveal section.slide-h2 h3, .reveal section.slide-h2 h4, .reveal section.slide-h2 h5, .reveal section.slide-h2 h6 {
+  color: var(--text-title) !important;
+}
+.reveal section.slide-h2 p {
+  color: var(--text-mention) !important;
+}
+
+.reveal section.slide-h3 h1, .reveal section.slide-h3 h2, .reveal section.slide-h3 h3, .reveal section.slide-h3 h4, .reveal section.slide-h3 h5, .reveal section.slide-h3 h6 {
+  color: var(--text-title) !important;
+}
+.reveal section.slide-h3 p {
+  color: var(--text-default) !important;
+}
+.reveal section.slide-h3 hgroup .slide-pretitle p,
+.reveal section.slide-h3 hgroup .slide-subtitle p {
+  color: var(--text-mention) !important;
+}
+
+.reveal a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.reveal a:hover {
+  color: var(--text-title);
+}

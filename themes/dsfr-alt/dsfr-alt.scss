@@ -1,0 +1,144 @@
+/**
+ * dsfr-alt theme — a "DSFR-derivative" skin.
+ *
+ * PURPOSE OF THIS FILE
+ * --------------------
+ * Demonstrates how the new layered architecture (shared + preset + skin) lets
+ * a new theme reuse the entire DSFR layout/scale while swapping just colors
+ * and typography. The point of contact with the rest of the system is the
+ * neutral semantic token contract (--accent, --surface, etc.) plus a few
+ * theme-specific overrides.
+ *
+ * DELTA WITH DSFR
+ * ---------------
+ * - Brand color: emerald instead of bleu France.
+ * - Title color: same emerald (not blue).
+ * - Heading gradient: a different emerald-leaning gradient on h1.
+ * - Font family: system stack (no Marianne) for a cleaner, modern feel.
+ */
+
+@use '../shared';
+@use '../presets/dsfr-layout';
+
+// --- Skin tokens (CSS custom properties) ----------------------------------
+:root {
+  // Map the neutral semantic token contract to our emerald palette
+  --accent: #169b62;        // Emerald (DSFR's "vert-emeraude")
+  --accent-soft: #c3fad5;   // Light emerald tint
+  --accent-bg: #e8fdf0;     // Very light emerald background
+  --surface: #ffffff;
+  --surface-contrast: #0a3a2e; // Deep emerald instead of pure black
+  --on-contrast: #ffffff;
+  --text-default: #1f2937;
+  --text-title: #0a3a2e;
+  --text-mention: #6b7280;
+}
+
+// --- Base & viewport -------------------------------------------------------
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.reveal-viewport {
+  background: var(--surface);
+}
+
+.reveal {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text-default);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  height: 100%;
+}
+
+.reveal ::selection {
+  color: var(--on-contrast);
+  background: var(--accent);
+  text-shadow: none;
+}
+
+// --- Headings (skin only — sizes come from the dsfr-layout preset) --------
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  color: var(--text-title);
+  font-family: inherit;
+}
+
+.reveal h1 {
+  color: var(--accent);
+  background: linear-gradient(89deg, #169b62 0%, #6dd9a3 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal h2 {
+  color: var(--text-title);
+}
+
+.reveal h3 {
+  color: var(--accent);
+}
+
+.reveal h2 em,
+.reveal h3 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.reveal strong,
+.reveal b {
+  color: var(--text-title);
+}
+
+.reveal small {
+  color: var(--text-mention);
+}
+
+// Section dividers — colors only
+.reveal section.slide-h2 {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-title) !important;
+  }
+  p {
+    color: var(--text-mention) !important;
+  }
+}
+
+.reveal section.slide-h3 {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-title) !important;
+  }
+  p {
+    color: var(--text-default) !important;
+  }
+  hgroup {
+    .slide-pretitle p,
+    .slide-subtitle p {
+      color: var(--text-mention) !important;
+    }
+  }
+}
+
+// --- Links -----------------------------------------------------------------
+.reveal a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: var(--text-title);
+  }
+}
