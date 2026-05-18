@@ -64,20 +64,44 @@ Nouveau sujet principal
 ```yaml
 ---
 title: "Titre Affiché"                    # Obligatoire pour l'index
-theme: dsfr                                # Options: dsfr, minimal, custom
+lang: fr                                   # Langue (optionnel, ex: fr, en)
+theme: dsfr                                # Options: dsfr, minimal, lee, dsfr-alt
 transition: slide                          # Options: slide, fade, convex, zoom, none
 center: true                               # Centrage vertical: true/false
 backgrounds:                               # Images de fond (optionnel)
   h1: "/backgrounds/image-titre.jpg"
   h2: "/backgrounds/image-section.jpg"
   h3: "/backgrounds/image-detail.jpg"
-  default: "/backgrounds/image-defaut.jpg"
+  default: "/backgrounds/image-defaut.jpg" # Fond par défaut pour toutes les autres diapos
+parser: separator                          # Optionnel: mode "separator" (utilise ---- au lieu de ## pour les slides horizontales)
+unlisted: true                             # Masquer de l'index public (optionnel)
+reveal:                                    # Surcharge de la config Reveal.js (optionnel)
+  slideNumber: true
+  width: 1200
+  height: 800
 ---
+```
+
+#### Mode `parser: separator`
+Quand `parser: separator` est activé, les diapositives horizontales sont séparées par `----` (quatre tirets) au lieu des titres `##`. Les titres `##` deviennent alors de simples titres de section dans la diapositive.
+
+```markdown
+# Titre de la présentation
+
+----
+
+## Première section
+
+----
+
+## Deuxième section
 ```
 
 ## Composants MDC Disponibles
 
 ### 1. Columns (Colonnes)
+
+**Mode auto (split sur les titres H3)** — le plus courant :
 ```markdown
 ::Columns
 ### Colonne Gauche
@@ -88,48 +112,78 @@ Contenu de la seconde colonne
 ::
 ```
 
-Avec trois colonnes :
+**Mode explicite avec `::column`** — pour un contrôle fin (utiliser `:::` pour l'encadrant) :
 ```markdown
-:::Columns{cols=3}
-### Colonne 1
-Contenu
+:::Columns{count=3 size="sm"}
+::column
+Contenu de la colonne 1
 
-### Colonne 2
-Contenu
+::column
+Contenu de la colonne 2
 
-### Colonne 3
-Contenu
+::column
+Contenu de la colonne 3
 :::
 ```
-- **cols**: nombre de colonnes (2 par défaut, 3 max)
-- Les alias `::TwoColumns` et `::ThreeColumns` fonctionnent aussi
+
+**Colonne à largeur variable** (`span` ou `ratio`) :
+```markdown
+:::Columns
+::column{span=2}
+Colonne large (2/3)
+
+::column{span=1}
+Colonne étroite (1/3)
+:::
+```
+
+Paramètres de `Columns` :
+- **count**: nombre de colonnes pour le mode auto (2 par défaut)
+- **size**: taille du texte — `xs`, `sm`, `md` (défaut), `lg`, `xl`
+
+Paramètres de `::column` :
+- **span**: poids relatif (ex: `span=2` vs `span=1` → 2/3 + 1/3)
+- **ratio**: ratio explicite (ex: `ratio="2/3"`)
+
+Les alias `::TwoColumns` et `::ThreeColumns` fonctionnent aussi (rétrocompatibilité).
 
 ### 2. Quote (Citation)
 ```markdown
-::Quote{author="Nom Auteur" role="Titre/Rôle"}
+::Quote{author="Nom Auteur" role="Titre/Rôle" avatar="/images/photo.jpg"}
 Texte de la citation
 ::
 ```
+- **author**: nom de l'auteur (optionnel)
+- **role**: titre ou rôle (optionnel)
+- **avatar**: URL de la photo de l'auteur (optionnel)
 
 ### 3. Image (Image)
 ```markdown
 ::Image{src="/images/photo.jpg" alt="Description" preview}
 ::
 ```
-- **preview**: active le zoom au survol
+- **preview**: active la lightbox Reveal.js au clic. Valeur booléenne ou URL d'une vignette distincte
 - **width**, **height**: dimensions optionnelles
+- **fit**: `contain` (défaut), `cover`, `fill`, `none`, `scale-down`
+- **position**: position de l'image (défaut: `center`)
+- **rounded**: coins arrondis (défaut: `true`)
+- **shadow**: ombre portée (défaut: `true`)
 
 ### 4. Layout média (diapositive à deux colonnes)
 ```markdown
 ### Titre de la diapositive
-:layout{name="media-right" src="https://example.com" type="iframe"}
+:layout{name="media-right" src="https://example.com" type="iframe" lightbox="true"}
 
 Contenu textuel à gauche, média à droite.
 ```
-- **name**: "media-right" (média à droite) ou "media-left" (média à gauche)
+- **name**: 
+  - `"media-right"` / `"media-left"` — partage équilibré (50/50)
+  - `"media-right-wide"` / `"media-left-wide"` — média plus large
 - **src**: URL de l'iframe ou chemin de l'image
-- **type**: "iframe" ou "image"
-- **title**, **alt**: attributs optionnels pour iframe/image
+- **type**: `"iframe"` ou `"image"`
+- **lightbox**: `"true"` pour activer l'ouverture en plein écran au clic (iframe uniquement)
+- **fit**: `"contain"` ou `"cover"` pour les images (contrôle l'object-fit)
+- **title** / **alt**: attributs optionnels pour iframe/image
 
 ### 5. FullScreenImage (Image Plein Écran)
 ```markdown
@@ -156,27 +210,52 @@ graph TD
 ::Iframe{src="https://example.com" height="500px"}
 ::
 ```
+- **height**: hauteur de l'iframe (défaut: `500px`)
+- **fullwidth**: prend toute la largeur (défaut: `true`)
+- **lightbox**: active la lightbox Reveal.js (clic pour agrandir) (défaut: `false`)
 
 ### 8. PreviewLink (Aperçu de Lien)
 ```markdown
-::PreviewLink{href="https://example.com" title="Titre du site"}
+::PreviewLink{href="https://example.com" label="Voir le site"}
 ::
 ```
+- **href**: URL à ouvrir (obligatoire)
+- **label**: texte du bouton (optionnel, affiche l'URL si absent)
+- Le contenu slot remplace le label si présent
 
 ### 9. Icônes Inline
 ```markdown
 :i{name="ri-home-line"} Accueil
 :i{name="ri-settings-line"} Paramètres
+:icon{name="ri-heart-line"} Alternatif
 ```
+- `:i{}` et `:icon{}` sont équivalents
+- **size**: taille optionnelle (ex: `size="1.5em"`)
+- Utiliser les noms Remix Icons: `ri-nom-de-l-icone` (voir [remixicon.com](https://remixicon.com))
 
 ### 10. Annotations de Diapositive (Inline)
 ```markdown
-:slide-background{src="/backgrounds/custom.jpg"}
+:slide-background{image="/backgrounds/custom.jpg"}
 :pretitle{text="Chapitre 1"}
 :subtitle{text="Sous-titre de la diapositive"}
+:quicklink{text="Aller à la conclusion" href="#conclusion"}
 ```
 - Placés dans le contenu d'une diapositive, avant le texte principal
 - Ne génèrent pas de contenu visible dans le flux markdown
+- **:slide-background** — surcharge l'image de fond de la diapositive (prop `image`, non `src`)
+- **:pretitle** — texte affiché au-dessus du titre
+- **:subtitle** — texte affiché sous le titre
+- **:quicklink** — lien de navigation épinglé en bas de diapositive (ancre interne)
+
+### 11. Highlight (Mise en avant)
+```markdown
+::Highlight{size="lg" variant="accent" center}
+Message clé à mettre en avant
+::
+```
+- **size**: `sm`, `md` (défaut), `lg`, `xl`
+- **variant**: `default` (hérite couleur slide), `accent` (bordure bleue + fond clair), `contrast` (fond sombre, texte blanc)
+- **center**: centre le texte horizontalement (optionnel)
 
 ## Syntaxe Markdown Standard
 
