@@ -74,6 +74,14 @@ export interface PresentationMeta {
   theme?: string
   backgrounds?: ThemeBackgrounds
   /**
+   * Base URL of a published Storybook (no trailing `iframe.html`).
+   * When set, a slide's `:layout{story="<storyId>"}` resolves to
+   * `<storybook>/iframe.html?id=<storyId>&viewMode=story` and is embedded
+   * as an iframe in the media pane. Example: `https://storybook.example.com`
+   * or `http://localhost:6006`.
+   */
+  storybook?: string
+  /**
    * Slide parser mode:
    * - 'heading' (default): splits slides by H1/H2/H3 headings
    * - 'separator': splits by --- (horizontal) and ---- (vertical)

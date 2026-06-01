@@ -14,18 +14,29 @@ const layoutStrategy = computed(() => getLayoutStrategy(props.slide.layout))
 
 const mediaParts = computed(() => {
   const lp = props.slide.layoutProps
-  if (!lp?.src)
+  if (!lp)
     return null
+  // Storybook shortcut: `:layout{story="<id>"}` resolves against the
+  // frontmatter `storybook` base URL and is embedded as an iframe. Falls
+  // back to an explicit `src`/`type` when no story is set.
+  const storybookBase = props.metadata?.storybook
+  const storySrc = (lp.story && storybookBase)
+    ? `${String(storybookBase).replace(/\/+$/, '')}/iframe.html?id=${lp.story}&viewMode=story`
+    : undefined
+  const src = storySrc ?? lp.src
+  if (!src)
+    return null
+  const type = storySrc ? 'iframe' : lp.type
   const fit = getMediaFit(lp)
   return {
-    src: lp.src,
-    type: lp.type,
+    src,
+    type,
     title: lp.title || '',
     alt: lp.alt || '',
     fit,
     hasLightbox: Boolean(lp.lightbox),
-    previewLink: (lp.lightbox && lp.type === 'iframe') ? lp.src : undefined,
-    previewImage: (lp.lightbox && lp.type !== 'iframe') ? lp.src : undefined,
+    previewLink: (lp.lightbox && type === 'iframe') ? src : undefined,
+    previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
   }
 })
 

@@ -454,7 +454,7 @@ body {
   color: var(--text-mention);
 }
 
-.reveal section.slide-h1 h1, .reveal section.slide-h1 h2, .reveal section.slide-h1 h3, .reveal section.slide-h1 h4, .reveal section.slide-h1 h5, .reveal section.slide-h1 h6 {
+.reveal section.slide-h1 h1, .reveal section.slide-h1 h2 {
   background: none;
   -webkit-text-fill-color: #ffffff;
   color: #ffffff !important;

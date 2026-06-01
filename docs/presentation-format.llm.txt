@@ -10,6 +10,8 @@ title: "Presentation Title"    # Display name (optional, defaults to slug)
 theme: dsfr                    # Theme name (optional, defaults to 'dsfr')
 transition: slide              # Reveal.js transition (optional, defaults to 'slide')
 center: true                   # Vertical centering (optional, defaults to true)
+storybook: http://localhost:6006  # Base URL of a published Storybook (optional).
+                               # Enables `:layout{story="<id>"}` live embeds (see below).
 # Custom fields supported for future extensions
 ---
 ```
@@ -166,7 +168,27 @@ while the media (iframe or image) renders in a sibling column. Supported layouts
 - `media-right-wide` — content left, wider media right (0.8fr / 1.7fr)
 - `media-left-wide` — wider media left, content right (1.7fr / 0.8fr)
 
-Props: `src` (required), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background).
+Props: `src` (required unless `story` is set), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background).
+
+#### Embedding a Storybook story (live, no screenshots)
+```markdown
+---
+title: "Design iterations"
+storybook: http://localhost:6006   # or a deployed Storybook URL
+---
+
+### My component, live
+:layout{name="media-right-wide" story="exploration-referentiel-vivant-plat--page" lightbox="true"}
+
+What we are testing, next to the live story.
+```
+When the frontmatter declares a `storybook` base URL, a `story` prop on `:layout`
+resolves to `<storybook>/iframe.html?id=<story>&viewMode=story` and is embedded
+as an `iframe` (type is forced to `iframe`; any `src`/`type` is ignored). The
+`story` value is the Storybook **story id** (`<componentId>--<storyName>`), e.g.
+`exploration-thematique-vivante--page`. This keeps slides in sync with the design
+system: no PNG to regenerate, the story renders live from the single `storybook`
+source. `lightbox="true"` adds the Reveal.js zoom on the embedded story.
 
 ### Leaf components (use `::`)
 

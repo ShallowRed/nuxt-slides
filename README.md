@@ -183,7 +183,25 @@ Description text next to the iframe.
 
 Supported layouts: `media-right`, `media-left`, `media-right-wide`, `media-left-wide`. The heading and body render in a content column alongside the media.
 
-Supported props: `src` (required), `type` (`iframe` or `image`), `alt`, `title`, `lightbox`, `fit` (`cover` by default, or `contain` for a floating image without container chrome).
+Supported props: `src` (required unless `story` is set), `type` (`iframe` or `image`), `alt`, `title`, `lightbox`, `fit` (`cover` by default, or `contain` for a floating image without container chrome).
+
+#### Live Storybook embeds
+
+Declare a `storybook` base URL in the frontmatter, then reference a story by id with the `story` prop:
+
+```markdown
+---
+title: "Design iterations"
+storybook: http://localhost:6006
+---
+
+### My component, live
+:layout{name="media-right-wide" story="my-component--page" lightbox="true"}
+
+What we are testing, next to the live story.
+```
+
+The `story` value (`<componentId>--<storyName>`) resolves to `<storybook>/iframe.html?id=<story>&viewMode=story` and renders as a live iframe — slides stay in sync with the design system, no screenshots to regenerate.
 
 For the full component reference, see [docs/presentation-format.llm.txt](./docs/presentation-format.llm.txt).
 
