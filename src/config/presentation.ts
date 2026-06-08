@@ -100,6 +100,9 @@ export const MDC_COMPONENTS = {
   i: 'IconInline',
   Columns: 'Columns',
   Highlight: 'Highlight',
+  // Storybook-aware media embeds
+  StoryFrame: 'StoryFrame',
+  Screens: 'Screens',
   // Backward-compat aliases — resolved to Columns
   TwoColumns: 'Columns',
   ThreeColumns: 'Columns',

@@ -165,10 +165,22 @@ The `:layout` annotation is extracted by the parser — the heading + body rende
 while the media (iframe or image) renders in a sibling column. Supported layouts:
 - `media-right` — content left, media right (default proportions: 1fr / 1.5fr)
 - `media-left` — media left, content right
-- `media-right-wide` — content left, wider media right (0.8fr / 1.7fr)
+- `media-right-wide` — content left, wider media right (1fr / 1.7fr)
 - `media-left-wide` — wider media left, content right (1.7fr / 0.8fr)
+- `media-right-xwide` — content shrinks to a caption rail, media dominates (0.62fr / 2.4fr)
+- `media-left-xwide` — same, media on the left (2.4fr / 0.62fr)
+- `media-below` — compact heading/intro row on top, full-width media row below (stacked)
+- `media-above` — full-width media row on top, heading/intro row below (stacked)
+- `media-cover` — one big screen full-bleed, heading/intro float in a translucent caption card
+
+Use `*-xwide` and `media-cover` for wide app screenshots/stories that the
+default side-by-side grid would shrink too much. Use `media-below` / `media-above`
+when the media is landscape and the text is short.
 
 Props: `src` (required unless `story` is set), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background).
+
+**Wider media tip:** the slide engine reserves a small `margin` for Reveal. To
+give media even more room, set `reveal.margin: 0.04` (or lower) in the frontmatter.
 
 #### Embedding a Storybook story (live, no screenshots)
 ```markdown
@@ -189,6 +201,41 @@ as an `iframe` (type is forced to `iframe`; any `src`/`type` is ignored). The
 `exploration-thematique-vivante--page`. This keeps slides in sync with the design
 system: no PNG to regenerate, the story renders live from the single `storybook`
 source. `lightbox="true"` adds the Reveal.js zoom on the embedded story.
+
+#### Several screens on one slide (`Screens` + `StoryFrame`)
+
+To compare several stories/screens side by side, use the `Screens` container
+with `StoryFrame` children. `StoryFrame` resolves a `story` id against the same
+frontmatter `storybook` root (or takes a raw `src`).
+
+```markdown
+### Five postures, side by side
+
+:::Screens{cols="5" gap="1rem"}
+::StoryFrame{story="vitrine-accueil-scenario-a--page" ratio="portrait" label="A · Acquisition" lightbox}
+::
+::StoryFrame{story="vitrine-accueil-scenario-b--page" ratio="portrait" label="B · Aiguillage" lightbox}
+::
+::StoryFrame{story="vitrine-accueil-scenario-c--page" ratio="portrait" label="C · Hub" lightbox}
+::
+:::
+```
+
+`Screens` props: `cols` (fixed column count; omit for an even auto-fit row),
+`gap` (CSS length, default `1.5rem`), `align` (`start` | `center` | `stretch`).
+
+`StoryFrame` props:
+- `story` — Storybook story id (resolved against the `storybook` frontmatter root)
+- `src` — explicit URL when no `story` is given
+- `type` — `iframe` (default for stories/URLs) or `image`
+- `ratio` — named (`desktop` 16/10, `wide` 16/9, `classic` 4/3, `photo` 3/2, `square`, `mobile` 9/16, `portrait` 3/4) or raw `16/9`
+- `fit` — `cover` (default) or `contain`
+- `label` — caption under the frame (or use the default slot)
+- `lightbox` — click to open the screen full-screen
+- `title` — accessible iframe title / image alt
+
+`StoryFrame` also works standalone in a slide body (without `Screens`) for a
+single embedded screen with a caption.
 
 ### Leaf components (use `::`)
 

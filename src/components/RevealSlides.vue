@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PresentationData } from '~/types/presentation'
+import { STORYBOOK_BASE } from '~/config/injection-keys'
 import { MDC_COMPONENTS } from '~/config/presentation'
 import { getSlideClasses, resolveSlideBackground } from '~/utils/slide-rendering'
 
@@ -7,6 +8,13 @@ const props = defineProps<{ presentationData: PresentationData }>()
 
 const { slideIdMap, getVerticalId } = useSlideIds(
   computed(() => props.presentationData.slides),
+)
+
+// Share the deck's Storybook root with MDC components (<StoryFrame>, <Screens>)
+// so a story id alone resolves to a full iframe URL.
+provide(
+  STORYBOOK_BASE,
+  computed(() => props.presentationData.metadata.storybook),
 )
 
 // Resolve auto-imported MDC components once at setup time

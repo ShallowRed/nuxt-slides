@@ -11,7 +11,7 @@
   section[class*="layout-media"] {
     display: grid !important;
     grid-template-columns: 1fr 1.5fr;
-    gap: 4rem;
+    gap: 2.5rem;
     align-items: stretch;
   }
 
@@ -27,6 +27,29 @@
     grid-template-columns: 1.7fr 0.8fr;
   }
 
+  // Maximal-media variants: content shrinks to a caption rail, media dominates.
+  section.layout-media-right-xwide {
+    grid-template-columns: 0.62fr 2.4fr;
+    gap: 2rem;
+  }
+
+  section.layout-media-left-xwide {
+    grid-template-columns: 2.4fr 0.62fr;
+    gap: 2rem;
+  }
+
+  // Stacked variants: compact heading/intro row + full-width media row.
+  section.layout-media-below,
+  section.layout-media-above {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  section.layout-media-above {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
   // Reorder panes when media is on the left
   section[class*="layout-media-left"] > .slide-content-pane {
     order: 2;
@@ -34,6 +57,23 @@
 
   section[class*="layout-media-left"] > .slide-media-pane {
     order: 1;
+  }
+
+  // Stacked ordering
+  section.layout-media-below > .slide-content-pane {
+    order: 1;
+  }
+
+  section.layout-media-below > .slide-media-pane {
+    order: 2;
+  }
+
+  section.layout-media-above > .slide-media-pane {
+    order: 1;
+  }
+
+  section.layout-media-above > .slide-content-pane {
+    order: 2;
   }
 
   // Content pane: vertical column layout
@@ -53,6 +93,29 @@
   section[class*="layout-media"][class*="-wide"] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
   section[class*="layout-media"][class*="-wide"] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
     font-size: 1.75em;
+  }
+
+  // X-wide: the content column is a caption rail — shrink it further still.
+  section[class*="layout-media"][class*="-xwide"] > .slide-content-pane {
+    font-size: 0.62em;
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+  }
+
+  section[class*="layout-media"][class*="-xwide"] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
+  section[class*="layout-media"][class*="-xwide"] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 1.9em;
+  }
+
+  // Stacked variants: heading row stays compact, media row fills the rest.
+  section.layout-media-below > .slide-content-pane,
+  section.layout-media-above > .slide-content-pane {
+    justify-content: flex-start;
+  }
+
+  section.layout-media-below > .slide-content-pane > article,
+  section.layout-media-above > .slide-content-pane > article {
+    justify-content: flex-start;
   }
 
   // Heading area sticks to the top, article fills the rest
@@ -130,5 +193,43 @@
 
   section[class*="layout-media"] > .slide-media-pane.has-lightbox iframe {
     pointer-events: none;
+  }
+
+  // -------------------------------------------------------------------------
+  // media-cover: one big screen full-bleed, with a floating caption overlay.
+  // The heading/intro sit on a translucent card over the media.
+  // -------------------------------------------------------------------------
+  section.layout-media-cover {
+    display: block !important;
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  section.layout-media-cover > .slide-media-pane {
+    position: absolute;
+    inset: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  section.layout-media-cover > .slide-media-pane:not(.fit-contain) {
+    border: none;
+    box-shadow: none;
+  }
+
+  section.layout-media-cover > .slide-content-pane {
+    position: absolute;
+    left: 2.5rem;
+    bottom: 2.5rem;
+    z-index: 2;
+    max-width: min(46%, 38rem);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 18, 0.18);
+    font-size: 0.7em;
   }
 }

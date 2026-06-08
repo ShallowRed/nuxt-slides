@@ -181,9 +181,26 @@ Optional caption text
 Description text next to the iframe.
 ```
 
-Supported layouts: `media-right`, `media-left`, `media-right-wide`, `media-left-wide`. The heading and body render in a content column alongside the media.
+Supported layouts: `media-right`, `media-left`, `media-right-wide`, `media-left-wide`, `media-right-xwide`, `media-left-xwide` (caption rail + dominant media), `media-below` / `media-above` (stacked), `media-cover` (full-bleed with floating caption). The heading and body render in a content column alongside the media.
 
 Supported props: `src` (required unless `story` is set), `type` (`iframe` or `image`), `alt`, `title`, `lightbox`, `fit` (`cover` by default, or `contain` for a floating image without container chrome).
+
+#### Several screens on one slide
+
+Compare multiple stories or screenshots side by side with `Screens` + `StoryFrame`:
+
+```markdown
+:::Screens{cols="3" gap="1rem"}
+::StoryFrame{story="my-component--a" ratio="desktop" label="Option A" lightbox}
+::
+::StoryFrame{story="my-component--b" ratio="desktop" label="Option B" lightbox}
+::
+::StoryFrame{story="my-component--c" ratio="desktop" label="Option C" lightbox}
+::
+:::
+```
+
+`StoryFrame` resolves a `story` id against the frontmatter `storybook` root (or takes a raw `src`), with `ratio` (`desktop`, `wide`, `mobile`, `portrait`, `16/9`…), `fit`, `label`, and `lightbox` props.
 
 #### Live Storybook embeds
 

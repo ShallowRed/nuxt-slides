@@ -23,6 +23,17 @@ export const SLIDE_LAYOUT_REGISTRY: Record<string, LayoutStrategy> = {
   'media-left': 'default',
   'media-right-wide': 'default',
   'media-left-wide': 'default',
+  // Maximal-media variants: the content column is squeezed to a caption rail
+  // so the screen claims most of the slide width.
+  'media-right-xwide': 'default',
+  'media-left-xwide': 'default',
+  // Stacked variants: a compact heading/intro row on top (or bottom) and a
+  // full-width media row — best for wide app screenshots that the side-by-side
+  // grid would shrink too much.
+  'media-below': 'default',
+  'media-above': 'default',
+  // Full-bleed media with a floating caption overlay (one big screen).
+  'media-cover': 'default',
 }
 
 /**
