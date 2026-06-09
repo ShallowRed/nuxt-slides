@@ -40,6 +40,11 @@ themes-watch: ## Build themes in watch mode
 bundle-storybook: ## (Re)build Storybook static output
 	cd $(STORYBOOK_DIR)/.. && pnpm build-storybook
 
+deploy-standalone: bundle-standalone ## Build + deploy standalone bundle to GitHub Pages
+	@echo "▶  Pushing dist-standalone to gh-pages branch"
+	@cd dist-standalone && git init -b gh-pages && git add -A && git commit -m "Deploy standalone bundle" && git push --force $(shell git remote get-url origin) gh-pages
+	@echo "✅ Deployed to GitHub Pages"
+
 bundle-standalone: ## Build a self-contained static site (Nuxt + Storybook at same origin)
 	@echo "▶  Setting up standalone bundle for '$(BUNDLE_SLUG)'"
 	@node scripts/bundle-standalone.js "$(BUNDLE_SLUG)" "$(abspath $(STORYBOOK_DIR))" "$(STORYBOOK_URL)" setup
