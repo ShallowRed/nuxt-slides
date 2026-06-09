@@ -11,14 +11,14 @@
  * - Slide backgrounds
  */
 
-import type { MaybeRef, Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { RevealConfig } from '~/types/presentation'
 import { DEFAULT_REVEAL_CONFIG } from '~/config/presentation'
 import { EMBED_SANDBOX } from '~/utils/storybook'
 
 export function useReveal(
   container: Ref<HTMLElement | null>,
-  config: MaybeRef<Partial<RevealConfig>> = {},
+  config: Partial<RevealConfig> = {},
 ) {
   let revealInstance: any = null
   let overlayObserver: MutationObserver | null = null
@@ -69,7 +69,7 @@ export function useReveal(
 
     const mergedConfig = {
       ...DEFAULT_REVEAL_CONFIG,
-      ...(isRef(config) ? config.value : config),
+      ...config,
     }
 
     revealInstance = new Reveal(container.value, mergedConfig)
