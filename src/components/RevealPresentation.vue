@@ -16,8 +16,9 @@ const revealContainer = ref<HTMLElement | null>(null)
 // Theme management
 const { loadTheme, unloadTheme, watchTheme } = useTheme(toRef(props, 'theme'))
 
-// Reveal.js instance management - pass config directly
-const { initialize, destroy, getInstance, sync } = useReveal(revealContainer, props.config || {})
+// Resolve config reactively so changes after mount (async data rehydration) are captured.
+const resolvedConfig = computed(() => props.config || {})
+const { initialize, destroy, getInstance, sync } = useReveal(revealContainer, resolvedConfig)
 
 // Provide Reveal.js sync function to child components
 // This allows MDC components to trigger a sync after dynamic content changes

@@ -4,6 +4,13 @@
 PRESENTATIONS_DIR := presentations
 CODIMD_DIR := ../codimd
 
+# Standalone bundle config — override on the command line if needed:
+#   make bundle-standalone BUNDLE_SLUG=other-presentation STORYBOOK_DIR=/other/path
+BUNDLE_SLUG     ?= pistes-vitrine-t3-2026
+STORYBOOK_DIR   ?= ../les-entreprises-s-engagent/apps/storybook/storybook-static
+STORYBOOK_URL   ?= /_storybook
+BUNDLE_OUT      ?= dist-standalone
+
 # ─── Development ──────────────────────────────────────────────
 
 .PHONY: dev preview build generate
@@ -25,6 +32,29 @@ themes: ## Build themes
 
 themes-watch: ## Build themes in watch mode
 	pnpm dev:theme
+
+# ─── Standalone bundle ────────────────────────────────────────
+
+.PHONY: bundle-standalone bundle-storybook
+
+bundle-storybook: ## (Re)build Storybook static output
+	cd $(STORYBOOK_DIR)/.. && pnpm build-storybook
+
+bundle-standalone: ## Build a self-contained static site (Nuxt + Storybook at same origin)
+	@echo "▶  Setting up standalone bundle for '$(BUNDLE_SLUG)'"
+	@node scripts/bundle-standalone.js "$(BUNDLE_SLUG)" "$(abspath $(STORYBOOK_DIR))" "$(STORYBOOK_URL)" setup
+	@echo "▶  Generating Nuxt static site (slug only: $(BUNDLE_SLUG)--standalone)"
+	@BUNDLE_ONLY_SLUG="$(BUNDLE_SLUG)--standalone" pnpm generate
+	@echo "▶  Injecting Storybook into output"
+	@rm -rf "$(BUNDLE_OUT)"
+	@cp -r .output/public "$(BUNDLE_OUT)"
+	@cp -r "$(abspath $(STORYBOOK_DIR))/." "$(BUNDLE_OUT)/_storybook"
+	@echo "▶  Cleaning up temp files"
+	@node scripts/bundle-standalone.js "$(BUNDLE_SLUG)" "$(abspath $(STORYBOOK_DIR))" "$(STORYBOOK_URL)" "" teardown
+	@echo ""
+	@echo "✅ Standalone bundle ready in ./$(BUNDLE_OUT)/"
+	@echo "   Presentation : $(BUNDLE_OUT)/slides/$(BUNDLE_SLUG)--standalone"
+	@echo "   Storybook    : $(BUNDLE_OUT)/_storybook/"
 
 # ─── Content (submodule) ─────────────────────────────────────
 

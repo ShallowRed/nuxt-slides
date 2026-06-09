@@ -32,3 +32,8 @@ export/*
 
 # Temporary clone directory for fetching presentations
 .presentations-temp
+
+# Standalone bundle artifacts
+dist-standalone/
+presentations/public/_storybook-bundle/
+presentations/public/*--standalone.md

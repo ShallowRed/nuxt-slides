@@ -88,15 +88,27 @@ export default defineNuxtConfig({
   // Hook to discover and prerender only PUBLIC presentation routes
   hooks: {
     'nitro:config': async function (nitroConfig) {
-      // Only prerender public presentations (SSG)
       const publicDir = join(process.cwd(), 'presentations', 'public')
+
+      // BUNDLE_ONLY_SLUG: restrict prerender to a single slug (standalone bundle mode)
+      const onlySlug = process.env.BUNDLE_ONLY_SLUG
+      if (onlySlug) {
+        nitroConfig.prerender = nitroConfig.prerender || {}
+        nitroConfig.prerender.crawlLinks = false
+        nitroConfig.prerender.routes = [
+          '/',
+          `/slides/${onlySlug}`,
+          `/api/presentations/${onlySlug}`,
+        ]
+        return
+      }
+
       try {
         const files = await readdir(publicDir)
         const slugs = files
           .filter((file: string) => file.endsWith('.md'))
           .map((file: string) => file.replace('.md', ''))
 
-        // Add only public presentation routes for prerendering
         const publicRoutes = slugs.flatMap((slug: string) => [
           `/slides/${slug}`,
           `/api/presentations/${slug}`,
@@ -107,7 +119,6 @@ export default defineNuxtConfig({
         nitroConfig.prerender.routes.push(...publicRoutes)
       }
       catch (error) {
-        // Public folder may not exist yet, that's okay
         console.warn('Could not discover public presentation routes:', error)
       }
     },
