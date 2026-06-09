@@ -4,7 +4,7 @@ import MDCRenderer from '@nuxtjs/mdc/runtime/components/MDCRenderer.vue'
 import { useScaledFrame } from '~/composables/useScaledFrame'
 import { getLayoutStrategy } from '~/config/layouts'
 import { getMediaFit, quicklinkParts } from '~/utils/slide-rendering'
-import { buildStoryUrl } from '~/utils/storybook'
+import { buildStoryUrl, EMBED_SANDBOX } from '~/utils/storybook'
 
 const props = defineProps<{
   slide: Slide
@@ -34,6 +34,7 @@ const mediaParts = computed(() => {
   const previewWidthRaw = lp.previewWidth ?? lp.previewwidth
   const previewWidth = previewWidthRaw ? Number.parseInt(previewWidthRaw, 10) : 1440
   const scaled = type === 'iframe' && lp.raw == null && fit !== 'contain'
+  const hasLightbox = Boolean(lp.lightbox)
   return {
     src,
     type,
@@ -41,8 +42,11 @@ const mediaParts = computed(() => {
     alt: lp.alt || '',
     fit,
     scaled,
+    // Without a lightbox, a scaled story embed is interactive in place: clicks
+    // browse *inside* the iframe (sandboxed, so it can't escape the slides).
+    interactive: scaled && !hasLightbox,
     previewWidth: Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : 1440,
-    hasLightbox: Boolean(lp.lightbox),
+    hasLightbox,
     previewLink: (lp.lightbox && type === 'iframe') ? src : undefined,
     previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
   }
@@ -137,7 +141,7 @@ const parsedQuicklink = computed(() => {
       class="slide-media-pane"
       :class="[
         `fit-${mediaParts.fit}`,
-        { 'has-lightbox': mediaParts.hasLightbox, 'is-scaled': mediaParts.scaled },
+        { 'has-lightbox': mediaParts.hasLightbox, 'is-scaled': mediaParts.scaled, 'is-interactive': mediaParts.interactive },
       ]"
       :data-preview-link="mediaParts.previewLink"
       :data-preview-image="mediaParts.previewImage"
@@ -147,6 +151,7 @@ const parsedQuicklink = computed(() => {
         :src="mediaParts.src"
         :title="mediaParts.title"
         :style="mediaParts.scaled ? mediaFrameStyle : undefined"
+        :sandbox="EMBED_SANDBOX"
         frameborder="0"
         allowfullscreen
       />

@@ -82,6 +82,35 @@
 }
 
 /**
+ * Slide spacing — comfortable text inset on every slide.
+ *
+ * Reveal only reserves a thin outer `margin`; without inner padding the text
+ * sits almost on the slide edge. This layer adds a horizontal/vertical inset
+ * to every *leaf* slide so text always breathes — while media panes are
+ * allowed to bleed back out to the slide edge (see `_media-layouts.scss`).
+ *
+ * Tunable per deck by overriding `--slide-padding-x` / `--slide-padding-y`
+ * on `.reveal`.
+ */
+.reveal {
+  --slide-padding-x: 4rem;
+  --slide-padding-y: 1.75rem;
+}
+
+/* Leaf slides only: the `.stack` wrapper of a vertical group is not a slide. */
+.reveal .slides > section:not(.stack),
+.reveal .slides > section.stack > section {
+  box-sizing: border-box;
+  padding: var(--slide-padding-y) var(--slide-padding-x);
+}
+
+/* Full-bleed layouts manage their own edges. */
+.reveal .slides section.layout-full,
+.reveal .slides section.layout-media-cover {
+  padding: 0;
+}
+
+/**
  * Media layout: two-column grid.
  *
  * Activated when a slide carries any `layout-media*` class (left/right and
@@ -138,6 +167,17 @@
 }
 .reveal .slides section.layout-media-above > .slide-content-pane {
   order: 2;
+}
+.reveal .slides section[class*=layout-media-right] > .slide-media-pane {
+  margin-right: calc(-1 * var(--slide-padding-x, 4rem));
+}
+.reveal .slides section[class*=layout-media-left] > .slide-media-pane {
+  margin-left: calc(-1 * var(--slide-padding-x, 4rem));
+}
+.reveal .slides section.layout-media-below > .slide-media-pane,
+.reveal .slides section.layout-media-above > .slide-media-pane {
+  margin-left: calc(-1 * var(--slide-padding-x, 4rem));
+  margin-right: calc(-1 * var(--slide-padding-x, 4rem));
 }
 .reveal .slides section[class*=layout-media] > .slide-content-pane {
   display: flex;
@@ -205,6 +245,9 @@
   height: 100%;
   border: none;
   pointer-events: none;
+}
+.reveal .slides section[class*=layout-media] > .slide-media-pane.is-interactive iframe {
+  pointer-events: auto;
 }
 .reveal .slides section[class*=layout-media] > .slide-media-pane.is-scaled {
   align-items: flex-start;

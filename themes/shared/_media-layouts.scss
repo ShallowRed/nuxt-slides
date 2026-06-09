@@ -76,6 +76,23 @@
     order: 2;
   }
 
+  // Media bleed: the slide keeps its text inset (`--slide-padding-x`), but the
+  // media pane pulls back out to the slide edge so wide screens stay wide.
+  section[class*="layout-media-right"] > .slide-media-pane {
+    margin-right: calc(-1 * var(--slide-padding-x, 4rem));
+  }
+
+  section[class*="layout-media-left"] > .slide-media-pane {
+    margin-left: calc(-1 * var(--slide-padding-x, 4rem));
+  }
+
+  // Stacked variants: media row bleeds on both sides.
+  section.layout-media-below > .slide-media-pane,
+  section.layout-media-above > .slide-media-pane {
+    margin-left: calc(-1 * var(--slide-padding-x, 4rem));
+    margin-right: calc(-1 * var(--slide-padding-x, 4rem));
+  }
+
   // Content pane: vertical column layout
   section[class*="layout-media"] > .slide-content-pane {
     display: flex;
@@ -162,6 +179,13 @@
     height: 100%;
     border: none;
     pointer-events: none;
+  }
+
+  // Interactive embed (no lightbox): let clicks reach the iframe so internal
+  // links browse *within* the embed. The iframe is sandboxed (no top-nav), so
+  // it can never navigate the slides window away.
+  section[class*="layout-media"] > .slide-media-pane.is-interactive iframe {
+    pointer-events: auto;
   }
 
   // Scaled iframes (`:layout{story}` zoomed out): the pane clips, the iframe

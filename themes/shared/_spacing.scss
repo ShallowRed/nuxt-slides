@@ -1,0 +1,29 @@
+/**
+ * Slide spacing — comfortable text inset on every slide.
+ *
+ * Reveal only reserves a thin outer `margin`; without inner padding the text
+ * sits almost on the slide edge. This layer adds a horizontal/vertical inset
+ * to every *leaf* slide so text always breathes — while media panes are
+ * allowed to bleed back out to the slide edge (see `_media-layouts.scss`).
+ *
+ * Tunable per deck by overriding `--slide-padding-x` / `--slide-padding-y`
+ * on `.reveal`.
+ */
+
+.reveal {
+  --slide-padding-x: 4rem;
+  --slide-padding-y: 1.75rem;
+}
+
+/* Leaf slides only: the `.stack` wrapper of a vertical group is not a slide. */
+.reveal .slides > section:not(.stack),
+.reveal .slides > section.stack > section {
+  box-sizing: border-box;
+  padding: var(--slide-padding-y) var(--slide-padding-x);
+}
+
+/* Full-bleed layouts manage their own edges. */
+.reveal .slides section.layout-full,
+.reveal .slides section.layout-media-cover {
+  padding: 0;
+}

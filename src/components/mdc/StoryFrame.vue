@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { STORYBOOK_BASE } from '~/config/injection-keys'
 import { useScaledFrame } from '~/composables/useScaledFrame'
-import { buildStoryUrl, resolveAspectRatio } from '~/utils/storybook'
+import { buildStoryUrl, EMBED_SANDBOX, resolveAspectRatio } from '~/utils/storybook'
 
 /**
  * StoryFrame — a single embedded screen for a slide.
@@ -115,6 +115,7 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
           :src="resolvedSrc"
           :title="props.title || props.label || 'Story'"
           :style="frameStyle"
+          :sandbox="EMBED_SANDBOX"
           frameborder="0"
           data-preload
         />
@@ -127,6 +128,7 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
         :src="resolvedSrc"
         :title="props.title || props.label || 'Story'"
         :style="frameStyle"
+        :sandbox="EMBED_SANDBOX"
         frameborder="0"
         allowfullscreen
         data-preload
