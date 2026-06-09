@@ -14,12 +14,48 @@
 import type { Ref } from 'vue'
 import type { RevealConfig } from '~/types/presentation'
 import { DEFAULT_REVEAL_CONFIG } from '~/config/presentation'
+import { EMBED_SANDBOX } from '~/utils/storybook'
 
 export function useReveal(
   container: Ref<HTMLElement | null>,
   config: Partial<RevealConfig> = {},
 ) {
   let revealInstance: any = null
+  let overlayObserver: MutationObserver | null = null
+
+  /**
+   * Reveal's built-in preview overlay (`data-preview-link` / `data-preview-image`)
+   * creates its OWN iframe that we don't render — so it escapes the `sandbox`
+   * we put on inline embeds. Without containment, an internal Storybook link
+   * clicked *inside the lightbox* navigates the whole slides window away.
+   *
+   * This watches for the overlay iframe and applies the same `EMBED_SANDBOX`
+   * (no `allow-top-navigation`), re-loading it under the policy. Result: every
+   * embed — inline `:layout`, `<StoryFrame>`, and lightbox — shares one pattern.
+   */
+  function sandboxOverlayIframes() {
+    const root = container.value
+    if (!root)
+      return
+    const iframes = root.querySelectorAll<HTMLIFrameElement>(
+      '.r-overlay iframe:not([data-embed-sandboxed])',
+    )
+    iframes.forEach((iframe) => {
+      iframe.setAttribute('sandbox', EMBED_SANDBOX)
+      iframe.setAttribute('data-embed-sandboxed', '')
+      // Re-trigger the load so the sandbox policy applies to the document.
+      const src = iframe.getAttribute('src')
+      if (src)
+        iframe.setAttribute('src', src)
+    })
+  }
+
+  function observeOverlays() {
+    if (typeof window === 'undefined' || !container.value)
+      return
+    overlayObserver = new MutationObserver(() => sandboxOverlayIframes())
+    overlayObserver.observe(container.value, { childList: true, subtree: true })
+  }
 
   /**
    * Initialize Reveal.js with the provided configuration
@@ -48,6 +84,9 @@ export function useReveal(
     // - Fragment animations
     revealInstance.sync()
 
+    // Contain navigation inside reveal's lightbox overlay iframe.
+    observeOverlays()
+
     return revealInstance
   }
 
@@ -74,6 +113,10 @@ export function useReveal(
    * Destroy the Reveal.js instance
    */
   function destroy() {
+    if (overlayObserver) {
+      overlayObserver.disconnect()
+      overlayObserver = null
+    }
     if (revealInstance) {
       revealInstance.destroy()
       revealInstance = null
