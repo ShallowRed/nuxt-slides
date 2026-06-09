@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { STORYBOOK_BASE } from '~/config/injection-keys'
+import { useScaledFrame } from '~/composables/useScaledFrame'
 import { buildStoryUrl, resolveAspectRatio } from '~/utils/storybook'
 
 /**
@@ -8,6 +9,10 @@ import { buildStoryUrl, resolveAspectRatio } from '~/utils/storybook'
  * Embeds either a live Storybook story (by id, resolved against the deck's
  * frontmatter `storybook` root) or an arbitrary iframe / image. Works on its
  * own in a slide body or as a child of `<Screens>` for side-by-side galleries.
+ *
+ * Iframes are rendered at a logical desktop width (`previewWidth`) and scaled
+ * down to fit the frame, so the *whole* page is visible instead of the
+ * top-left corner at 1:1. Raise `previewWidth` to show more, lower it to zoom in.
  *
  * Examples (markdown):
  *   ::StoryFrame{story="vitrine-accueil-scenario-a--page" label="A · Acquisition"}
@@ -26,6 +31,13 @@ interface Props {
   fit?: 'cover' | 'contain'
   /** Aspect ratio: named (`desktop`, `wide`, `mobile`…) or raw `16/9`. */
   ratio?: string
+  /**
+   * Logical width (px) the iframe renders at before being scaled to fit.
+   * Higher = "zoom out" (more of the page visible). Default 1440 (desktop).
+   */
+  previewWidth?: string | number
+  /** Disable scaling — render the iframe at the frame's native size (1:1). */
+  raw?: boolean
   /** Caption shown under the frame (overrides the default slot). */
   label?: string
   /** Click to open the media full-screen (Reveal lightbox). */
@@ -38,6 +50,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   fit: 'cover',
+  previewWidth: 1440,
+  raw: false,
   lightbox: false,
   grow: false,
 })
@@ -59,6 +73,17 @@ const isIframe = computed(() => {
 
 const aspect = computed(() => resolveAspectRatio(props.ratio))
 const missing = computed(() => !resolvedSrc.value)
+
+// Iframe scaling: render at a logical desktop width, shrink to fit.
+const mediaEl = ref<HTMLElement | null>(null)
+const previewWidthNum = computed(() => {
+  const n = typeof props.previewWidth === 'string'
+    ? Number.parseInt(props.previewWidth, 10)
+    : props.previewWidth
+  return n && Number.isFinite(n) && n > 0 ? n : 1440
+})
+const scalingEnabled = computed(() => isIframe.value && !props.raw)
+const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
 </script>
 
 <template>
@@ -67,7 +92,9 @@ const missing = computed(() => !resolvedSrc.value)
     :class="[`fit-${props.fit}`, { 'grow': props.grow, 'has-lightbox': props.lightbox }]"
   >
     <div
+      ref="mediaEl"
       class="story-frame__media"
+      :class="{ 'is-scaled': scalingEnabled }"
       :style="aspect ? { aspectRatio: aspect } : undefined"
     >
       <p
@@ -87,6 +114,7 @@ const missing = computed(() => !resolvedSrc.value)
         <iframe
           :src="resolvedSrc"
           :title="props.title || props.label || 'Story'"
+          :style="frameStyle"
           frameborder="0"
           data-preload
         />
@@ -98,6 +126,7 @@ const missing = computed(() => !resolvedSrc.value)
         v-else-if="isIframe"
         :src="resolvedSrc"
         :title="props.title || props.label || 'Story'"
+        :style="frameStyle"
         frameborder="0"
         allowfullscreen
         data-preload
@@ -156,12 +185,24 @@ const missing = computed(() => !resolvedSrc.value)
   height: 100%;
 }
 
+/* Non-scaled iframes fill the frame natively (raw mode / fallback). */
 .story-frame__media iframe {
   display: block;
   width: 100%;
   height: 100%;
   min-height: 100%;
   border: none;
+}
+
+/* Scaled iframes are absolutely positioned at top-left; their width/height +
+   transform come from `frameStyle` (logical desktop size scaled to fit). */
+.story-frame__media.is-scaled iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
 }
 
 /* Story canvases render at desktop width — scale them down to fit the frame
@@ -209,6 +250,7 @@ const missing = computed(() => !resolvedSrc.value)
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
   opacity: 0;
   transition: opacity 0.2s;
+  z-index: 2;
 }
 
 .story-frame__lightbox:hover .story-frame__hint {

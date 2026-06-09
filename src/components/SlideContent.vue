@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { PresentationMetadata, Slide } from '~/types/presentation'
 import MDCRenderer from '@nuxtjs/mdc/runtime/components/MDCRenderer.vue'
+import { useScaledFrame } from '~/composables/useScaledFrame'
 import { getLayoutStrategy } from '~/config/layouts'
 import { getMediaFit, quicklinkParts } from '~/utils/slide-rendering'
+import { buildStoryUrl } from '~/utils/storybook'
 
 const props = defineProps<{
   slide: Slide
@@ -19,26 +21,42 @@ const mediaParts = computed(() => {
   // Storybook shortcut: `:layout{story="<id>"}` resolves against the
   // frontmatter `storybook` base URL and is embedded as an iframe. Falls
   // back to an explicit `src`/`type` when no story is set.
-  const storybookBase = props.metadata?.storybook
-  const storySrc = (lp.story && storybookBase)
-    ? `${String(storybookBase).replace(/\/+$/, '')}/iframe.html?id=${lp.story}&viewMode=story`
+  const storySrc = lp.story
+    ? buildStoryUrl(props.metadata?.storybook, lp.story)
     : undefined
   const src = storySrc ?? lp.src
   if (!src)
     return null
   const type = storySrc ? 'iframe' : lp.type
   const fit = getMediaFit(lp)
+  // `previewWidth` (logical desktop px) drives the iframe zoom-out. Disabled
+  // with `raw` or `fit="contain"`. MDC may lowercase the attribute key.
+  const previewWidthRaw = lp.previewWidth ?? lp.previewwidth
+  const previewWidth = previewWidthRaw ? Number.parseInt(previewWidthRaw, 10) : 1440
+  const scaled = type === 'iframe' && lp.raw == null && fit !== 'contain'
   return {
     src,
     type,
     title: lp.title || '',
     alt: lp.alt || '',
     fit,
+    scaled,
+    previewWidth: Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : 1440,
     hasLightbox: Boolean(lp.lightbox),
     previewLink: (lp.lightbox && type === 'iframe') ? src : undefined,
     previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
   }
 })
+
+// Scale the `:layout{story}` iframe to a logical desktop width, like StoryFrame.
+const mediaPaneEl = ref<HTMLElement | null>(null)
+const mediaPreviewWidth = computed(() => mediaParts.value?.previewWidth ?? 1440)
+const mediaScaling = computed(() => Boolean(mediaParts.value?.scaled))
+const { frameStyle: mediaFrameStyle } = useScaledFrame(
+  mediaPaneEl,
+  mediaPreviewWidth,
+  mediaScaling,
+)
 
 const parsedQuicklink = computed(() => {
   if (!props.slide.quicklink)
@@ -115,10 +133,11 @@ const parsedQuicklink = computed(() => {
     <!-- Media pane (image or iframe) -->
     <aside
       v-if="mediaParts"
+      ref="mediaPaneEl"
       class="slide-media-pane"
       :class="[
         `fit-${mediaParts.fit}`,
-        { 'has-lightbox': mediaParts.hasLightbox },
+        { 'has-lightbox': mediaParts.hasLightbox, 'is-scaled': mediaParts.scaled },
       ]"
       :data-preview-link="mediaParts.previewLink"
       :data-preview-image="mediaParts.previewImage"
@@ -127,6 +146,7 @@ const parsedQuicklink = computed(() => {
         v-if="mediaParts.type === 'iframe'"
         :src="mediaParts.src"
         :title="mediaParts.title"
+        :style="mediaParts.scaled ? mediaFrameStyle : undefined"
         frameborder="0"
         allowfullscreen
       />

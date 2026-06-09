@@ -177,10 +177,21 @@ Use `*-xwide` and `media-cover` for wide app screenshots/stories that the
 default side-by-side grid would shrink too much. Use `media-below` / `media-above`
 when the media is landscape and the text is short.
 
-Props: `src` (required unless `story` is set), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background).
+Props: `src` (required unless `story` is set), `type` ("iframe" or "image", default "image"), `alt`, `title`, `lightbox`, `fit` ("cover" by default, or "contain" to remove container chrome and let the image float on the slide background), `previewWidth` (logical iframe width — see below), `raw` (disable iframe scaling).
 
-**Wider media tip:** the slide engine reserves a small `margin` for Reveal. To
-give media even more room, set `reveal.margin: 0.04` (or lower) in the frontmatter.
+**Iframe scaling (show the whole page, not the top-left corner):** embedded
+stories/apps render their responsive layout at the iframe's pixel width, so a
+small slide frame would only show a corner at 1:1. Instead the engine renders
+the iframe at a logical desktop width (`previewWidth`, default `1440`) and
+scales it down to fit. Raise `previewWidth` to "zoom out" and show more (e.g.
+`1700` for a tall dashboard), lower it to zoom in. Add `raw` to opt out and
+render at native size. Scaling is automatic for `:layout{story}` /
+`StoryFrame` iframes; it is disabled for `fit="contain"`.
+
+**Deck size & side padding:** Reveal renders the deck at a fixed logical size
+and letterboxes the rest. For a 16:9 screen without empty side bars, set
+`reveal.width: 1280` + `reveal.height: 720` in the frontmatter. Lower
+`reveal.margin` (e.g. `0.03`) trims the reserved border further.
 
 #### Embedding a Storybook story (live, no screenshots)
 ```markdown
@@ -230,6 +241,8 @@ frontmatter `storybook` root (or takes a raw `src`).
 - `type` — `iframe` (default for stories/URLs) or `image`
 - `ratio` — named (`desktop` 16/10, `wide` 16/9, `classic` 4/3, `photo` 3/2, `square`, `mobile` 9/16, `portrait` 3/4) or raw `16/9`
 - `fit` — `cover` (default) or `contain`
+- `previewWidth` — logical iframe width before scaling (default `1440`; higher shows more)
+- `raw` — render the iframe at native size (disable scaling)
 - `label` — caption under the frame (or use the default slot)
 - `lightbox` — click to open the screen full-screen
 - `title` — accessible iframe title / image alt

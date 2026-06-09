@@ -135,6 +135,7 @@
 
   // Media pane: centered, no decoration by default
   section[class*="layout-media"] > .slide-media-pane {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -161,6 +162,21 @@
     height: 100%;
     border: none;
     pointer-events: none;
+  }
+
+  // Scaled iframes (`:layout{story}` zoomed out): the pane clips, the iframe
+  // is positioned top-left and sized/transformed inline (logical desktop size).
+  section[class*="layout-media"] > .slide-media-pane.is-scaled {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  section[class*="layout-media"] > .slide-media-pane.is-scaled iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
   }
 
   section[class*="layout-media"] > .slide-media-pane img {
