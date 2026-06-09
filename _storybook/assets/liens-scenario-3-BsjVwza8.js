@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-DaCzexP6.js";var t,n,r,i,a,o=e((()=>{t=`vitrine-scenario-3-galerie`,n=`vitrine-scenario-3-landing`,r=e=>`?id=${e}--page&viewMode=story`,i=r(t),a=r(n)}));export{a as n,o as r,i as t};

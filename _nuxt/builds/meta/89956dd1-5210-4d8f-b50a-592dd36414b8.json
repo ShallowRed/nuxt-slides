@@ -1,0 +1,1 @@
+{"id":"89956dd1-5210-4d8f-b50a-592dd36414b8","timestamp":1781034820757,"matcher":{"static":{"/":{"prerender":true},"/login":{"prerender":true},"/api/presentations":{"prerender":true}},"wildcard":{"/slides/public":{"prerender":true}},"dynamic":{}},"prerendered":["/slides/pistes-vitrine-t3-2026--standalone"]}

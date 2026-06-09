@@ -1,0 +1,9 @@
+import{i as e}from"./preload-helper-DaCzexP6.js";import{u as t}from"./iframe-Ar-lzPaK.js";import{n,t as r}from"./espace-membre-header-view-BC0-oTUo.js";import{a as i,i as a,n as o,o as s,r as c,s as l,t as u}from"./breadcrumb-DXdLKHEp.js";function d(){return(0,f.jsx)(u,{children:(0,f.jsxs)(a,{children:[(0,f.jsx)(o,{children:(0,f.jsx)(c,{href:`#`,children:`Espace membre`})}),(0,f.jsx)(s,{children:`/`}),(0,f.jsx)(o,{children:(0,f.jsx)(i,{children:`Informations entreprise`})})]})})}var f,p,m,h,g;e((()=>{f=t(),n(),l(),p={title:`Design system/Compositions/Webapp/Header`,component:r,tags:[`autodocs`],parameters:{espace:`espace-membre`,layout:`fullscreen`,docs:{description:{component:[`Header global de l'espace membre moderne : fil d'Ariane à gauche,`,"bouton de notifications et menu utilisateur (`AvatarDropdown`) à",`droite. Barre fixe de 74px, bordure inférieure grise, fond blanc.`,``,"Le `EspaceMembreHeader` réel est un Server Component (session +","Prisma) ; la story rend la vue présentationnelle `EspaceMembreHeaderView`."].join(`
+`)}}},args:{nomUtilisateur:`Camille Durand`,nomEntreprise:`Entreprise exemple SAS`,breadcrumb:(0,f.jsx)(d,{})}},m={name:`Par défaut`},h={name:`Nom d’entreprise long (tronqué)`,args:{nomEntreprise:`Très très longue raison sociale qui doit être tronquée proprement`}},m.parameters={...m.parameters,docs:{...m.parameters?.docs,source:{originalSource:`{
+  name: 'Par défaut'
+}`,...m.parameters?.docs?.source}}},h.parameters={...h.parameters,docs:{...h.parameters?.docs,source:{originalSource:`{
+  name: 'Nom d’entreprise long (tronqué)',
+  args: {
+    nomEntreprise: 'Très très longue raison sociale qui doit être tronquée proprement'
+  }
+}`,...h.parameters?.docs?.source}}},g=[`ParDefaut`,`NomEntrepriseLong`]}))();export{h as NomEntrepriseLong,m as ParDefaut,g as __namedExportsOrder,p as default};

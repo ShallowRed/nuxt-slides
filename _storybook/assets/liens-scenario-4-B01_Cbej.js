@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-DaCzexP6.js";var t,n,r,i,a,o=e((()=>{t=`vitrine-scenario-4-composer`,n=`vitrine-scenario-4-programme`,r=e=>`?id=${e}--page&viewMode=story`,i=r(t),a=r(n)}));export{a as n,o as r,i as t};

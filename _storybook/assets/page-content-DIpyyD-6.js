@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-DaCzexP6.js";import{u as t}from"./iframe-Ar-lzPaK.js";import{n,t as r}from"./utils-CEt5KEI0.js";function i({children:e,className:t,grid:n=!0}){return(0,a.jsx)(`div`,{className:r(`w-full px-12 py-8`,n&&`grid auto-rows-min grid-cols-12 gap-6`,t),children:e})}var a,o=e((()=>{a=t(),n()}));export{o as n,i as t};
