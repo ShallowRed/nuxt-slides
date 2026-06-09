@@ -47,9 +47,9 @@ deploy-standalone: bundle-standalone ## Build + deploy standalone bundle to GitH
 
 bundle-standalone: ## Build a self-contained static site (Nuxt + Storybook at same origin)
 	@echo "▶  Setting up standalone bundle for '$(BUNDLE_SLUG)'"
-	@node scripts/bundle-standalone.js "$(BUNDLE_SLUG)" "$(abspath $(STORYBOOK_DIR))" "$(STORYBOOK_URL)" setup
+	@NUXT_APP_BASE_URL="/nuxt-slides/" node scripts/bundle-standalone.js "$(BUNDLE_SLUG)" "$(abspath $(STORYBOOK_DIR))" "$(STORYBOOK_URL)" setup
 	@echo "▶  Generating Nuxt static site (slug only: $(BUNDLE_SLUG)--standalone)"
-	@BUNDLE_ONLY_SLUG="$(BUNDLE_SLUG)--standalone" pnpm generate
+	@BUNDLE_ONLY_SLUG="$(BUNDLE_SLUG)--standalone" NUXT_APP_BASE_URL="/nuxt-slides/" pnpm generate
 	@echo "▶  Injecting Storybook into output"
 	@rm -rf "$(BUNDLE_OUT)"
 	@cp -r .output/public "$(BUNDLE_OUT)"

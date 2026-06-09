@@ -69,9 +69,13 @@ async function setup() {
   // 2. Patch the presentation: replace `storybook: http://...` with the bundled URL
   console.log(`  → Patching presentation frontmatter`)
   const original = await readFile(srcPres, 'utf-8')
+  const baseUrl = process.env.NUXT_APP_BASE_URL || '/'
+  const resolvedStorybookUrl = baseUrl !== '/'
+    ? baseUrl.replace(/\/$/, '') + storybookUrl
+    : storybookUrl
   const patched = original.replace(
     /^(storybook:\s*)https?:\/\/[^\n]*/m,
-    `$1${storybookUrl}`,
+    `$1${resolvedStorybookUrl}`,
   )
   if (patched === original) {
     console.warn('  ⚠️  No storybook: frontmatter found — presentation unchanged')
