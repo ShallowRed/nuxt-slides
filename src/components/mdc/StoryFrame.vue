@@ -46,6 +46,8 @@ interface Props {
   title?: string
   /** Let the frame grow to fill the available height (galleries). */
   grow?: boolean
+  /** Short incentive text shown beside the frame to invite interaction. */
+  hint?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -143,6 +145,13 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
         :data-preview-image="props.lightbox ? resolvedSrc : undefined"
       >
     </div>
+
+    <p
+      v-if="props.hint"
+      class="story-frame__hint-beside"
+    >
+      {{ props.hint }}
+    </p>
 
     <figcaption
       v-if="props.label || $slots.default"
@@ -264,6 +273,20 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
   line-height: 1.3;
   color: var(--text-mention, #6b6b6b);
   text-align: center;
+}
+
+.story-frame__hint-beside {
+  margin: 0.3rem 0 0;
+  font-size: 0.55em;
+  line-height: 1.35;
+  color: var(--text-mention, #6b6b6b);
+  text-align: center;
+  pointer-events: none;
+}
+
+.story-frame__hint-beside::before {
+  content: '↑ ';
+  opacity: 0.7;
 }
 
 .story-frame__missing {

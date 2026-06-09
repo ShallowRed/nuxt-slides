@@ -47,6 +47,7 @@ const mediaParts = computed(() => {
     interactive: scaled && !hasLightbox,
     previewWidth: Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : 1440,
     hasLightbox,
+    hint: lp.hint || undefined,
     previewLink: (lp.lightbox && type === 'iframe') ? src : undefined,
     previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
   }
@@ -132,6 +133,13 @@ const parsedQuicklink = computed(() => {
           :components="mdcComponents"
         />
       </article>
+
+      <p
+        v-if="mediaParts?.hint"
+        class="slide-media-hint"
+      >
+        {{ mediaParts.hint }}
+      </p>
     </div>
 
     <!-- Media pane (image or iframe) -->
@@ -162,6 +170,7 @@ const parsedQuicklink = computed(() => {
         :alt="mediaParts.alt"
       >
     </aside>
+
 
     <!-- Quick navigation hint pinned to the bottom -->
     <div
