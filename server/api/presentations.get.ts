@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { listAllPresentations } from '../utils/presentations'
+import { listRegistry } from '../utils/registry'
 
 interface PresentationListItem {
   slug: string
@@ -12,6 +13,13 @@ interface PresentationListItem {
   status: PublicationStatus
   filename: string
   unlisted?: boolean
+  /**
+   * Stable alias when this deck is in the registry (DDR-018). The home links to
+   *  `/p/<alias>` so the SAME canonical URL is used in client navigation and on
+   *  reload — otherwise a legacy `/slides/<slug>` link only converges server-side
+   *  (on reload), not in SPA navigation.
+   */
+  alias?: string
 }
 
 export default defineEventHandler(async (event): Promise<PresentationListItem[]> => {
@@ -22,6 +30,10 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
   try {
     const allPresentations = await listAllPresentations()
     const baseDir = join(process.cwd(), 'presentations')
+
+    // Map stub slug → canonical alias so the home can link to /p/<alias>.
+    const registry = await listRegistry()
+    const slugToAlias = new Map(registry.map(e => [e.slug, e.alias]))
 
     const items = await Promise.all(
       allPresentations
@@ -50,6 +62,7 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
             status,
             filename: `${slug}.md`,
             unlisted,
+            alias: slugToAlias.get(slug),
           }
         }),
     )

@@ -5,6 +5,8 @@ interface Presentation {
   theme: string
   status: 'public' | 'draft' | 'private' | 'semi-private'
   filename: string
+  /** Canonical alias (DDR-018) — link to /p/<alias> when present. */
+  alias?: string
 }
 
 const { data: presentations, status, error } = await useAsyncData(
@@ -89,7 +91,7 @@ const statusConfig: Record<string, { badge: string, label: string, icon: string 
         <NuxtLink
           v-for="presentation in presentations"
           :key="presentation.slug"
-          :to="`/slides/${presentation.slug}`"
+          :to="presentation.alias ? `/p/${presentation.alias}` : `/slides/${presentation.slug}`"
           class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
         >
           <div class="card-body">
