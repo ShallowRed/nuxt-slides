@@ -34,33 +34,27 @@ watch(requiresPassword, (needsPassword) => {
 
 <template>
   <div class="presentation-page">
-    <ClientOnly>
-      <template v-if="presentationData && presentationData.slides.length > 0">
-        <RevealPresentation
-          :theme="presentationData.metadata.theme"
-          :config="presentationData.metadata.reveal"
-        >
-          <RevealSlides :presentation-data="presentationData" />
-        </RevealPresentation>
+    <!-- No <ClientOnly> (DDR-017 §2.a-ter): the markup is SSR-safe and must prerender
+         for the frozen bundle. Reveal init stays client-only (onMounted). -->
+    <template v-if="presentationData && presentationData.slides.length > 0">
+      <RevealPresentation
+        :theme="presentationData.metadata.theme"
+        :config="presentationData.metadata.reveal"
+      >
+        <RevealSlides :presentation-data="presentationData" />
+      </RevealPresentation>
 
-        <a
-          v-if="editUrl"
-          :href="editUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="codimd-edit-link"
-          title="Edit collaboratively"
-        >
-          Edit
-        </a>
-      </template>
-
-      <template #fallback>
-        <div class="loading">
-          <p>Initializing presentation...</p>
-        </div>
-      </template>
-    </ClientOnly>
+      <a
+        v-if="editUrl"
+        :href="editUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="codimd-edit-link"
+        title="Edit collaboratively"
+      >
+        Edit
+      </a>
+    </template>
 
     <div
       v-if="error"

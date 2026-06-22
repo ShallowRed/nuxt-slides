@@ -11,6 +11,24 @@ export default defineNuxtConfig({
 
   srcDir: 'src/',
 
+  // Frozen bundles build against a reduced public/ (build-reduced-public.js) instead
+  // of the whole repo public/ (~11 Mo of home photos + all themes' backgrounds).
+  ...(process.env.BUNDLE_PUBLIC_DIR
+    ? { dir: { public: process.env.BUNDLE_PUBLIC_DIR } }
+    : {}),
+
+  features: {
+    // Reveal-only frozen deck (DDR-017 §2.a-ter), bundle mode only. Together these
+    // produce hydration-free HTML with all CSS inlined, so the deck needs no JS:
+    //   noScripts → no entry script / _payload / preload hints (slides are in the
+    //     SSR markup since we dropped <ClientOnly>, nothing to hydrate).
+    //   inlineStyles: () => true → inline ALL CSS, not just `.vue` (the default
+    //     predicate). Composable-level CSS (e.g. reveal.css) would otherwise stay a
+    //     <link> into the deleted _nuxt/ dir and 404.
+    noScripts: !!process.env.BUNDLE_ONLY_SLUG,
+    inlineStyles: process.env.BUNDLE_ONLY_SLUG ? () => true : undefined,
+  },
+
   modules: ['@nuxtjs/mdc', 'nuxt-auth-utils', '@nuxt/icon'],
 
   css: ['~/assets/css/tailwind.css'],
@@ -56,33 +74,66 @@ export default defineNuxtConfig({
     },
   },
 
-  // Hybrid rendering: SSG for public slides, SSR for protected routes
-  routeRules: {
-    // Index and login are prerendered
-    '/': { prerender: true },
-    '/login': { prerender: true },
+  // Hybrid rendering: SSG for public slides, SSR for protected routes.
+  // In bundle mode (BUNDLE_ONLY_SLUG, DDR-017 §2.a-ter) we ONLY want the deck's
+  // own slug + its API — not the app shell (/, /login) nor the global API index,
+  // which would otherwise be prerendered into the bundle as dead pages.
+  routeRules: process.env.BUNDLE_ONLY_SLUG
+    ? {
+        '/slides/**': { prerender: true },
+        '/api/presentations/**': { prerender: true },
+      }
+    : {
+        // Index and login are prerendered
+        '/': { prerender: true },
+        '/login': { prerender: true },
 
-    // Public slides are prerendered (SSG) - more specific first
-    '/slides/public/**': { prerender: true },
+        // Public slides are prerendered (SSG) - more specific first
+        '/slides/public/**': { prerender: true },
 
-    // Protected/dynamic slides require SSR - after specific rules
-    '/slides/**': { ssr: true },
-    '/unlock/**': { ssr: true },
-    '/admin/**': { ssr: true },
+        // Protected/dynamic slides require SSR - after specific rules
+        '/slides/**': { ssr: true },
+        '/unlock/**': { ssr: true },
+        '/admin/**': { ssr: true },
 
-    // API: public presentations can be prerendered
-    '/api/presentations': { prerender: true },
+        // API: public presentations can be prerendered
+        '/api/presentations': { prerender: true },
 
-    // API: protected presentations require SSR (cookies, auth)
-    '/api/presentations/**': { ssr: true },
-  },
+        // API: protected presentations require SSR (cookies, auth)
+        '/api/presentations/**': { ssr: true },
+      },
 
   nitro: {
+    // Frozen-presentation hosting (DDR-018) lives OUTSIDE public/, so `nuxt
+    // generate` never aspirates already-frozen bundles (or their mirrored assets)
+    // into the next build. Nitro serves these extra dirs as static at the same
+    // origin: `.frozen/` → /frozen/<alias>/ (the bundles), `.frozen-mirror/` → /
+    // (the future-proof origin-root asset safety net; bundles are self-contained
+    // and don't need it, but a non-rebased consumer would). maxAge 0 keeps them
+    // re-servable without a cache-bust between freezes.
+    publicAssets: [
+      { dir: join(process.cwd(), '.frozen'), baseURL: '/frozen', maxAge: 0 },
+      { dir: join(process.cwd(), '.frozen-mirror'), baseURL: '/', maxAge: 0 },
+    ],
     prerender: {
       // Crawl links to discover routes
       crawlLinks: true,
       // Only prerender public presentations API
       routes: ['/api/presentations'],
+    },
+    hooks: {
+      // In bundle mode, skip the SPA fallbacks (index/200/404) + the prerendered
+      // API json — dead weight in a single-deck static bundle.
+      'prerender:generate': function (route) {
+        if (!process.env.BUNDLE_ONLY_SLUG)
+          return
+        // Skip SPA fallbacks (the deck is a single static Reveal page) and the
+        // prerendered API json (the deck is static — it no longer fetches it).
+        if (['/index.html', '/200.html', '/404.html', '/'].includes(route.route)
+          || route.route?.startsWith('/api/')) {
+          route.skip = true
+        }
+      },
     },
   },
 
@@ -96,8 +147,9 @@ export default defineNuxtConfig({
       if (onlySlug) {
         nitroConfig.prerender = nitroConfig.prerender || {}
         nitroConfig.prerender.crawlLinks = false
+        // ONLY the deck's slug + its API. No '/' (the app home is dead weight in a
+        // single-deck bundle); the fallback files are skipped via prerender:generate.
         nitroConfig.prerender.routes = [
-          '/',
           `/slides/${onlySlug}`,
           `/api/presentations/${onlySlug}`,
         ]

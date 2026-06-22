@@ -58,6 +58,17 @@ const frenchTypographyTransformer = new DomTextTransformer({
  */
 export const vFrenchTypography: Directive<HTMLElement> = {
   /**
+   * SSR no-op (DDR-017 §2.a-ter). The transform runs client-side at `mounted`,
+   * but the directive must still expose `getSSRProps` so Vue's server renderer
+   * doesn't crash when the deck is prerendered (`ssrGetDirectiveProps` →
+   * `getSSRProps` of an undefined directive). Returning no props leaves the
+   * server markup untouched; the client applies the typography on mount.
+   */
+  getSSRProps() {
+    return {}
+  },
+
+  /**
    * Called when the element is mounted to the DOM.
    * Processes existing content and sets up observer for dynamic content.
    */
