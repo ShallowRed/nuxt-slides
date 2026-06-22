@@ -10,7 +10,7 @@ import { readPresentationContent } from '../../utils/presentations'
  * The local stub's frontmatter is preserved (access control, theme, etc.)
  * while the slide body comes from CodiMD.
  */
-function mergeCodiMDContent(localContent: string, codimdMarkdown: string): string {
+export function mergeCodiMDContent(localContent: string, codimdMarkdown: string): string {
   // Extract local frontmatter block
   const fmMatch = localContent.match(/^(---\r?\n[\s\S]*?\r?\n---)\r?\n?/)
   const localFrontmatter = fmMatch ? fmMatch[1] : ''

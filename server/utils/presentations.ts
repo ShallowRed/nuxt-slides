@@ -110,3 +110,21 @@ export async function readPresentationContent(slug: string): Promise<{
   const content = await readFile(found.filePath, 'utf-8')
   return { content, status: found.status }
 }
+
+/**
+ * Read presentation content from a specific access folder. Used by the registry
+ * (DDR-018) to disambiguate when the same slug exists in several folders.
+ */
+export async function readPresentationContentAt(
+  slug: string,
+  access: PublicationStatus,
+): Promise<{ content: string, status: PublicationStatus } | null> {
+  const filePath = join(getPresentationsDir(), access, `${slug}.md`)
+  try {
+    const content = await readFile(filePath, 'utf-8')
+    return { content, status: access }
+  }
+  catch {
+    return null
+  }
+}
