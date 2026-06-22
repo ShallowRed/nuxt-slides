@@ -189,19 +189,27 @@
     pointer-events: auto;
   }
 
-  // Scaled iframes (`:layout{story}` zoomed out): the pane clips, the iframe
-  // is positioned top-left and sized/transformed inline (logical desktop size).
+  // Scaled story iframes (`:layout{story}`): rendered at a logical desktop width
+  // (`--preview-width`) and shrunk to fit. The size+transform are set by
+  // scaled-frame.js, not CSS — the exact fit needs the pane height, and CSS `cqh`
+  // is unreliable in Firefox on grid items. This block only sets the clip box.
   section[class*="layout-media"] > .slide-media-pane.is-scaled {
+    --preview-width: 1440px;
     align-items: flex-start;
     justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
   }
 
   section[class*="layout-media"] > .slide-media-pane.is-scaled iframe {
     position: absolute;
     top: 0;
     left: 0;
-    width: auto;
-    height: auto;
+    // Pre-paint fallback before scaled-frame.js runs: fill the pane so there is no
+    // flash of an unscaled 1440px iframe. The script then sets the exact scaled size.
+    width: 100%;
+    height: 100%;
+    transform-origin: top left;
   }
 
   section[class*="layout-media"] > .slide-media-pane img {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { PresentationMetadata, Slide } from '~/types/presentation'
 import MDCRenderer from '@nuxtjs/mdc/runtime/components/MDCRenderer.vue'
-import { useScaledFrame } from '~/composables/useScaledFrame'
 import { getLayoutStrategy } from '~/config/layouts'
 import { getMediaFit, quicklinkParts } from '~/utils/slide-rendering'
 import { buildStoryUrl, EMBED_SANDBOX } from '~/utils/storybook'
@@ -30,8 +29,10 @@ const mediaParts = computed(() => {
   const type = storySrc ? 'iframe' : lp.type
   const fit = getMediaFit(lp)
   // `previewWidth` (logical desktop px) drives the iframe zoom-out. Disabled
-  // with `raw` or `fit="contain"`. MDC may lowercase the attribute key.
-  const previewWidthRaw = lp.previewWidth ?? lp.previewwidth
+  // with `raw` or `fit="contain"`. MDC kebab-cases camelCase attribute keys, so
+  // `previewWidth="1600"` arrives as `preview-width` — check that first, with the
+  // camel/lower forms as fallbacks.
+  const previewWidthRaw = lp['preview-width'] ?? lp.previewWidth ?? lp.previewwidth
   const previewWidth = previewWidthRaw ? Number.parseInt(previewWidthRaw, 10) : 1440
   const scaled = type === 'iframe' && lp.raw == null && fit !== 'contain'
   const hasLightbox = Boolean(lp.lightbox)
@@ -52,16 +53,6 @@ const mediaParts = computed(() => {
     previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
   }
 })
-
-// Scale the `:layout{story}` iframe to a logical desktop width, like StoryFrame.
-const mediaPaneEl = ref<HTMLElement | null>(null)
-const mediaPreviewWidth = computed(() => mediaParts.value?.previewWidth ?? 1440)
-const mediaScaling = computed(() => Boolean(mediaParts.value?.scaled))
-const { frameStyle: mediaFrameStyle } = useScaledFrame(
-  mediaPaneEl,
-  mediaPreviewWidth,
-  mediaScaling,
-)
 
 const parsedQuicklink = computed(() => {
   if (!props.slide.quicklink)
@@ -145,12 +136,12 @@ const parsedQuicklink = computed(() => {
     <!-- Media pane (image or iframe) -->
     <aside
       v-if="mediaParts"
-      ref="mediaPaneEl"
       class="slide-media-pane"
       :class="[
         `fit-${mediaParts.fit}`,
         { 'has-lightbox': mediaParts.hasLightbox, 'is-scaled': mediaParts.scaled, 'is-interactive': mediaParts.interactive },
       ]"
+      :style="mediaParts.scaled ? { '--preview-width': `${mediaParts.previewWidth}px` } : undefined"
       :data-preview-link="mediaParts.previewLink"
       :data-preview-image="mediaParts.previewImage"
     >
@@ -158,7 +149,6 @@ const parsedQuicklink = computed(() => {
         v-if="mediaParts.type === 'iframe'"
         :src="mediaParts.src"
         :title="mediaParts.title"
-        :style="mediaParts.scaled ? mediaFrameStyle : undefined"
         :sandbox="EMBED_SANDBOX"
         frameborder="0"
         allowfullscreen
@@ -170,7 +160,6 @@ const parsedQuicklink = computed(() => {
         :alt="mediaParts.alt"
       >
     </aside>
-
 
     <!-- Quick navigation hint pinned to the bottom -->
     <div

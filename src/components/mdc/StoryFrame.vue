@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { STORYBOOK_BASE } from '~/config/injection-keys'
-import { useScaledFrame } from '~/composables/useScaledFrame'
 import { buildStoryUrl, EMBED_SANDBOX, resolveAspectRatio } from '~/utils/storybook'
 
 /**
@@ -76,8 +75,9 @@ const isIframe = computed(() => {
 const aspect = computed(() => resolveAspectRatio(props.ratio))
 const missing = computed(() => !resolvedSrc.value)
 
-// Iframe scaling: render at a logical desktop width, shrink to fit.
-const mediaEl = ref<HTMLElement | null>(null)
+// Iframe scaling: render at a logical desktop width, shrink to fit. The width is
+// exposed as `--preview-width`; scaled-frame.js reads it and sizes the iframe
+// (cross-browser, unlike CSS cqh in Firefox — see _media-layouts.scss).
 const previewWidthNum = computed(() => {
   const n = typeof props.previewWidth === 'string'
     ? Number.parseInt(props.previewWidth, 10)
@@ -85,7 +85,8 @@ const previewWidthNum = computed(() => {
   return n && Number.isFinite(n) && n > 0 ? n : 1440
 })
 const scalingEnabled = computed(() => isIframe.value && !props.raw)
-const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
+const scaledFrameStyle = computed(() =>
+  scalingEnabled.value ? { '--preview-width': `${previewWidthNum.value}px` } : undefined)
 </script>
 
 <template>
@@ -94,10 +95,9 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
     :class="[`fit-${props.fit}`, { 'grow': props.grow, 'has-lightbox': props.lightbox }]"
   >
     <div
-      ref="mediaEl"
       class="story-frame__media"
       :class="{ 'is-scaled': scalingEnabled }"
-      :style="aspect ? { aspectRatio: aspect } : undefined"
+      :style="[aspect ? { aspectRatio: aspect } : {}, scaledFrameStyle || {}]"
     >
       <p
         v-if="missing"
@@ -116,7 +116,6 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
         <iframe
           :src="resolvedSrc"
           :title="props.title || props.label || 'Story'"
-          :style="frameStyle"
           :sandbox="EMBED_SANDBOX"
           frameborder="0"
           data-preload
@@ -129,7 +128,6 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
         v-else-if="isIframe"
         :src="resolvedSrc"
         :title="props.title || props.label || 'Story'"
-        :style="frameStyle"
         :sandbox="EMBED_SANDBOX"
         frameborder="0"
         allowfullscreen
@@ -205,15 +203,22 @@ const { frameStyle } = useScaledFrame(mediaEl, previewWidthNum, scalingEnabled)
   border: none;
 }
 
-/* Scaled iframes are absolutely positioned at top-left; their width/height +
-   transform come from `frameStyle` (logical desktop size scaled to fit). */
+/* Scaled iframes — sized by scaled-frame.js, not CSS (see _media-layouts.scss for
+   why). This block only sets the clip box + anchor; the script sets the transform. */
+.story-frame__media.is-scaled {
+  --preview-width: 1440px;
+  position: relative;
+  overflow: hidden;
+}
 .story-frame__media.is-scaled iframe {
   position: absolute;
   top: 0;
   left: 0;
-  width: auto;
-  height: auto;
+  /* Pre-paint fallback before scaled-frame.js runs (avoids an unscaled flash). */
+  width: 100%;
+  height: 100%;
   min-height: 0;
+  transform-origin: top left;
 }
 
 /* Story canvases render at desktop width — scale them down to fit the frame
