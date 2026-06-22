@@ -7,6 +7,8 @@ interface Presentation {
   filename: string
   /** Canonical alias (DDR-018) — link to /p/<alias> when present. */
   alias?: string
+  /** Registry lifecycle (DDR-018): frozen/archived decks serve a static bundle. */
+  lifecycle?: 'live' | 'frozen' | 'archived'
 }
 
 const { data: presentations, status, error } = await useAsyncData(
@@ -22,6 +24,13 @@ const statusConfig: Record<string, { badge: string, label: string, icon: string 
   'semi-private': { badge: 'badge-warning', label: 'Password', icon: '🔑' },
   'private': { badge: 'badge-info', label: 'Private', icon: '🔒' },
   'draft': { badge: 'badge-ghost', label: 'Draft', icon: '📝' },
+}
+
+// A frozen/archived deck serves a self-contained static bundle (DDR-017/018):
+// it's a snapshot, no longer editable live. Flagged so it reads differently from
+// a live deck still wired to its collaborative note.
+function isFrozen(p: Presentation) {
+  return p.lifecycle === 'frozen' || p.lifecycle === 'archived'
 }
 </script>
 
@@ -92,14 +101,29 @@ const statusConfig: Record<string, { badge: string, label: string, icon: string 
           v-for="presentation in presentations"
           :key="presentation.slug"
           :to="presentation.alias ? `/p/${presentation.alias}` : `/slides/${presentation.slug}`"
-          class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+          class="card shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+          :class="isFrozen(presentation)
+            ? 'bg-base-200 border-l-4 border-info'
+            : 'bg-base-100'"
         >
           <div class="card-body">
             <h2 class="card-title text-base-content">
               {{ presentation.title }}
+              <span
+                v-if="presentation.lifecycle === 'archived'"
+                class="text-xs font-normal opacity-50"
+              >· archivée</span>
             </h2>
             <div class="card-actions justify-start mt-4">
               <div
+                v-if="isFrozen(presentation)"
+                class="badge badge-info gap-1"
+                title="Bundle autoportant — instantané gelé, non éditable en direct (DDR-017)"
+              >
+                ❄️ Gelée
+              </div>
+              <div
+                v-else
                 class="badge"
                 :class="statusConfig[presentation.status]?.badge || 'badge-ghost'"
               >
