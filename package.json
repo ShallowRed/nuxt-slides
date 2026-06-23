@@ -19,29 +19,35 @@
     "preview": "nuxt preview",
     "preview:static": "pnpm generate && nuxt preview",
     "prepare": "nuxt prepare",
-    "hash-password": "node scripts/hash-password.js"
+    "hash-password": "node scripts/hash-password.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
     "@nuxtjs/mdc": "^0.19.1",
     "@types/node": "^24.10.1",
+    "js-yaml": "^5.1.0",
     "mermaid": "^11.12.2",
     "nuxt": "^4.2.1",
     "nuxt-auth-utils": "^0.5.25",
     "reveal.js": "^5.2.1",
     "unist-util-visit": "^5.0.0",
     "vue": "^3.5.25",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.4.2",
     "@iconify-json/ri": "^1.2.6",
     "@nuxt/icon": "^2.1.0",
     "@tailwindcss/vite": "^4.1.17",
+    "@types/js-yaml": "^4.0.9",
     "concurrently": "^9.2.1",
     "daisyui": "^5.5.8",
     "eslint": "^9.39.1",
     "sass": "^1.94.2",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "vitest": "^4.1.9"
   }
 }

@@ -108,60 +108,8 @@ export function getEditUrl(source: NoteSource, noteId: string): string | null {
   return codimdUrl ? `${codimdUrl}/${noteId}` : null
 }
 
-/**
- * Strip YAML frontmatter from a markdown string.
- * Returns the body without the leading `---…---` block.
- */
-export function stripFrontmatter(markdown: string): string {
-  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/)
-  if (!match)
-    return markdown
-  return markdown.slice(match[0].length)
-}
-
-/**
- * Parse flat (non-nested) key: value pairs from a YAML frontmatter block.
- * Handles quoted and unquoted string values. Ignores nested objects/arrays.
- * Returns an empty object when there is no frontmatter.
- */
-export function parseFlatFrontmatter(markdown: string): Record<string, string> {
-  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/)
-  if (!match)
-    return {}
-  const result: Record<string, string> = {}
-  for (const line of match[1]!.split(/\r?\n/)) {
-    // Match `key: value` or `key: "value"` — skip indented (nested) lines.
-    // Regex is deliberately non-backtracking: key segment, literal ': ',
-    // then an optional opening quote, a run of non-quote/non-newline chars,
-    // and an optional closing quote.
-    const colonIdx = line.indexOf(': ')
-    if (colonIdx < 1)
-      continue
-    const key = line.slice(0, colonIdx)
-    if (!/^\w[\w-]*$/.test(key))
-      continue
-    let val = line.slice(colonIdx + 2).trim()
-    if (val.startsWith('"') && val.endsWith('"'))
-      val = val.slice(1, -1)
-    result[key] = val
-  }
-  return result
-}
-
-/**
- * Set (or insert) a top-level scalar key in a markdown document's frontmatter.
- * Used by the live `/p/<alias>` route to let the collaborative note drive a few
- * display-only fields (e.g. `storybook`) over the repo stub, without touching the
- * stub's local-dev defaults or its access-control keys. No-op if there is no
- * frontmatter block.
- */
-export function setFrontmatterScalar(markdown: string, key: string, value: string): string {
-  const fm = markdown.match(/^(---\r?\n)([\s\S]*?)(\r?\n---)/)
-  if (!fm)
-    return markdown
-  const [, open, body, close] = fm
-  const line = `${key}: ${value}`
-  const keyLine = new RegExp(`^${key}:.*$`, 'm')
-  const nextBody = keyLine.test(body!) ? body!.replace(keyLine, line) : `${body}\n${line}`
-  return markdown.replace(fm[0], `${open}${nextBody}${close}`)
-}
+// Frontmatter handling now lives in the framework-agnostic deck core
+// (`shared/deck/frontmatter.ts`, audit §5.3): parse → operate on objects →
+// serialize once via a real YAML library, never by ad-hoc regex. The former
+// `stripFrontmatter` / `parseFlatFrontmatter` / `setFrontmatterScalar` helpers
+// were removed once the routes converged on `resolveDeck`.
