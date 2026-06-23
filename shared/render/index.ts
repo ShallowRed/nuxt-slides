@@ -4,6 +4,7 @@
  * config defaults, the iframe sandbox policy, the asset-URL rebasing pass, the
  * Storybook embed URL shape, and the named transform pipeline.
  */
+export * from './embed-storybook'
 export * from './reveal'
 export * from './storybook'
 export * from './transforms'
