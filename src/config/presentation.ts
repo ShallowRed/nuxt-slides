@@ -3,6 +3,7 @@
  */
 
 import type { PresentationMetadata } from '~/types/presentation'
+import { buildComponentMap, FULL_SLIDE_COMPONENT_NAMES } from '#shared/deck'
 import { DEFAULT_REVEAL_CONFIG } from '#shared/render'
 import { THEME_BACKGROUNDS } from '#shared/theme/tokens'
 
@@ -34,34 +35,20 @@ export { DEFAULT_REVEAL_CONFIG }
  * Components that occupy the full slide content area.
  * When the parser detects any of these as a top-level node, it keeps all
  * children in `body` without splitting into header/body.
- * Add any future full-slide components here to extend parser support.
+ *
+ * Derived from the single component contract (`shared/deck/components.ts`,
+ * audit §5.8 / #13) — add the `fullSlide: true` flag there to extend support.
  */
-export const FULL_SLIDE_COMPONENTS = ['FullScreenImage', 'full-screen-image']
+export const FULL_SLIDE_COMPONENTS = FULL_SLIDE_COMPONENT_NAMES
 
 /**
- * MDC component mappings
- * Maps markdown component names to Vue components
+ * MDC component mappings — maps markdown component names (and aliases) to Vue
+ * components, derived from the single component contract
+ * (`shared/deck/components.ts`, audit §5.8 / #13) so there is no longer a
+ * hand-maintained second list that can drift from the parser/preview.
  *
- * Note: `slide-background` is intentionally NOT listed here.
- * It is intercepted and filtered out in `utils/slide-ast.ts` before
- * the MDCRenderer ever sees it, so registering it would have no effect
- * and could cause unexpected rendering.
+ * Note: `slide-background` is intentionally NOT a component — it is a slide
+ * annotation (see `DECK_ANNOTATIONS`), intercepted and filtered out in
+ * `utils/slide-ast.ts` before the MDCRenderer ever sees it.
  */
-export const MDC_COMPONENTS = {
-  Quote: 'Quote',
-  FullScreenImage: 'FullScreenImage',
-  Iframe: 'Iframe',
-  Image: 'Image',
-  Mermaid: 'Mermaid',
-  PreviewLink: 'PreviewLink',
-  IconInline: 'IconInline',
-  i: 'IconInline',
-  Columns: 'Columns',
-  Highlight: 'Highlight',
-  // Storybook-aware media embeds
-  StoryFrame: 'StoryFrame',
-  Screens: 'Screens',
-  // Backward-compat aliases — resolved to Columns
-  TwoColumns: 'Columns',
-  ThreeColumns: 'Columns',
-} as const
+export const MDC_COMPONENTS = buildComponentMap()
