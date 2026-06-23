@@ -1,25 +1,10 @@
-import type { NoteSource } from '../../utils/codimd'
+import type { NoteSource } from '#shared/deck'
 import process from 'node:process'
-import { parseMarkdown } from '@nuxtjs/mdc/runtime'
-import { fetchCollaborativeNote, getEditUrl, stripFrontmatter } from '../../utils/codimd'
+import { resolveDeck, splitFrontmatter } from '#shared/deck'
+import { getEditUrl } from '../../utils/codimd'
 import { verifyAccessPassword } from '../../utils/password'
 import { readPresentationContent } from '../../utils/presentations'
-
-/**
- * Build the final markdown content for a CodiMD-sourced presentation.
- * The local stub's frontmatter is preserved (access control, theme, etc.)
- * while the slide body comes from CodiMD.
- */
-export function mergeCodiMDContent(localContent: string, codimdMarkdown: string): string {
-  // Extract local frontmatter block
-  const fmMatch = localContent.match(/^(---\r?\n[\s\S]*?\r?\n---)\r?\n?/)
-  const localFrontmatter = fmMatch ? fmMatch[1] : ''
-
-  // Use only the body from CodiMD (strip its own frontmatter if any)
-  const codimdBody = stripFrontmatter(codimdMarkdown)
-
-  return localFrontmatter ? `${localFrontmatter}\n\n${codimdBody}` : codimdBody
-}
+import { noteSource } from '../../utils/sources'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -41,8 +26,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  let { content } = result
-  const { status } = result
+  const { content: stub, status } = result
+
+  // The stub frontmatter is the local source of truth for access + provenance.
+  const stubMeta = splitFrontmatter(stub).data
 
   // Access control based on status
   if (status === 'draft' || status === 'private') {
@@ -61,9 +48,7 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const password = query.password as string | undefined
 
-    // Parse frontmatter to get stored password hash
-    const ast = await parseMarkdown(content)
-    const storedHash = ast.data?.accessPassword as string | undefined
+    const storedHash = stubMeta.accessPassword as string | undefined
 
     if (storedHash) {
       // Check password cookie first
@@ -101,25 +86,31 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // If the presentation sources its content from a collaborative editor, fetch it
-  const ast = await parseMarkdown(content)
-  const source = ast.data?.source as NoteSource | undefined
-  const noteId = ast.data?.noteId as string | undefined
-  const isCollaborative = (source === 'codimd' || source === 'hackmd') && noteId
+  // If the presentation sources its body from a collaborative editor, fetch it.
+  // The stub frontmatter always wins (the note contributes its body only); this
+  // is the declared precedence for /slides, expressed as data (noteOverride: []).
+  const source = stubMeta.source as NoteSource | undefined
+  const noteId = stubMeta.noteId as string | undefined
+  const isCollaborative = (source === 'codimd' || source === 'hackmd') && Boolean(noteId)
 
+  let deck
   if (isCollaborative) {
-    const remoteContent = await fetchCollaborativeNote(source, noteId)
-    if (remoteContent) {
-      content = mergeCodiMDContent(content, remoteContent)
+    const remote = await noteSource(source!).load(noteId!)
+    if (remote) {
+      deck = resolveDeck({ stub, remote: remote.raw, noteOverride: [], source })
     }
     else {
       console.warn(`[${source}] Could not fetch note "${noteId}" for slug "${slug}" — falling back to local content`)
+      deck = resolveDeck({ stub })
     }
+  }
+  else {
+    deck = resolveDeck({ stub })
   }
 
   return {
-    content,
+    content: deck.content,
     status,
-    editUrl: isCollaborative ? getEditUrl(source, noteId) : undefined,
+    editUrl: isCollaborative ? getEditUrl(source!, noteId!) : undefined,
   }
 })
