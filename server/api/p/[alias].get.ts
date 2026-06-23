@@ -1,6 +1,6 @@
 import type { NoteSource } from '../../utils/codimd'
 import type { PublicationStatus } from '../../utils/presentations'
-import { fetchCollaborativeNote, getEditUrl } from '../../utils/codimd'
+import { fetchCollaborativeNote, getEditUrl, parseFlatFrontmatter, setFrontmatterScalar } from '../../utils/codimd'
 import { readPresentationContent, readPresentationContentAt } from '../../utils/presentations'
 import { resolveAlias } from '../../utils/registry'
 import { mergeCodiMDContent } from '../presentations/[slug].get'
@@ -60,10 +60,19 @@ export default defineEventHandler(async (event) => {
 
   if (isCollaborative) {
     const remote = await fetchCollaborativeNote(source!, noteId!)
-    if (remote)
+    if (remote) {
       content = mergeCodiMDContent(content, remote)
-    else
+      // The repo stub keeps a local-dev `storybook` (e.g. http://localhost:6007)
+      // for previewing /slides/<slug>. On the diffused /p/<alias> URL we want the
+      // PUBLIC Storybook the author set in the live note, so its iframes resolve
+      // for everyone. Let the note's `storybook` override the stub's here only.
+      const noteStorybook = parseFlatFrontmatter(remote).storybook
+      if (noteStorybook)
+        content = setFrontmatterScalar(content, 'storybook', noteStorybook)
+    }
+    else {
       console.warn(`[${source}] alias "${alias}": could not fetch note "${noteId}" — using stub body`)
+    }
   }
 
   return {

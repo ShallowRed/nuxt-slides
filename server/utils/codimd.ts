@@ -147,3 +147,21 @@ export function parseFlatFrontmatter(markdown: string): Record<string, string> {
   }
   return result
 }
+
+/**
+ * Set (or insert) a top-level scalar key in a markdown document's frontmatter.
+ * Used by the live `/p/<alias>` route to let the collaborative note drive a few
+ * display-only fields (e.g. `storybook`) over the repo stub, without touching the
+ * stub's local-dev defaults or its access-control keys. No-op if there is no
+ * frontmatter block.
+ */
+export function setFrontmatterScalar(markdown: string, key: string, value: string): string {
+  const fm = markdown.match(/^(---\r?\n)([\s\S]*?)(\r?\n---)/)
+  if (!fm)
+    return markdown
+  const [, open, body, close] = fm
+  const line = `${key}: ${value}`
+  const keyLine = new RegExp(`^${key}:.*$`, 'm')
+  const nextBody = keyLine.test(body!) ? body!.replace(keyLine, line) : `${body}\n${line}`
+  return markdown.replace(fm[0], `${open}${nextBody}${close}`)
+}

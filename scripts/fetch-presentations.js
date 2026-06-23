@@ -20,6 +20,11 @@ const config = {
 }
 
 async function fetchPresentations() {
+  // On CI/Vercel the private content MUST be fetched: silently shipping an empty
+  // presentations/ produces a site where every deck, the registry and all /p
+  // aliases 404 — while the build still "succeeds". Fail loudly instead.
+  const isCI = Boolean(process.env.VERCEL || process.env.CI)
+
   // Check if submodule is already populated (local dev)
   if (existsSync(join(PRESENTATIONS_DIR, 'public'))) {
     const files = readdirSync(join(PRESENTATIONS_DIR, 'public'))
@@ -30,7 +35,13 @@ async function fetchPresentations() {
   }
 
   if (!config.token) {
-    console.log('⚠️  No PRESENTATIONS_REPO_TOKEN — run: git submodule update --init')
+    const msg = '⚠️  No PRESENTATIONS_REPO_TOKEN — run: git submodule update --init'
+    if (isCI) {
+      console.error(`❌ ${msg}`)
+      console.error('   Refusing to build an empty site on CI. Set PRESENTATIONS_REPO_TOKEN.')
+      process.exit(1)
+    }
+    console.log(msg)
     return
   }
 
@@ -50,8 +61,14 @@ async function fetchPresentations() {
   }
   catch (error) {
     console.error('❌ Failed to fetch presentations:', error.message)
+    if (isCI) {
+      console.error('   Likely an expired/invalid PRESENTATIONS_REPO_TOKEN. Rotate it in Vercel env.')
+      console.error('   Refusing to deploy a site without its presentations.')
+      process.exit(1)
+    }
     console.log('   Continuing build without private content...')
   }
 }
 
 fetchPresentations()
+
