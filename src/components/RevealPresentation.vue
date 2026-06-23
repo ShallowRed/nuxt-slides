@@ -47,6 +47,21 @@ function openPrintView() {
   window.location.href = buildPrintPdfUrl(window.location.href)
 }
 
+// URL to leave print mode (drop the `?print-pdf` flag), for the overlay's
+// "back to the presentation" link.
+const exitPrintUrl = computed(() => {
+  if (!import.meta.client)
+    return ''
+  const url = new URL(window.location.href)
+  url.searchParams.delete(PRINT_PDF_QUERY)
+  return `${url.pathname}${url.search}${url.hash}`
+})
+
+// Exposed to the template so the overlay can re-trigger the print dialog.
+function reopenPrintDialog() {
+  window.print()
+}
+
 // Serialised onto `.reveal` so it survives into the prerendered HTML: the frozen
 // bundle reads `data-reveal-config` to init Reveal with the deck's frontmatter
 // `reveal:` (margin/width), not just defaults. DDR-017 §2.a-ter. Uses the shared
@@ -96,13 +111,18 @@ onMounted(async () => {
   // Reveal computes its print pagination during initialize(), but the Vue/MDC
   // slide bodies render *after* mount — so the first print layout sees a deck
   // that isn't filled in yet. Once content has settled, sync + re-layout so each
-  // slide is paginated against its real height. Two frames: one for Vue to flush
-  // the slot, one for the browser to apply the resulting sizes.
+  // slide is paginated against its real height, then open the browser's print
+  // dialog: Reveal's print layout is meant for the paged-print medium (on screen
+  // the pages sit off-viewport), so we hand straight to Save-as-PDF rather than
+  // leave the user on a blank-looking page. Two frames: one for Vue to flush the
+  // slot, one for the browser to apply the resulting sizes.
   if (isPrintMode) {
     await nextTick()
     requestAnimationFrame(() => requestAnimationFrame(() => {
       sync()
       getInstance()?.layout()
+      // A further frame so the re-layout paints before the (blocking) dialog.
+      requestAnimationFrame(() => window.print())
     }))
   }
 })
@@ -123,6 +143,31 @@ onUnmounted(() => {
   >
     <div class="slides">
       <slot />
+    </div>
+    <!-- On screen, Reveal's print layout sits off-viewport (it targets the paged
+         print medium), so without this the page looks blank. Screen-only; hidden
+         in the actual print render via @media print. -->
+    <div
+      v-if="isPrintMode"
+      class="print-overlay"
+    >
+      <p>Préparation de l’export PDF…</p>
+      <p class="print-overlay__hint">
+        La fenêtre d’impression s’ouvre automatiquement — choisissez « Enregistrer en PDF ».
+      </p>
+      <button
+        type="button"
+        class="print-overlay__btn"
+        @click="reopenPrintDialog"
+      >
+        Rouvrir la fenêtre d’impression
+      </button>
+      <a
+        class="print-overlay__btn print-overlay__btn--ghost"
+        :href="exitPrintUrl"
+      >
+        Revenir à la présentation
+      </a>
     </div>
     <button
       v-if="!isPrintMode"
@@ -180,9 +225,55 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.7);
 }
 
-/* Never let the on-screen control bleed into a print/PDF render. */
+.print-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.print-overlay p {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.print-overlay__hint {
+  max-width: 32rem;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  color: #555;
+}
+
+.print-overlay__btn {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  background: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  border-radius: 0.4rem;
+}
+
+.print-overlay__btn--ghost {
+  color: #1a1a1a;
+  background: transparent;
+}
+
+/* Never let on-screen controls bleed into the print/PDF render. */
 @media print {
-  .print-pdf-button {
+  .print-pdf-button,
+  .print-overlay {
     display: none !important;
   }
 }
