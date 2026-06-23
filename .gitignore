@@ -44,3 +44,5 @@ presentations/public/*--standalone.md
 # already-frozen bundle (or its mirrored assets) into the next one.
 .frozen/
 .frozen-mirror/
+.vercel
+.env*
