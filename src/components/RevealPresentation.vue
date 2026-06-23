@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { RevealConfig } from '~/types/presentation'
-import { DEFAULT_REVEAL_CONFIG } from '~/config/presentation'
+import { mergeRevealConfig } from '#shared/render'
 import 'reveal.js/dist/reveal.css'
 
 interface Props {
@@ -16,9 +16,10 @@ const revealContainer = ref<HTMLElement | null>(null)
 
 // Serialised onto `.reveal` so it survives into the prerendered HTML: the frozen
 // bundle reads `data-reveal-config` to init Reveal with the deck's frontmatter
-// `reveal:` (margin/width), not just defaults. DDR-017 §2.a-ter.
+// `reveal:` (margin/width), not just defaults. DDR-017 §2.a-ter. Uses the shared
+// merge so live and frozen agree on the defaults.
 const resolvedRevealConfig = computed(() =>
-  JSON.stringify({ ...DEFAULT_REVEAL_CONFIG, ...(props.config || {}) }))
+  JSON.stringify(mergeRevealConfig(props.config)))
 
 // Theme management
 const { loadTheme, unloadTheme, watchTheme } = useTheme(toRef(props, 'theme'))

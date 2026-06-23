@@ -6,20 +6,25 @@
  *   - "hackmd"  → hackmd.io API:     GET https://api.hackmd.io/v1/notes/:noteId
  *
  * The content is cached in-memory with a short TTL so that live collaborative
- * edits propagate quickly while avoiding excessive requests per page load.
+ * edits propagate quickly while avoiding excessive requests per page load. The
+ * TTL is the single shared `createTtlCache` helper (audit §5.7 / P1 #6),
+ * configurable via `NUXT_SOURCE_CACHE_TTL_MS`.
  */
+
+import { createTtlCache, DEFAULT_CACHE_TTL_MS, SourceUnreachableError } from '#shared/deck'
 
 export type NoteSource = 'codimd' | 'hackmd'
 
-const CACHE_TTL_MS = 10_000 // 10 seconds
 const HACKMD_API_BASE = 'https://api.hackmd.io/v1'
 
-interface CacheEntry {
-  content: string
-  fetchedAt: number
-}
+/** Shared TTL cache; only successful fetches are stored (null is never cached). */
+const noteCache = createTtlCache<string>(sourceCacheTtlMs)
 
-const cache = new Map<string, CacheEntry>()
+function sourceCacheTtlMs(): number {
+  const raw = useRuntimeConfig().sourceCacheTtlMs
+  const n = typeof raw === 'number' ? raw : Number(raw)
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_CACHE_TTL_MS
+}
 
 function getConfig() {
   const config = useRuntimeConfig()
@@ -75,21 +80,18 @@ async function fetchFromHackMD(noteId: string): Promise<string | null> {
 export async function fetchCollaborativeNote(source: NoteSource, noteId: string): Promise<string | null> {
   const cacheKey = `${source}:${noteId}`
 
-  // Return cached value if still fresh
-  const cached = cache.get(cacheKey)
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-    return cached.content
-  }
-
   try {
-    const content = source === 'hackmd'
-      ? await fetchFromHackMD(noteId)
-      : await fetchFromCodiMD(noteId)
-
-    if (content !== null) {
-      cache.set(cacheKey, { content, fetchedAt: Date.now() })
-    }
-    return content
+    // The loader throws on an unreachable/empty source so failures are NOT cached
+    // (only successful markdown is memoized for the TTL window). Fail-closed at the
+    // cache layer; callers decide whether to degrade to a stub.
+    return await noteCache.get(cacheKey, async () => {
+      const content = source === 'hackmd'
+        ? await fetchFromHackMD(noteId)
+        : await fetchFromCodiMD(noteId)
+      if (content === null)
+        throw new SourceUnreachableError(source, noteId)
+      return content
+    })
   }
   catch (error: any) {
     console.error(`[${source}] Failed to fetch note "${noteId}":`, error?.message || error)

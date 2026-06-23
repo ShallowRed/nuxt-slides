@@ -4,12 +4,12 @@
  */
 
 import type { PresentationData } from '~/types/presentation'
+import { parserIdFor } from '#shared/deck'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { DEFAULT_METADATA } from '~/config/presentation'
-import { parseSlides, parseSlidesFromSeparators } from '~/utils/slide-ast'
+import { PARSERS } from '~/utils/slide-ast'
 
 export function usePresentation(slug: string, apiUrl?: string) {
-
   const { data, error, status, refresh } = useAsyncData(
     `presentation-${slug}`,
     async (): Promise<PresentationData> => {
@@ -25,10 +25,11 @@ export function usePresentation(slug: string, apiUrl?: string) {
         ...(ast.data || {}),
       }
 
-      // Parse slides: separator mode (--- / ----) or default heading mode (H1/H2/H3)
-      const slides = metadata.parser === 'separator'
-        ? await parseSlidesFromSeparators(response.content)
-        : parseSlides(ast)
+      // Parse slides through the shared parser port: the deck's `parser` mode
+      // selects the implementation (heading vs separator) — one contract, no
+      // ad-hoc branching (audit §5.8). Both take the raw markdown uniformly.
+      const parser = PARSERS[parserIdFor(metadata)]
+      const slides = await parser.parse(response.content, metadata)
 
       return { slides, metadata, editUrl: response.editUrl }
     },

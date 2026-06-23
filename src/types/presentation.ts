@@ -1,6 +1,15 @@
 /**
- * Core type definitions for the presentation system
+ * Core type definitions for the presentation system.
+ *
+ * The canonical `Slide`, `RevealConfig`, and `ThemeBackgrounds` shapes now live in
+ * the framework-agnostic deck core (`shared/deck`, audit §5.8) so there is a single
+ * definition consumed by parsers, renderers, the server, and tests alike. They are
+ * re-exported here for backward compatibility with existing `~/types` imports.
  */
+
+import type { RevealConfig, Slide, ThemeBackgrounds } from '#shared/deck'
+
+export type { RevealConfig, Slide, ThemeBackgrounds }
 
 /**
  * Publication status based on folder location
@@ -10,64 +19,6 @@
  * - semi-private: Accessible via password (no login required)
  */
 export type PublicationStatus = 'public' | 'draft' | 'private' | 'semi-private'
-
-export interface Slide {
-  header?: any
-  /** Text shown above the heading (e.g. chapter label, context tag) */
-  pretitle?: any
-  /** Text shown below the heading in an hgroup (section tagline) */
-  subtitle?: any
-  body: any
-  verticalSlides?: Slide[]
-  headingLevel?: string
-  backgroundImage?: string
-  layout?: string
-  /** Extra props for the layout (e.g. media src/type for media-right/media-left) */
-  layoutProps?: Record<string, string>
-  /** Quick navigation link pinned to bottom of slide */
-  quicklink?: { text: string, href: string }
-}
-
-export interface ThemeBackgrounds {
-  h1?: string
-  h2?: string
-  h3?: string
-  default?: string
-}
-
-/**
- * Reveal.js configuration options
- * These are passed directly to Reveal.initialize()
- */
-export interface RevealConfig {
-  hash?: boolean
-  center?: boolean
-  transition?: string
-  slideNumber?: string | boolean
-  embedded?: boolean
-  margin?: number
-  minScale?: number
-  maxScale?: number
-  width?: number
-  height?: number
-  controls?: boolean
-  progress?: boolean
-  keyboard?: boolean
-  touch?: boolean
-  loop?: boolean
-  fragments?: boolean
-  help?: boolean
-  showNotes?: boolean
-  autoPlayMedia?: boolean | null
-  preloadIframes?: boolean | null
-  autoSlide?: number
-  view?: string
-  navigationMode?: 'default' | 'linear' | 'grid'
-}
-
-/**
- * Custom presentation metadata (not Reveal.js config)
- */
 export interface PresentationMeta {
   title?: string
   lang?: string

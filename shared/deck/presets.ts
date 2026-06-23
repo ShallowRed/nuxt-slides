@@ -1,12 +1,15 @@
+import type { ThemeTokens } from '../theme/tokens'
 import type { DeckMeta } from './schema'
+import { KNOWN_THEMES, THEME_TOKENS } from '../theme/tokens'
 
 /**
  * Named presets for preset-driven decks (the CodiMD route).
  *
- * These were previously **duplicated**: a partial copy in `src/config/presets.ts`
- * (unused) and the authoritative copy inlined inside
- * `server/api/codimd/[noteId].get.ts`. This module is now the single source of
- * truth, faithful to the live server behavior, consumed by `resolveDeck`.
+ * Previously the preset definitions were **duplicated**: a partial copy in
+ * `src/config/presets.ts` (unused) and the authoritative copy inlined inside
+ * `server/api/codimd/[noteId].get.ts`. Presets are now **derived from the single
+ * theme tokens manifest** (`shared/theme/tokens.ts`, audit §5.5): a preset is
+ * just a theme's tokens projected into deck metadata.
  */
 
 export type PresetMeta = Pick<
@@ -14,50 +17,26 @@ export type PresetMeta = Pick<
   'lang' | 'theme' | 'parser' | 'backgrounds' | 'reveal'
 >
 
-export const PRESETS: Record<string, PresetMeta> = {
-  dsfr: {
-    lang: 'fr',
-    theme: 'dsfr',
-    parser: 'separator',
-    backgrounds: {
-      h1: '/backgrounds/slide-bg-default.png',
-      h2: '/backgrounds/slide-bg-contrast.png',
-      h3: '/backgrounds/slide-bg-subtle.png',
-    },
-    reveal: {
-      slideNumber: true,
-      width: 1200,
-      height: 800,
-    },
-  },
-  minimal: {
-    lang: 'fr',
-    theme: 'minimal',
-    parser: 'separator',
-    reveal: {
-      slideNumber: true,
-    },
-  },
-  lee: {
-    lang: 'fr',
-    theme: 'lee',
-    parser: 'separator',
-    backgrounds: {
-      h1: '/backgrounds/lee-slide-contrast.png',
-      h2: '/backgrounds/lee-slide-contrast.png',
-      h3: '/backgrounds/lee-slide-subtle.png',
-    },
-    reveal: {
-      slideNumber: true,
-      width: 1200,
-      height: 800,
-    },
-  },
+function presetFromTokens(tokens: ThemeTokens): PresetMeta {
+  const preset: PresetMeta = { theme: tokens.name }
+  if (tokens.lang)
+    preset.lang = tokens.lang
+  if (tokens.parser)
+    preset.parser = tokens.parser
+  if (tokens.backgrounds)
+    preset.backgrounds = tokens.backgrounds
+  if (tokens.reveal)
+    preset.reveal = tokens.reveal
+  return preset
 }
+
+export const PRESETS: Record<string, PresetMeta> = Object.fromEntries(
+  Object.values(THEME_TOKENS).map(t => [t.name, presetFromTokens(t)]),
+)
 
 export const DEFAULT_PRESET = 'dsfr'
 
-export const KNOWN_THEMES = Object.keys(PRESETS)
+export { KNOWN_THEMES }
 
 /**
  * Build the base preset layer for a deck, optionally swapping the visual bits

@@ -10,18 +10,16 @@
  * iframe URL shape.
  */
 
+import { EMBED_SANDBOX } from '#shared/render'
+
 /**
  * `sandbox` value for embedded story/app iframes.
  *
- * Crucially OMITS `allow-top-navigation` (and its by-user-activation variant):
- * embedded apps that call `window.parent.location.assign(...)` — e.g. Storybook
- * stories wired for the Storybook manager — would otherwise replace the whole
- * slides window with the Storybook URL. The flags propagate to nested iframes,
- * so a story navigated *inside* the embed also stays contained. Self-navigation
- * (plain `<a href>`) still works, so internal links browse within the embed.
+ * Re-exported from the shared render utilities (`shared/render/reveal.ts`,
+ * audit §5.9) so inline embeds, the Reveal lightbox overlay observer, and any
+ * future consumer share one definition. Kept as a named export for back-compat.
  */
-export const EMBED_SANDBOX
-  = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation'
+export { EMBED_SANDBOX }
 
 export interface StoryUrlOptions {
   /** Reveal Storybook UI chrome (toolbar) instead of the bare canvas. */

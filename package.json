@@ -12,7 +12,7 @@
     "dev:theme": "node scripts/build-themes.js --watch",
     "prebuild": "node scripts/fetch-presentations.js",
     "build": "pnpm build:themes && nuxt build",
-    "build:themes": "node scripts/build-themes.js",
+    "build:themes": "node scripts/build-theme-tokens.ts && node scripts/build-themes.js",
     "build:theme": "node scripts/build-themes.js",
     "pregenerate": "node scripts/fetch-presentations.js",
     "generate": "pnpm build:themes && nuxt generate",

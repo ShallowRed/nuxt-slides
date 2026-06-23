@@ -2,13 +2,14 @@
  * Pure functions for parsing MDC AST content into slide structures.
  * No Vue reactivity — all functions are stateless and independently testable.
  *
- * Two entry points:
+ * Two entry points, both conforming to the shared `DeckParser` port
+ * (audit §5.8 / Axe G) via `headingParser` / `separatorParser` below:
  * - parseSlides(ast)              heading-based parser (H1/H2/H3)
  * - parseSlidesFromSeparators(md) separator-based parser (--- / ----)
  */
 
+import type { DeckParser, Slide } from '#shared/deck'
 import type { MDCParserResult } from '@nuxtjs/mdc'
-import type { Slide } from '~/types/presentation'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import { FULL_SLIDE_COMPONENTS } from '~/config/presentation'
 
@@ -353,3 +354,34 @@ export async function parseSlidesFromSeparators(rawContent: string): Promise<Sli
 
   return slides
 }
+
+// ---------------------------------------------------------------------------
+// Parser port adapters (audit §5.8 / Axe G)
+// ---------------------------------------------------------------------------
+
+/**
+ * The two parsers above, exposed behind the shared `DeckParser` port so callers
+ * (the composable today; the IR pipeline / renderers tomorrow) depend on one
+ * contract rather than picking a function by hand. Both take raw markdown so the
+ * port shape is uniform; the heading parser runs MDC first (frontmatter is read
+ * into `ast.data` and excluded from the body).
+ */
+export const headingParser: DeckParser = {
+  id: 'heading',
+  async parse(raw: string): Promise<Slide[]> {
+    const ast = await parseMarkdown(raw)
+    return parseSlides(ast)
+  },
+}
+
+export const separatorParser: DeckParser = {
+  id: 'separator',
+  parse(raw: string): Promise<Slide[]> {
+    return parseSlidesFromSeparators(raw)
+  },
+}
+
+export const PARSERS = {
+  heading: headingParser,
+  separator: separatorParser,
+} as const
