@@ -39,7 +39,12 @@ body {
   font-family: 'Marianne', arial, sans-serif;
   font-size: 24px;
   font-weight: 400;
+  line-height: 1.5;
   color: var(--text-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
 .reveal .slides {
@@ -155,12 +160,39 @@ body {
 .reveal ul,
 .reveal ol {
   display: block;
-  margin: 0.5em 0;
-  padding-left: 1.5em;
+  margin: 0.6em 0;
+  padding-left: 1.35em;
 }
 
 .reveal li {
-  margin-bottom: 0.35em;
+  margin-bottom: 0.5em;
+  line-height: 1.45; // match body copy so wrapped bullets read evenly
+  padding-left: 0.15em;
+}
+
+.reveal li:last-child {
+  margin-bottom: 0;
+}
+
+// Custom bullet in brand accent — softer than the default heavy disc.
+.reveal ul {
+  list-style: none;
+  padding-left: 1.5em;
+}
+
+.reveal ul > li {
+  position: relative;
+}
+
+.reveal ul > li::before {
+  content: '';
+  position: absolute;
+  left: -1em;
+  top: 0.62em;
+  width: 0.38em;
+  height: 0.38em;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 // --- Code ------------------------------------------------------------------

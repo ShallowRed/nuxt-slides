@@ -34,6 +34,10 @@ export const SLIDE_LAYOUT_REGISTRY: Record<string, LayoutStrategy> = {
   'media-above': 'default',
   // Full-bleed media with a floating caption overlay (one big screen).
   'media-cover': 'default',
+  // Compact heading: shrinks the slide title row so a body gallery (e.g. a 2×2
+  // `Screens` grid of full-height screenshots) gets most of the vertical space.
+  // CSS-only (see themes/shared/_slide-structure.scss → .layout-grid-compact).
+  'grid-compact': 'default',
 }
 
 /**

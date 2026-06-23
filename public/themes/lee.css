@@ -202,6 +202,13 @@
 .reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
 .reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
   font-size: 1.9em;
+  line-height: 1.08;
+  margin-bottom: 0.7em;
+}
+.reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > article > p:first-child {
+  font-size: 1.08em;
+  line-height: 1.45;
+  margin-top: 0;
 }
 .reveal .slides section.layout-media-below > .slide-content-pane,
 .reveal .slides section.layout-media-above > .slide-content-pane {
@@ -403,6 +410,44 @@
 }
 
 /**
+ * `grid-compact` layout modifier.
+ *
+ * For comparison slides whose body is a tall gallery (e.g. a 2×2 `Screens` grid
+ * of full-height page screenshots): the default slide title eats ~⅓ of the
+ * height. Here we shrink the heading row to a single compact line and hand the
+ * remaining vertical space to the article, so each screenshot can show its whole
+ * hero without being clipped. CSS-only (registered as 'default' strategy).
+ */
+.reveal section.layout-grid-compact,
+.reveal section.slide-h3.layout-grid-compact {
+  justify-content: start;
+}
+.reveal section.layout-grid-compact header,
+.reveal section.layout-grid-compact hgroup,
+.reveal section.slide-h3.layout-grid-compact header,
+.reveal section.slide-h3.layout-grid-compact hgroup {
+  flex: 0 0 auto;
+  min-height: 0;
+  margin-bottom: 0.9em;
+}
+.reveal section.layout-grid-compact header h3,
+.reveal section.layout-grid-compact hgroup h3,
+.reveal section.slide-h3.layout-grid-compact header h3,
+.reveal section.slide-h3.layout-grid-compact hgroup h3 {
+  font-size: 1.4em;
+  line-height: 1.1;
+  margin: 0;
+}
+.reveal section.layout-grid-compact article,
+.reveal section.slide-h3.layout-grid-compact article {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  justify-content: center;
+}
+
+/**
  * Quicklink: small navigation hint pinned to the bottom of a slide.
  * Prefix (e.g. "Pressé·e ?") is muted text; the link is styled distinctly.
  *
@@ -460,30 +505,38 @@
 .reveal h6 {
   margin: 0 0 0.5em 0;
   font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: normal;
+  line-height: 1.12;
+  letter-spacing: -0.011em;
   text-transform: none;
   text-shadow: none;
   word-wrap: break-word;
+  text-wrap: balance;
   text-align: left;
 }
 .reveal h1 {
   font-size: 4rem;
   font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   margin-bottom: 0.5em;
 }
 .reveal h2 {
   font-size: 4rem;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
   padding-bottom: 0.2em;
   margin-bottom: 0.5em;
 }
 .reveal h3 {
   font-size: 2.5rem;
-  margin-bottom: 1em;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.8em;
 }
 .reveal h4 {
   font-size: 2rem;
   font-weight: 600;
+  line-height: 1.15;
   margin-bottom: 1em;
 }
 .reveal h5 {
@@ -492,9 +545,10 @@
   font-weight: 600;
 }
 .reveal p {
-  margin: 0.5em 0;
-  line-height: 1.4;
+  margin: 0.6em 0;
+  line-height: 1.5;
   text-align: left;
+  text-wrap: pretty;
 }
 .reveal strong,
 .reveal b {
@@ -571,7 +625,12 @@ body {
   font-family: "Marianne", arial, sans-serif;
   font-size: 24px;
   font-weight: 400;
+  line-height: 1.5;
   color: var(--text-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 .reveal .slides {
@@ -667,12 +726,38 @@ body {
 .reveal ul,
 .reveal ol {
   display: block;
-  margin: 0.5em 0;
-  padding-left: 1.5em;
+  margin: 0.6em 0;
+  padding-left: 1.35em;
 }
 
 .reveal li {
-  margin-bottom: 0.35em;
+  margin-bottom: 0.5em;
+  line-height: 1.45;
+  padding-left: 0.15em;
+}
+
+.reveal li:last-child {
+  margin-bottom: 0;
+}
+
+.reveal ul {
+  list-style: none;
+  padding-left: 1.5em;
+}
+
+.reveal ul > li {
+  position: relative;
+}
+
+.reveal ul > li::before {
+  content: "";
+  position: absolute;
+  left: -1em;
+  top: 0.62em;
+  width: 0.38em;
+  height: 0.38em;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .reveal code {

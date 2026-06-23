@@ -203,6 +203,13 @@
 .reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
 .reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
   font-size: 1.9em;
+  line-height: 1.08;
+  margin-bottom: 0.7em;
+}
+.reveal .slides section[class*=layout-media][class*=-xwide] > .slide-content-pane > article > p:first-child {
+  font-size: 1.08em;
+  line-height: 1.45;
+  margin-top: 0;
 }
 .reveal .slides section.layout-media-below > .slide-content-pane,
 .reveal .slides section.layout-media-above > .slide-content-pane {
@@ -401,6 +408,44 @@
 
 .reveal section article {
   width: 100%;
+}
+
+/**
+ * `grid-compact` layout modifier.
+ *
+ * For comparison slides whose body is a tall gallery (e.g. a 2×2 `Screens` grid
+ * of full-height page screenshots): the default slide title eats ~⅓ of the
+ * height. Here we shrink the heading row to a single compact line and hand the
+ * remaining vertical space to the article, so each screenshot can show its whole
+ * hero without being clipped. CSS-only (registered as 'default' strategy).
+ */
+.reveal section.layout-grid-compact,
+.reveal section.slide-h3.layout-grid-compact {
+  justify-content: start;
+}
+.reveal section.layout-grid-compact header,
+.reveal section.layout-grid-compact hgroup,
+.reveal section.slide-h3.layout-grid-compact header,
+.reveal section.slide-h3.layout-grid-compact hgroup {
+  flex: 0 0 auto;
+  min-height: 0;
+  margin-bottom: 0.9em;
+}
+.reveal section.layout-grid-compact header h3,
+.reveal section.layout-grid-compact hgroup h3,
+.reveal section.slide-h3.layout-grid-compact header h3,
+.reveal section.slide-h3.layout-grid-compact hgroup h3 {
+  font-size: 1.4em;
+  line-height: 1.1;
+  margin: 0;
+}
+.reveal section.layout-grid-compact article,
+.reveal section.slide-h3.layout-grid-compact article {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  justify-content: center;
 }
 
 /**

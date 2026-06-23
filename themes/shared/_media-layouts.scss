@@ -123,6 +123,16 @@
   section[class*="layout-media"][class*="-xwide"] > .slide-content-pane > header :is(h1, h2, h3, h4, h5, h6),
   section[class*="layout-media"][class*="-xwide"] > .slide-content-pane > hgroup .slide-heading :is(h1, h2, h3, h4, h5, h6) {
     font-size: 1.9em;
+    line-height: 1.08; // tight leading for the display title in a narrow rail
+    margin-bottom: 0.7em;
+  }
+
+  // Lead paragraph of a caption rail: a touch larger + airier than the bullets,
+  // so the one-line summary reads as the intro and the list as supporting detail.
+  section[class*="layout-media"][class*="-xwide"] > .slide-content-pane > article > p:first-child {
+    font-size: 1.08em;
+    line-height: 1.45;
+    margin-top: 0;
   }
 
   // Stacked variants: heading row stays compact, media row fills the rest.

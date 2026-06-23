@@ -17,34 +17,44 @@
   h6 {
     margin: 0 0 0.5em 0;
     font-weight: 700;
-    line-height: 1.5;
-    letter-spacing: normal;
+    // Display type wants a tight leading — 1.5 left multi-line titles with a
+    // gaping gap (e.g. "Option 1 : Le / bento"). Tightened per level below.
+    line-height: 1.12;
+    letter-spacing: -0.011em; // subtle optical tightening for large weights
     text-transform: none;
     text-shadow: none;
     word-wrap: break-word;
+    text-wrap: balance; // even line lengths on wrapped titles
     text-align: left;
   }
 
   h1 {
     font-size: 4rem;
     font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
     margin-bottom: 0.5em;
   }
 
   h2 {
     font-size: 4rem;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
     padding-bottom: 0.2em;
     margin-bottom: 0.5em;
   }
 
   h3 {
     font-size: 2.5rem;
-    margin-bottom: 1em;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.8em;
   }
 
   h4 {
     font-size: 2rem;
     font-weight: 600;
+    line-height: 1.15;
     margin-bottom: 1em;
   }
 
@@ -55,9 +65,10 @@
   }
 
   p {
-    margin: 0.5em 0;
-    line-height: 1.4;
+    margin: 0.6em 0;
+    line-height: 1.5; // comfortable reading measure for body copy
     text-align: left;
+    text-wrap: pretty; // avoid orphans/short last lines
   }
 
   strong,

@@ -47,3 +47,42 @@
 .reveal section article {
   width: 100%;
 }
+
+/**
+ * `grid-compact` layout modifier.
+ *
+ * For comparison slides whose body is a tall gallery (e.g. a 2×2 `Screens` grid
+ * of full-height page screenshots): the default slide title eats ~⅓ of the
+ * height. Here we shrink the heading row to a single compact line and hand the
+ * remaining vertical space to the article, so each screenshot can show its whole
+ * hero without being clipped. CSS-only (registered as 'default' strategy).
+ */
+// Doubled-up class selector (`.slide-h3.layout-grid-compact`) so it overrides the
+// DSFR-layout preset's `section.slide-h3 header { min-height: 8rem }` and article
+// padding (same specificity otherwise — preset wins by source order).
+.reveal section.layout-grid-compact,
+.reveal section.slide-h3.layout-grid-compact {
+  justify-content: start;
+
+  header,
+  hgroup {
+    flex: 0 0 auto;
+    min-height: 0; // drop the reserved 8rem title band → gallery reclaims it
+    margin-bottom: 0.9em; // light breathing room under the compact title
+  }
+
+  header h3,
+  hgroup h3 {
+    font-size: 1.4em; // ~half the default section-title scale
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  article {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-top: 0; // drop the preset's 2rem vertical padding
+    padding-bottom: 0;
+    justify-content: center;
+  }
+}
