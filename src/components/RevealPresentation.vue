@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { RevealConfig } from '~/types/presentation'
-import { buildPrintPdfUrl, mergeRevealConfig, PRINT_PDF_QUERY } from '#shared/render'
+import { buildPrintPdfUrl, buildPrintView, mergeRevealConfig, PRINT_PDF_QUERY } from '#shared/render'
 import 'reveal.js/dist/reveal.css'
 // Reveal's print stylesheet: when the URL carries `?print-pdf`, Reveal adds the
 // `reveal-print` class to <html> and this CSS lays the deck out one slide per
@@ -18,9 +18,24 @@ const props = withDefaults(defineProps<Props>(), {
 
 const revealContainer = ref<HTMLElement | null>(null)
 
-// When the deck is already loaded in `?print-pdf` mode, Reveal switches to its
-// print layout — the on-screen "Print / PDF" affordance is then irrelevant.
-const isPrintMode = ref(false)
+// Whether THIS load is a `?print-pdf` render. Detected synchronously at setup
+// (client only) so Reveal can be initialized with the print config — not the
+// live one — from the start. SSR keeps it false (no `window`).
+const isPrintMode = import.meta.client
+  && new RegExp(PRINT_PDF_QUERY, 'i').test(window.location.search)
+
+/**
+ * The config Reveal is actually initialized with. In `?print-pdf` mode it is the
+ * print writer's view (audit §5.8 / #14): the deck's `reveal:` with print-only
+ * overrides forced on — crucially `embedded: false`, so Reveal lays the deck out
+ * full-page (one slide per page) instead of confining it to its live container.
+ * Otherwise it is the deck's live `reveal:` config unchanged.
+ */
+const effectiveConfig = isPrintMode
+  ? buildPrintView({ meta: { reveal: props.config }, slides: [], assets: [] }, {
+    deckUrl: window.location.href,
+  }).reveal
+  : (props.config || {})
 
 /**
  * Open the current deck in Reveal's native print/PDF view. Reuses the shared
@@ -42,7 +57,7 @@ const resolvedRevealConfig = computed(() =>
 // Theme management
 const { loadTheme, unloadTheme, watchTheme } = useTheme(toRef(props, 'theme'))
 
-const { initialize, destroy, getInstance, sync } = useReveal(revealContainer, props.config || {})
+const { initialize, destroy, getInstance, sync } = useReveal(revealContainer, effectiveConfig)
 
 // Provide Reveal.js sync function to child components
 // This allows MDC components to trigger a sync after dynamic content changes
@@ -73,11 +88,23 @@ function handleAnchorClick(event: MouseEvent) {
 }
 
 onMounted(async () => {
-  isPrintMode.value = new RegExp(PRINT_PDF_QUERY, 'i').test(window.location.search)
   loadTheme(props.theme)
   watchTheme()
   await initialize()
   revealContainer.value?.addEventListener('click', handleAnchorClick)
+
+  // Reveal computes its print pagination during initialize(), but the Vue/MDC
+  // slide bodies render *after* mount — so the first print layout sees a deck
+  // that isn't filled in yet. Once content has settled, sync + re-layout so each
+  // slide is paginated against its real height. Two frames: one for Vue to flush
+  // the slot, one for the browser to apply the resulting sizes.
+  if (isPrintMode) {
+    await nextTick()
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      sync()
+      getInstance()?.layout()
+    }))
+  }
 })
 
 onUnmounted(() => {

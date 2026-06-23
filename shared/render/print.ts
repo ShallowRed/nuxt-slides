@@ -38,6 +38,15 @@ export interface DeckRenderer<T = unknown> {
 /** Reveal.js print-pdf query flag — the native entry into its print stylesheet. */
 export const PRINT_PDF_QUERY = 'print-pdf'
 
+/**
+ * Default printed page size (reveal.js logical units). Reveal paginates print
+ * output against the slide `width`/`height`; without explicit dimensions it sizes
+ * each page to its slide's natural content height, producing wildly uneven pages.
+ * Pinning a size gives uniform, predictable pages (4:3, reveal's own default).
+ */
+export const DEFAULT_PRINT_WIDTH = 960
+export const DEFAULT_PRINT_HEIGHT = 700
+
 export interface PrintOptions {
   /**
    * Base deck URL the print view is derived from (the live or frozen deck URL).
@@ -81,20 +90,25 @@ export interface PrintView {
  * and `controls:false` so the layout fills the page with no live-only chrome.
  */
 export function buildPrintView(model: DeckModel, options: PrintOptions): PrintView {
+  const deckReveal = model.meta.reveal
   const printOverrides: Partial<RevealConfig> = {
     embedded: false,
     controls: false,
     progress: false,
     showNotes: options.showNotes ?? false,
+    // Pin a page size so pages are uniform (keep the deck's own if it set one).
+    width: deckReveal?.width ?? DEFAULT_PRINT_WIDTH,
+    height: deckReveal?.height ?? DEFAULT_PRINT_HEIGHT,
+    // Default to one page per slide so a tall slide doesn't spill into a giant
+    // multi-screen page; callers can override via `maxPagesPerSlide`.
+    pdfMaxPagesPerSlide: options.maxPagesPerSlide ?? 1,
   }
-  if (options.maxPagesPerSlide != null)
-    printOverrides.pdfMaxPagesPerSlide = options.maxPagesPerSlide
   if (options.separateFragments != null)
     printOverrides.pdfSeparateFragments = options.separateFragments
 
   return {
     url: buildPrintPdfUrl(options.deckUrl),
-    reveal: mergeRevealConfig({ ...model.meta.reveal, ...printOverrides }),
+    reveal: mergeRevealConfig({ ...deckReveal, ...printOverrides }),
   }
 }
 

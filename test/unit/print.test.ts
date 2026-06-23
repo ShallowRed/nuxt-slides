@@ -4,6 +4,8 @@ import {
   buildPrintPdfUrl,
   buildPrintView,
   createPrintRenderer,
+  DEFAULT_PRINT_HEIGHT,
+  DEFAULT_PRINT_WIDTH,
   PRINT_PDF_QUERY,
 } from '../../shared/render/print'
 import { DEFAULT_REVEAL_CONFIG } from '../../shared/render/reveal'
@@ -39,8 +41,18 @@ describe('buildPrintView', () => {
     expect(view.reveal.controls).toBe(false)
     expect(view.reveal.progress).toBe(false)
     expect(view.reveal.showNotes).toBe(false)
+    // Pins a uniform page size + one page per slide so PDF pages are even.
+    expect(view.reveal.width).toBe(DEFAULT_PRINT_WIDTH)
+    expect(view.reveal.height).toBe(DEFAULT_PRINT_HEIGHT)
+    expect(view.reveal.pdfMaxPagesPerSlide).toBe(1)
     // Untouched defaults still flow through the shared merge.
     expect(view.reveal.hash).toBe(DEFAULT_REVEAL_CONFIG.hash)
+  })
+
+  it('keeps the deck\'s own page size when it declares one', () => {
+    const view = buildPrintView(model({ width: 1280, height: 720 }), { deckUrl: '/d/' })
+    expect(view.reveal.width).toBe(1280)
+    expect(view.reveal.height).toBe(720)
   })
 
   it('merges the deck reveal: frontmatter under the print overrides', () => {
@@ -56,18 +68,18 @@ describe('buildPrintView', () => {
   it('passes through pdf paging options when provided', () => {
     const view = buildPrintView(model(), {
       deckUrl: '/d/',
-      maxPagesPerSlide: 1,
+      maxPagesPerSlide: 3,
       separateFragments: true,
       showNotes: true,
     })
-    expect(view.reveal.pdfMaxPagesPerSlide).toBe(1)
+    expect(view.reveal.pdfMaxPagesPerSlide).toBe(3)
     expect(view.reveal.pdfSeparateFragments).toBe(true)
     expect(view.reveal.showNotes).toBe(true)
   })
 
-  it('omits pdf paging options when not provided', () => {
+  it('defaults to one page per slide and omits separateFragments when not given', () => {
     const view = buildPrintView(model(), { deckUrl: '/d/' })
-    expect(view.reveal.pdfMaxPagesPerSlide).toBeUndefined()
+    expect(view.reveal.pdfMaxPagesPerSlide).toBe(1)
     expect(view.reveal.pdfSeparateFragments).toBeUndefined()
   })
 })
