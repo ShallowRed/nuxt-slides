@@ -10,8 +10,12 @@
 
 import type { DeckParser, Slide } from '#shared/deck'
 import type { MDCParserResult } from '@nuxtjs/mdc'
+import {
+  BACKGROUND_ANNOTATION_TAG,
+  FULL_SLIDE_COMPONENT_NAMES,
+  STRIPPED_ANNOTATION_TAGS,
+} from '#shared/deck'
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
-import { FULL_SLIDE_COMPONENTS } from '~/config/presentation'
 
 // ---------------------------------------------------------------------------
 // AST helpers
@@ -45,7 +49,7 @@ function isItalicParagraph(node: any): boolean {
  */
 function getSlideLayout(children: any[]): string | undefined {
   for (const node of children) {
-    if (node.type === 'element' && FULL_SLIDE_COMPONENTS.includes(node.tag))
+    if (node.type === 'element' && FULL_SLIDE_COMPONENT_NAMES.includes(node.tag))
       return 'full'
     if (node.children) {
       const childLayout = getSlideLayout(node.children)
@@ -64,7 +68,7 @@ function getSlideLayout(children: any[]): string | undefined {
  * Extracts :slide-background{image="..."} override.
  */
 function extractBackgroundOverride(children: any[]): string | undefined {
-  const node = children.find(n => n.type === 'element' && n.tag === 'slide-background' && n.props?.image)
+  const node = children.find(n => n.type === 'element' && n.tag === BACKGROUND_ANNOTATION_TAG && n.props?.image)
   return node?.props.image
 }
 
@@ -72,7 +76,7 @@ function extractBackgroundOverride(children: any[]): string | undefined {
  * Removes :slide-background nodes so they don't reach MDCRenderer.
  */
 function filterBackgroundNodes(children: any[]): any[] {
-  return children.filter(n => !(n.type === 'element' && n.tag === 'slide-background'))
+  return children.filter(n => !(n.type === 'element' && n.tag === BACKGROUND_ANNOTATION_TAG))
 }
 
 /**
@@ -130,7 +134,7 @@ function extractLayout(children: any[]): { name: string, props: Record<string, s
  */
 function filterAnnotationNodes(children: any[]): any[] {
   return children.filter(n =>
-    !(n.type === 'element' && ['pretitle', 'subtitle', 'layout', 'quicklink'].includes(n.tag)),
+    !(n.type === 'element' && STRIPPED_ANNOTATION_TAGS.includes(n.tag)),
   )
 }
 

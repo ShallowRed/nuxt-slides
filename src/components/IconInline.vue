@@ -7,6 +7,8 @@
  * Remix Icons prefix: ri
  * Browse icons at: https://remixicon.com/ or https://icon-sets.iconify.design/ri/
  */
+import { normalizeIconName } from '#shared/deck'
+
 interface Props {
   name: string
   size?: string | number
@@ -16,14 +18,8 @@ const props = withDefaults(defineProps<Props>(), {
   size: '1.2em',
 })
 
-// Normalise ri-home-line → ri:home-line for Iconify
-const iconName = computed(() => {
-  // Already in Iconify format (contains ':')
-  if (props.name.includes(':'))
-    return props.name
-  // Convert first hyphen to colon: ri-home-line → ri:home-line
-  return props.name.replace('-', ':')
-})
+// Single icon-name rule (audit §5.8 / #13): ri-home-line → ri:home-line.
+const iconName = computed(() => normalizeIconName(props.name))
 
 // Dynamically import Icon component for client-side only
 const IconifyIcon = defineAsyncComponent(() =>
