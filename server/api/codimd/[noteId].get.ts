@@ -1,5 +1,6 @@
 import type { NoteSource } from '../../utils/codimd'
-import { fetchCollaborativeNote, getEditUrl, parseFlatFrontmatter, stripFrontmatter } from '../../utils/codimd'
+import { parseMarkdown } from '@nuxtjs/mdc/runtime'
+import { fetchCollaborativeNote, getEditUrl, stripFrontmatter } from '../../utils/codimd'
 
 /**
  * Dynamic CodiMD presentation endpoint.
@@ -39,8 +40,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Parse flat keys from the note's own frontmatter (theme, lang, title, …)
-  const noteFrontmatter = parseFlatFrontmatter(remoteContent)
+  // Parse the note's own frontmatter (full, including nested `reveal`/`backgrounds`).
+  // Uses the same parser as the rest of the app so nested config is read faithfully.
+  const ast = await parseMarkdown(remoteContent)
+  const noteFrontmatter = (ast.data || {}) as Record<string, any>
 
   // Strip any frontmatter from the remote note (we'll use preset instead)
   const body = stripFrontmatter(remoteContent)
@@ -56,14 +59,16 @@ export default defineEventHandler(async (event) => {
 })
 
 /**
- * Build a full markdown document with frontmatter from a named preset,
- * with flat keys from the note's own frontmatter merged on top (note wins).
+ * Build a full markdown document with frontmatter from a named preset, then
+ * deep-merge the note's own frontmatter on top (the note is the author's source
+ * of truth). Nested blocks like `reveal` (margin/width/height) and `backgrounds`
+ * override the preset's, so a deck's `reveal.margin` set in CodiMD is honoured.
  * Preset definitions are duplicated here (server-side) to avoid importing
  * from src/ which is client/universal code.
  */
 function buildContentWithPreset(
   presetName: string,
-  noteFrontmatter: Record<string, string>,
+  noteFrontmatter: Record<string, any>,
   body: string,
 ): string {
   const dsfr = {
@@ -114,7 +119,7 @@ function buildContentWithPreset(
 
   // Note frontmatter overrides flat keys (theme, lang, title, …).
   // When the theme changes, swap the backgrounds/reveal to match the new preset.
-  const noteTheme = noteFrontmatter.theme
+  const noteTheme = typeof noteFrontmatter.theme === 'string' ? noteFrontmatter.theme : undefined
   if (noteTheme && noteTheme !== preset.theme && presets[noteTheme]) {
     const themePreset = presets[noteTheme]!
     if (themePreset.backgrounds)
@@ -123,15 +128,37 @@ function buildContentWithPreset(
       preset.reveal = themePreset.reveal
   }
 
-  // Merge flat note keys on top
-  for (const [k, v] of Object.entries(noteFrontmatter)) {
-    // Don't let nested-object keys from the note accidentally overwrite objects
-    if (typeof preset[k] !== 'object')
-      preset[k] = v
-  }
+  // Deep-merge the note's own frontmatter over the preset. The note is the
+  // author's source of truth: nested blocks like `reveal` (margin/width/height)
+  // and `backgrounds` override the preset's, and scalar keys (theme, lang, title…)
+  // win too. This is what makes a deck's `reveal.margin` set in CodiMD apply.
+  const merged = deepMerge(preset, noteFrontmatter)
 
-  const frontmatter = toYaml(preset)
+  const frontmatter = toYaml(merged)
   return `---\n${frontmatter}---\n\n${body}`
+}
+
+/**
+ * Recursively merge `override` onto `base`. Plain objects merge deeply; scalars
+ * and arrays replace. `null`/`undefined` overrides are ignored so a stray empty
+ * note key can't wipe a preset default.
+ */
+function deepMerge(base: Record<string, any>, override: Record<string, any>): Record<string, any> {
+  const out: Record<string, any> = { ...base }
+  for (const [key, value] of Object.entries(override)) {
+    if (value === undefined || value === null)
+      continue
+    const current = out[key]
+    if (isPlainObject(current) && isPlainObject(value))
+      out[key] = deepMerge(current, value)
+    else
+      out[key] = value
+  }
+  return out
+}
+
+function isPlainObject(value: any): value is Record<string, any> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 /**
@@ -147,6 +174,15 @@ function toYaml(obj: Record<string, any>, indent = 0): string {
 
     if (typeof value === 'object' && !Array.isArray(value)) {
       yaml += `${pad}${key}:\n${toYaml(value, indent + 1)}`
+    }
+    else if (Array.isArray(value)) {
+      yaml += `${pad}${key}:\n`
+      for (const item of value) {
+        if (typeof item === 'number' || typeof item === 'boolean')
+          yaml += `${pad}  - ${item}\n`
+        else
+          yaml += `${pad}  - "${item}"\n`
+      }
     }
     else if (typeof value === 'boolean') {
       yaml += `${pad}${key}: ${value}\n`
