@@ -7,7 +7,7 @@
  */
 
 import process from 'node:process'
-import { DEFAULT_REVEAL_CONFIG } from '../../src/config/presentation'
+import { DEFAULT_REVEAL_CONFIG, rebaseAssetUrls } from '#shared/render'
 
 /**
  * Iframe scaler, inlined after Reveal.initialize (a separate <script src> is
@@ -65,11 +65,9 @@ export default defineNitroPlugin((nitroApp) => {
       `<script src="${prefix}/reveal/reveal.js"></script>`,
       `<script>Reveal.initialize(${revealInitExpr});\n${INLINE_SCALER}</script>`,
     )
-    // Rebase the deck's own root-absolute asset URLs, keyed on the PATH TARGET not
-    // the attribute name — so `src`, `href`, and the Reveal lightbox's
-    // `data-preview-link` are all covered. Value rewriting only, never tag removal.
-    const ASSET_DIRS = '_storybook|vitrine|fonts|images|backgrounds|geojson|icons|themes|documents|manifests'
-    const re = new RegExp(`(=")/((?:${ASSET_DIRS})/[^"]*)`, 'g')
-    html.body = html.body.map(chunk => chunk.replace(re, `$1${prefix}/$2`))
+    // Rebase the deck's own root-absolute asset URLs through the shared rebasing
+    // utility (audit §5.9 / Axe H) — one regex for `src`, `href`, and the Reveal
+    // lightbox's `data-preview-link`. Value rewriting only, never tag removal.
+    html.body = html.body.map(chunk => rebaseAssetUrls(chunk, prefix))
   })
 })

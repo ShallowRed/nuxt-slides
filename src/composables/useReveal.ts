@@ -13,8 +13,7 @@
 
 import type { Ref } from 'vue'
 import type { RevealConfig } from '~/types/presentation'
-import { DEFAULT_REVEAL_CONFIG } from '~/config/presentation'
-import { EMBED_SANDBOX } from '~/utils/storybook'
+import { EMBED_SANDBOX, mergeRevealConfig } from '#shared/render'
 
 export function useReveal(
   container: Ref<HTMLElement | null>,
@@ -67,10 +66,7 @@ export function useReveal(
     // Dynamic import to avoid SSR issues
     const { default: Reveal } = await import('reveal.js')
 
-    const mergedConfig = {
-      ...DEFAULT_REVEAL_CONFIG,
-      ...config,
-    }
+    const mergedConfig = mergeRevealConfig(config)
 
     revealInstance = new Reveal(container.value, mergedConfig)
     await revealInstance.initialize()

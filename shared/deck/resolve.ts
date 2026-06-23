@@ -1,5 +1,6 @@
 import type { NoteOverridePolicy } from './merge'
 import type { DeckMeta, NoteSource } from './schema'
+import { KNOWN_THEMES } from '../theme/tokens'
 import { splitFrontmatter, stringifyDocument } from './frontmatter'
 import { applyOverridePolicy, deepMerge } from './merge'
 import { buildPresetBase } from './presets'
@@ -40,6 +41,8 @@ export interface DeckProvenance {
   overrides: string[]
   /** Provider of the remote note, when any. */
   source?: NoteSource
+  /** Non-fatal diagnostics (e.g. an unknown theme name). */
+  warnings: string[]
 }
 
 export interface ResolvedDeck {
@@ -94,6 +97,14 @@ export function resolveDeck(input: ResolveDeckInput): ResolvedDeck {
   // 3) Validate once, derive types, coerce numerics.
   const { meta } = parseDeckMeta(base, { strict, label })
 
+  // 3b) Theme-name traceability (audit §5.5 #5): the link frontmatter ↔ tokens is
+  // checked here. Unknown themes are *recorded* (not rejected) so a CSS-only theme
+  // with no token entry — or a typo — surfaces in provenance for debugging without
+  // taking a production deck dark.
+  const warnings: string[] = []
+  if (typeof meta.theme === 'string' && !KNOWN_THEMES.includes(meta.theme))
+    warnings.push(`unknown theme "${meta.theme}" (no tokens entry)`)
+
   // 4) Body precedence: remote note wins, else the stub, else nothing.
   let body: string
   let bodyFrom: DeckProvenance['bodyFrom']
@@ -114,6 +125,6 @@ export function resolveDeck(input: ResolveDeckInput): ResolvedDeck {
     meta,
     body,
     content: stringifyDocument(meta as Record<string, unknown>, body),
-    provenance: { bodyFrom, layers, overrides, source },
+    provenance: { bodyFrom, layers, overrides, source, warnings },
   }
 }

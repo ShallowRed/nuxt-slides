@@ -68,6 +68,8 @@ export default defineNuxtConfig({
     codimdUrl: process.env.NUXT_CODIMD_URL || '',
     // HackMD.io API token for Bearer auth (server-only, never exposed to client)
     hackmdApiToken: process.env.NUXT_HACKMD_API_TOKEN || '',
+    // Single, shared TTL (ms) for content sources + registry (audit §5.7 / P1 #6).
+    sourceCacheTtlMs: process.env.NUXT_SOURCE_CACHE_TTL_MS || '',
     public: {
       // Exposed to client for building "Edit" links
       codimdUrl: process.env.NUXT_CODIMD_URL || '',

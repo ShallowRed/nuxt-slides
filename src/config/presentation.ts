@@ -2,7 +2,9 @@
  * Default configuration for presentations
  */
 
-import type { PresentationMetadata, RevealConfig, ThemeBackgrounds } from '~/types/presentation'
+import type { PresentationMetadata, ThemeBackgrounds } from '~/types/presentation'
+import { DEFAULT_REVEAL_CONFIG } from '#shared/render'
+import { THEME_BACKGROUNDS } from '#shared/theme/tokens'
 
 export const DEFAULT_METADATA: PresentationMetadata = {
   theme: 'minimal',
@@ -11,27 +13,13 @@ export const DEFAULT_METADATA: PresentationMetadata = {
 }
 
 /**
- * Theme-specific background images
- * Maps theme names to background configurations by heading level
+ * Theme-specific background images.
+ *
+ * Re-exported from the single theme tokens manifest (`shared/theme/tokens.ts`,
+ * audit §5.5) so there is no longer a hand-maintained second copy here. Kept as a
+ * named export for backward compatibility with existing imports.
  */
-export const THEME_BACKGROUNDS: Record<string, ThemeBackgrounds> = {
-  dsfr: {
-    h1: '/backgrounds/slide-bg-default.png',
-    h2: '/backgrounds/slide-bg-contrast.png',
-    h3: '/backgrounds/slide-bg-subtle.png',
-    // h2: '/backgrounds/dsfr-section.jpg',
-    // h3: undefined (inherits from parent)
-    // default: undefined
-  },
-  minimal: {
-    // No backgrounds by default
-  },
-  lee: {
-    h1: '/backgrounds/lee-slide-contrast.png',
-    h2: '/backgrounds/lee-slide-contrast.png',
-    h3: '/backgrounds/lee-slide-subtle.png',
-  },
-}
+export { THEME_BACKGROUNDS }
 
 /**
  * Get background image for a slide based on theme and heading level
@@ -51,26 +39,14 @@ export function getSlideBackground(theme: string, headingLevel?: string, customB
   return backgrounds.default
 }
 
-export const DEFAULT_REVEAL_CONFIG: RevealConfig = {
-  hash: true,
-  slideNumber: 'c/t',
-  embedded: true,
-  margin: 0.1,
-  minScale: 0.2,
-  maxScale: 2.0,
-  center: false,
-  controls: true,
-  progress: true,
-  keyboard: true,
-  touch: true,
-  loop: false,
-  fragments: true,
-  help: true,
-  showNotes: false,
-  autoPlayMedia: null,
-  preloadIframes: null,
-  autoSlide: 0,
-}
+/**
+ * Default Reveal.js init config.
+ *
+ * Re-exported from the shared render utilities (`shared/render/reveal.ts`,
+ * audit §5.8) so the live composable, the SSG component, and the frozen bundle
+ * plugin all init Reveal from one definition instead of three.
+ */
+export { DEFAULT_REVEAL_CONFIG }
 
 /**
  * Components that occupy the full slide content area.
