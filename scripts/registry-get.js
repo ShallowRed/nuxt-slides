@@ -19,6 +19,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
 import { load as parseYaml } from 'js-yaml'
+import { splitFrontmatter } from '../shared/deck/frontmatter.ts'
 
 const [alias, field] = process.argv.slice(2)
 if (!alias || !field) {
@@ -43,11 +44,12 @@ if (field === 'theme') {
     const stub = join(presentationsDir, folder, `${slug}.md`)
     if (!existsSync(stub))
       continue
+    // Read the stub frontmatter through the shared parser (audit §5.3) instead of
+    // a bespoke regex — one definition of "parse frontmatter", nested-key safe.
     const raw = await readFile(stub, 'utf-8')
-    const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)
-    const m = fm?.[1].match(/^theme:(.+)$/m)
-    if (m) {
-      theme = m[1].trim().replace(/^['"]|['"]$/g, '')
+    const value = splitFrontmatter(raw).data.theme
+    if (typeof value === 'string' && value.trim()) {
+      theme = value.trim()
       break
     }
   }
