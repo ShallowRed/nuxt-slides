@@ -1,74 +1,72 @@
 /**
- * Initialize the presentations submodule during CI builds (Vercel).
+ * Initialize the presentations content during CI builds (Vercel).
  *
- * Locally the submodule is cloned normally via `git submodule update --init`.
- * On Vercel, where the private submodule can't be cloned without a token,
- * this script clones it directly into the presentations/ directory.
+ * Locally the content is a git submodule cloned via `git submodule update --init`.
+ * On Vercel, where the private repo can't be cloned without a token, this script
+ * clones it directly into the presentations/ directory.
+ *
+ * The source is now DECLARED once (audit §5.7 / Axe F): `readContentSourceConfig`
+ * interprets the env into a typed config, and `decideFetchAction` makes the
+ * fail-closed policy an explicit, tested decision instead of branching buried in
+ * this script. Shipping an empty presentations/ on CI is refused loudly — that
+ * silent-empty deploy was the worst past failure mode.
  */
 
 import { execSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
+import { decideFetchAction, readContentSourceConfig } from '../shared/content/source-config.ts'
 
 const PRESENTATIONS_DIR = join(process.cwd(), 'presentations')
 
-const config = {
-  repo: process.env.PRESENTATIONS_REPO || 'ShallowRed/nuxt-slides-content',
-  token: process.env.PRESENTATIONS_REPO_TOKEN,
-  branch: process.env.PRESENTATIONS_BRANCH || 'main',
+/** Is the content already checked out locally (submodule populated)? */
+function isPopulated() {
+  const publicDir = join(PRESENTATIONS_DIR, 'public')
+  if (!existsSync(publicDir))
+    return false
+  return readdirSync(publicDir).some(f => f.endsWith('.md'))
 }
 
 async function fetchPresentations() {
-  // On CI/Vercel the private content MUST be fetched: silently shipping an empty
-  // presentations/ produces a site where every deck, the registry and all /p
-  // aliases 404 — while the build still "succeeds". Fail loudly instead.
-  const isCI = Boolean(process.env.VERCEL || process.env.CI)
+  const config = readContentSourceConfig()
+  const decision = decideFetchAction(config, isPopulated())
 
-  // Check if submodule is already populated (local dev)
-  if (existsSync(join(PRESENTATIONS_DIR, 'public'))) {
-    const files = readdirSync(join(PRESENTATIONS_DIR, 'public'))
-    if (files.some(f => f.endsWith('.md'))) {
-      console.log('✅ Presentations submodule already initialized — skipping fetch')
+  switch (decision.action) {
+    case 'skip':
+      console.log(`✅ Presentations: ${decision.reason} — skipping fetch`)
       return
-    }
-  }
 
-  if (!config.token) {
-    const msg = '⚠️  No PRESENTATIONS_REPO_TOKEN — run: git submodule update --init'
-    if (isCI) {
-      console.error(`❌ ${msg}`)
-      console.error('   Refusing to build an empty site on CI. Set PRESENTATIONS_REPO_TOKEN.')
+    case 'fail':
+      console.error(`❌ ${decision.reason}`)
+      console.error('   Set PRESENTATIONS_REPO_TOKEN in the CI environment.')
       process.exit(1)
-    }
-    console.log(msg)
-    return
-  }
+      return
 
-  console.log(`📥 Cloning ${config.repo} into presentations/...`)
-
-  try {
-    const cloneUrl = `https://x-access-token:${config.token}@github.com/${config.repo}.git`
-    // Remove empty submodule placeholder and clone fresh
-    execSync(`rm -rf "${PRESENTATIONS_DIR}"`, { stdio: 'inherit' })
-    execSync(
-      `git clone --depth 1 --branch ${config.branch} ${cloneUrl} "${PRESENTATIONS_DIR}"`,
-      { stdio: 'inherit' },
-    )
-    // Remove .git from cloned dir so Nuxt doesn't get confused
-    execSync(`rm -rf "${join(PRESENTATIONS_DIR, '.git')}"`, { stdio: 'inherit' })
-    console.log('✨ Presentations fetched successfully!')
-  }
-  catch (error) {
-    console.error('❌ Failed to fetch presentations:', error.message)
-    if (isCI) {
-      console.error('   Likely an expired/invalid PRESENTATIONS_REPO_TOKEN. Rotate it in Vercel env.')
-      console.error('   Refusing to deploy a site without its presentations.')
-      process.exit(1)
-    }
-    console.log('   Continuing build without private content...')
+    case 'clone':
+      console.log(`📥 Cloning ${decision.repo}@${decision.branch} into presentations/...`)
+      try {
+        const cloneUrl = `https://x-access-token:${process.env.PRESENTATIONS_REPO_TOKEN}@github.com/${decision.repo}.git`
+        // Remove empty submodule placeholder and clone fresh
+        execSync(`rm -rf "${PRESENTATIONS_DIR}"`, { stdio: 'inherit' })
+        execSync(
+          `git clone --depth 1 --branch ${decision.branch} ${cloneUrl} "${PRESENTATIONS_DIR}"`,
+          { stdio: 'inherit' },
+        )
+        // Remove .git from cloned dir so Nuxt doesn't get confused
+        execSync(`rm -rf "${join(PRESENTATIONS_DIR, '.git')}"`, { stdio: 'inherit' })
+        console.log('✨ Presentations fetched successfully!')
+      }
+      catch (error) {
+        console.error('❌ Failed to fetch presentations:', error.message)
+        if (config.failClosed) {
+          console.error('   Likely an expired/invalid PRESENTATIONS_REPO_TOKEN. Rotate it in Vercel env.')
+          console.error('   Refusing to deploy a site without its presentations.')
+          process.exit(1)
+        }
+        console.log('   Continuing build without private content...')
+      }
   }
 }
 
 fetchPresentations()
-
