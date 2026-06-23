@@ -6,7 +6,7 @@
  * copied in by the Makefile.
  */
 
-import process from 'node:process'
+import { readBundleConfig } from '#shared/build'
 import { DEFAULT_REVEAL_CONFIG, rebaseAssetUrls } from '#shared/render'
 
 /**
@@ -30,10 +30,11 @@ if(window.Reveal&&Reveal.on){Reveal.on('ready',scan);Reveal.on('slidechanged',sc
 })();`
 
 export default defineNitroPlugin((nitroApp) => {
-  if (!process.env.BUNDLE_ONLY_SLUG)
+  const bundle = readBundleConfig()
+  if (!bundle.enabled)
     return
 
-  const theme = process.env.BUNDLE_THEME || 'lee'
+  const theme = bundle.theme
   // The deck HTML is emitted at `slides/<slug>--standalone/index.html` — two dirs
   // below the bundle root, where `reveal/`, `_storybook/`, `themes/` and the asset
   // dirs live. Using a depth-relative prefix (not a root-absolute `/…` nor the

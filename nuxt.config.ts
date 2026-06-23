@@ -5,6 +5,10 @@ import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import presentationWatcher from './plugins/presentation-watcher.js'
 import themeWatcher from './plugins/theme-watcher.js'
+import { readBundleConfig } from './shared/build/bundle'
+
+// Single typed read of the standalone-bundle toggles (audit §7 P2 #10).
+const bundle = readBundleConfig()
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-27',
@@ -13,8 +17,8 @@ export default defineNuxtConfig({
 
   // Frozen bundles build against a reduced public/ (build-reduced-public.js) instead
   // of the whole repo public/ (~11 Mo of home photos + all themes' backgrounds).
-  ...(process.env.BUNDLE_PUBLIC_DIR
-    ? { dir: { public: process.env.BUNDLE_PUBLIC_DIR } }
+  ...(bundle.publicDir
+    ? { dir: { public: bundle.publicDir } }
     : {}),
 
   features: {
@@ -25,8 +29,8 @@ export default defineNuxtConfig({
     //   inlineStyles: () => true → inline ALL CSS, not just `.vue` (the default
     //     predicate). Composable-level CSS (e.g. reveal.css) would otherwise stay a
     //     <link> into the deleted _nuxt/ dir and 404.
-    noScripts: !!process.env.BUNDLE_ONLY_SLUG,
-    inlineStyles: process.env.BUNDLE_ONLY_SLUG ? () => true : undefined,
+    noScripts: bundle.enabled,
+    inlineStyles: bundle.enabled ? () => true : undefined,
   },
 
   modules: ['@nuxtjs/mdc', 'nuxt-auth-utils', '@nuxt/icon'],
@@ -53,7 +57,7 @@ export default defineNuxtConfig({
   },
 
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/',
+    baseURL: bundle.baseUrl,
     head: {
       title: 'Nuxt Slides',
       meta: [
@@ -80,7 +84,7 @@ export default defineNuxtConfig({
   // In bundle mode (BUNDLE_ONLY_SLUG, DDR-017 §2.a-ter) we ONLY want the deck's
   // own slug + its API — not the app shell (/, /login) nor the global API index,
   // which would otherwise be prerendered into the bundle as dead pages.
-  routeRules: process.env.BUNDLE_ONLY_SLUG
+  routeRules: bundle.enabled
     ? {
         '/slides/**': { prerender: true },
         '/api/presentations/**': { prerender: true },
@@ -136,7 +140,7 @@ export default defineNuxtConfig({
       // In bundle mode, skip the SPA fallbacks (index/200/404) + the prerendered
       // API json — dead weight in a single-deck static bundle.
       'prerender:generate': function (route) {
-        if (!process.env.BUNDLE_ONLY_SLUG)
+        if (!bundle.enabled)
           return
         // Skip SPA fallbacks (the deck is a single static Reveal page) and the
         // prerendered API json (the deck is static — it no longer fetches it).
@@ -154,7 +158,7 @@ export default defineNuxtConfig({
       const publicDir = join(process.cwd(), 'presentations', 'public')
 
       // BUNDLE_ONLY_SLUG: restrict prerender to a single slug (standalone bundle mode)
-      const onlySlug = process.env.BUNDLE_ONLY_SLUG
+      const onlySlug = bundle.onlySlug
       if (onlySlug) {
         nitroConfig.prerender = nitroConfig.prerender || {}
         nitroConfig.prerender.crawlLinks = false
