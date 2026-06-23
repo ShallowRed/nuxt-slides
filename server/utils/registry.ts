@@ -10,10 +10,8 @@
  * access — the registry only adds the lifecycle axis and the alias mapping.
  */
 
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { load as parseYaml } from 'js-yaml'
-import { getPresentationsDir } from './presentations'
+import { presentationsStorage } from './presentations'
 
 export type Lifecycle = 'live' | 'frozen' | 'archived'
 
@@ -48,11 +46,11 @@ async function loadRegistry(): Promise<Map<string, RegistryEntry>> {
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS)
     return cache.entries
 
-  const path = join(getPresentationsDir(), 'registry.yml')
   const entries = new Map<string, RegistryEntry>()
 
   try {
-    const raw = await readFile(path, 'utf-8')
+    const stored = await presentationsStorage().getItem('registry.yml')
+    const raw = typeof stored === 'string' ? stored : stored == null ? '' : String(stored)
     const doc = (parseYaml(raw) || {}) as Record<string, Omit<RegistryEntry, 'alias'>>
 
     for (const [alias, value] of Object.entries(doc)) {

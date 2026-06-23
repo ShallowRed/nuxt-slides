@@ -104,6 +104,15 @@ export default defineNuxtConfig({
       },
 
   nitro: {
+    // Bundle the `presentations/` folder (stubs + registry.yml) as a server asset
+    // so it is reachable at runtime through `useStorage('assets:presentations')` on
+    // every target — including serverless (Vercel), where a cwd-relative path does
+    // NOT resolve. This is what makes the live `/p/<alias>` route + the registry
+    // work in production (DDR-018).
+    serverAssets: [
+      { baseName: 'presentations', dir: join(process.cwd(), 'presentations') },
+    ],
+
     // Frozen-presentation hosting (DDR-018) lives OUTSIDE public/, so `nuxt
     // generate` never aspirates already-frozen bundles (or their mirrored assets)
     // into the next build. Nitro serves these extra dirs as static at the same

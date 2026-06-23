@@ -1,10 +1,12 @@
 /**
- * Server utilities for presentation discovery and access control
+ * Server utilities for presentation discovery and access control.
+ *
+ * Content is read through Nitro's server assets (`useStorage('assets:presentations')`)
+ * rather than the raw filesystem. The `presentations/` folder is registered as a
+ * server asset in nuxt.config, so Nitro bundles it into the deployed function and
+ * the same access works in dev, on a Node server, and on serverless (Vercel) —
+ * where a cwd-relative path would not resolve.
  */
-
-import { readdir, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import process from 'node:process'
 
 /**
  * Valid publication status folders
@@ -14,19 +16,10 @@ export type PublicationStatus = 'public' | 'draft' | 'private' | 'semi-private'
 export const PUBLICATION_STATUSES: PublicationStatus[] = ['public', 'draft', 'private', 'semi-private']
 
 /**
- * Get the presentations base directory
+ * The Nitro storage mount that exposes the bundled `presentations/` folder.
  */
-export function getPresentationsDir(): string {
-  // In production build, presentations are in server/presentations
-  // In dev, they're in the project root
-  const cwd = process.cwd()
-
-  // Check if we're in .output directory (production build)
-  if (cwd.includes('.output')) {
-    return join(cwd, 'server', 'presentations')
-  }
-
-  return join(cwd, 'presentations')
+export function presentationsStorage() {
+  return useStorage('assets:presentations')
 }
 
 /**
@@ -34,21 +27,13 @@ export function getPresentationsDir(): string {
  * Returns null if not found, throws if duplicate slugs exist
  */
 export async function findPresentationBySlug(slug: string): Promise<{
-  filePath: string
   status: PublicationStatus
 } | null> {
-  const baseDir = getPresentationsDir()
-  const matches: { filePath: string, status: PublicationStatus }[] = []
+  const matches: PublicationStatus[] = []
 
   for (const status of PUBLICATION_STATUSES) {
-    const filePath = join(baseDir, status, `${slug}.md`)
-    try {
-      await readFile(filePath, 'utf-8')
-      matches.push({ filePath, status })
-    }
-    catch {
-      // File doesn't exist in this folder, continue
-    }
+    if (await readPresentationContentAt(slug, status))
+      matches.push(status)
   }
 
   if (matches.length === 0) {
@@ -56,27 +41,20 @@ export async function findPresentationBySlug(slug: string): Promise<{
   }
 
   if (matches.length > 1) {
-    throw new Error(`Duplicate slug "${slug}" found in multiple folders: ${matches.map(m => m.status).join(', ')}`)
+    throw new Error(`Duplicate slug "${slug}" found in multiple folders: ${matches.join(', ')}`)
   }
 
-  return matches[0]!
+  return { status: matches[0]! }
 }
 
 /**
  * List all presentations from a specific status folder
  */
 export async function listPresentationsByStatus(status: PublicationStatus): Promise<string[]> {
-  const dir = join(getPresentationsDir(), status)
-  try {
-    const files = await readdir(dir)
-    return files
-      .filter((file: string) => file.endsWith('.md'))
-      .map((file: string) => file.replace('.md', ''))
-  }
-  catch {
-    // Folder may not exist
-    return []
-  }
+  const keys = await presentationsStorage().getKeys(status)
+  return keys
+    .filter((key: string) => key.endsWith('.md'))
+    .map((key: string) => key.slice(key.lastIndexOf(':') + 1).replace(/\.md$/, ''))
 }
 
 /**
@@ -107,8 +85,7 @@ export async function readPresentationContent(slug: string): Promise<{
     return null
   }
 
-  const content = await readFile(found.filePath, 'utf-8')
-  return { content, status: found.status }
+  return readPresentationContentAt(slug, found.status)
 }
 
 /**
@@ -119,12 +96,8 @@ export async function readPresentationContentAt(
   slug: string,
   access: PublicationStatus,
 ): Promise<{ content: string, status: PublicationStatus } | null> {
-  const filePath = join(getPresentationsDir(), access, `${slug}.md`)
-  try {
-    const content = await readFile(filePath, 'utf-8')
-    return { content, status: access }
-  }
-  catch {
+  const raw = await presentationsStorage().getItem(`${access}:${slug}.md`)
+  if (raw == null)
     return null
-  }
+  return { content: typeof raw === 'string' ? raw : String(raw), status: access }
 }
