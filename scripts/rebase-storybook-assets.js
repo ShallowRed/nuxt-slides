@@ -16,6 +16,7 @@ import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
+import { detectAssetRoots } from '../shared/render/embed-storybook.ts'
 
 const [storybookDir, ...flags] = process.argv.slice(2)
 const DRY = flags.includes('--dry')
@@ -25,31 +26,12 @@ if (!storybookDir || !existsSync(storybookDir)) {
   process.exit(1)
 }
 
-// Storybook's own runtime — never a rewrite target.
-const RUNTIME = new Set([
-  'index.html',
-  'iframe.html',
-  'index.json',
-  'project.json',
-  'nunjucks-env.js',
-  'vite-inject-mocker-entry.js',
-  'assets',
-  'sb-addons',
-  'sb-common-assets',
-  'sb-manager',
-  'sb-preview',
-  '.well-known',
-])
-
-// Top-level static-asset names present in the bundle (dirs + loose files).
+// Top-level static-asset names present in the bundle (dirs + loose files), via
+// the EmbedSource port's single runtime/asset classifier (shared with mirror/prune).
 // A root-absolute URL whose first segment is one of these is a staticDir asset
 // we can safely rebase to relative.
 const topLevel = await readdir(storybookDir, { withFileTypes: true })
-const assetRoots = new Set(
-  topLevel
-    .filter(e => !RUNTIME.has(e.name) && !e.name.startsWith('.') && !e.name.endsWith('.js') && !e.name.endsWith('.json'))
-    .map(e => e.name),
-)
+const assetRoots = new Set(detectAssetRoots(topLevel.map(e => e.name)))
 
 if (assetRoots.size === 0) {
   console.log('  → No static-asset roots to rebase (already self-contained).')

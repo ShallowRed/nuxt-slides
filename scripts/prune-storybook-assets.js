@@ -13,6 +13,7 @@ import { existsSync } from 'node:fs'
 import { readdir, readFile, rm, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import process from 'node:process'
+import { isStorybookRuntime } from '../shared/render/embed-storybook.ts'
 
 const [storybookDir, ...flags] = process.argv.slice(2)
 const DRY = flags.includes('--dry')
@@ -23,20 +24,7 @@ if (!storybookDir || !existsSync(storybookDir)) {
 }
 
 // Storybook's own runtime — never prune; these ARE the app, not static assets.
-const RUNTIME = new Set([
-  'index.html',
-  'iframe.html',
-  'index.json',
-  'project.json',
-  'nunjucks-env.js',
-  'vite-inject-mocker-entry.js',
-  'assets',
-  'sb-addons',
-  'sb-common-assets',
-  'sb-manager',
-  'sb-preview',
-  '.well-known',
-])
+// Classified by the EmbedSource port (the single definition shared with mirror/rebase).
 
 // Text files whose contents we scan for asset references.
 const TEXT_EXT = /\.(?:js|mjs|cjs|css|html|json|svg|map)$/i
@@ -118,7 +106,7 @@ async function pruneEntry(name) {
 }
 
 for (const e of topEntries) {
-  if (RUNTIME.has(e.name) || e.name.endsWith('.js') || e.name.endsWith('.json'))
+  if (isStorybookRuntime(e.name))
     continue
   if (e.isDirectory()) {
     await pruneEntry(e.name)

@@ -20,6 +20,7 @@ import { existsSync } from 'node:fs'
 import { cp, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
+import { isStorybookRuntime } from '../shared/render/embed-storybook.ts'
 
 const [storybookDir, bundleOut] = process.argv.slice(2)
 if (!storybookDir || !bundleOut) {
@@ -27,29 +28,15 @@ if (!storybookDir || !bundleOut) {
   process.exit(1)
 }
 
-// Storybook's own build output — never mirror these to the root.
-const STORYBOOK_RUNTIME = new Set([
-  'index.html',
-  'iframe.html',
-  'index.json',
-  'project.json',
-  'nunjucks-env.js',
-  'vite-inject-mocker-entry.js',
-  'assets',
-  'sb-addons',
-  'sb-common-assets',
-  'sb-manager',
-  'sb-preview',
-  '.well-known',
-])
-
 const entries = await readdir(storybookDir, { withFileTypes: true })
 const mirrored = []
 const skipped = []
 
 for (const entry of entries) {
   const name = entry.name
-  if (STORYBOOK_RUNTIME.has(name) || name.endsWith('.js') || name.endsWith('.json')) {
+  // Skip Storybook's own runtime (the EmbedSource port's single definition) —
+  // only its staticDir assets get mirrored to the bundle root.
+  if (isStorybookRuntime(name)) {
     continue
   }
   const dest = join(bundleOut, name)
