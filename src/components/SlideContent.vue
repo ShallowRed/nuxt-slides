@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { PresentationMetadata, Slide } from '~/types/presentation'
+import { EMBED_SANDBOX, resolveSlideMedia } from '#shared/render'
 import MDCRenderer from '@nuxtjs/mdc/runtime/components/MDCRenderer.vue'
 import { getLayoutStrategy } from '~/config/layouts'
-import { getMediaFit, quicklinkParts } from '~/utils/slide-rendering'
-import { buildStoryUrl, EMBED_SANDBOX } from '~/utils/storybook'
+import { quicklinkParts } from '~/utils/slide-rendering'
 
 const props = defineProps<{
   slide: Slide
@@ -13,46 +13,11 @@ const props = defineProps<{
 
 const layoutStrategy = computed(() => getLayoutStrategy(props.slide.layout))
 
-const mediaParts = computed(() => {
-  const lp = props.slide.layoutProps
-  if (!lp)
-    return null
-  // Storybook shortcut: `:layout{story="<id>"}` resolves against the
-  // frontmatter `storybook` base URL and is embedded as an iframe. Falls
-  // back to an explicit `src`/`type` when no story is set.
-  const storySrc = lp.story
-    ? buildStoryUrl(props.metadata?.storybook, lp.story)
-    : undefined
-  const src = storySrc ?? lp.src
-  if (!src)
-    return null
-  const type = storySrc ? 'iframe' : lp.type
-  const fit = getMediaFit(lp)
-  // `previewWidth` (logical desktop px) drives the iframe zoom-out. Disabled
-  // with `raw` or `fit="contain"`. MDC kebab-cases camelCase attribute keys, so
-  // `previewWidth="1600"` arrives as `preview-width` — check that first, with the
-  // camel/lower forms as fallbacks.
-  const previewWidthRaw = lp['preview-width'] ?? lp.previewWidth ?? lp.previewwidth
-  const previewWidth = previewWidthRaw ? Number.parseInt(previewWidthRaw, 10) : 1440
-  const scaled = type === 'iframe' && lp.raw == null && fit !== 'contain'
-  const hasLightbox = Boolean(lp.lightbox)
-  return {
-    src,
-    type,
-    title: lp.title || '',
-    alt: lp.alt || '',
-    fit,
-    scaled,
-    // Without a lightbox, a scaled story embed is interactive in place: clicks
-    // browse *inside* the iframe (sandboxed, so it can't escape the slides).
-    interactive: scaled && !hasLightbox,
-    previewWidth: Number.isFinite(previewWidth) && previewWidth > 0 ? previewWidth : 1440,
-    hasLightbox,
-    hint: lp.hint || undefined,
-    previewLink: (lp.lightbox && type === 'iframe') ? src : undefined,
-    previewImage: (lp.lightbox && type !== 'iframe') ? src : undefined,
-  }
-})
+// Media pane resolution (story URL, scaling, fit, preview) lives in the shared
+// transform pipeline (audit §7 P2 #8) so it has one tested home instead of being
+// inlined here. Returns null when the slide has no media.
+const mediaParts = computed(() =>
+  resolveSlideMedia(props.slide.layoutProps, { storybook: props.metadata?.storybook }))
 
 const parsedQuicklink = computed(() => {
   if (!props.slide.quicklink)

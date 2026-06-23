@@ -2,7 +2,7 @@
  * Default configuration for presentations
  */
 
-import type { PresentationMetadata, ThemeBackgrounds } from '~/types/presentation'
+import type { PresentationMetadata } from '~/types/presentation'
 import { DEFAULT_REVEAL_CONFIG } from '#shared/render'
 import { THEME_BACKGROUNDS } from '#shared/theme/tokens'
 
@@ -20,24 +20,6 @@ export const DEFAULT_METADATA: PresentationMetadata = {
  * named export for backward compatibility with existing imports.
  */
 export { THEME_BACKGROUNDS }
-
-/**
- * Get background image for a slide based on theme and heading level
- */
-export function getSlideBackground(theme: string, headingLevel?: string, customBackgrounds?: ThemeBackgrounds): string | undefined {
-  // Priority: 1. Custom backgrounds from frontmatter, 2. Theme defaults
-  const backgrounds = customBackgrounds || THEME_BACKGROUNDS[theme]
-
-  if (!backgrounds)
-    return undefined
-
-  // Check for specific heading level
-  if (headingLevel && backgrounds[headingLevel as keyof ThemeBackgrounds])
-    return backgrounds[headingLevel as keyof ThemeBackgrounds]
-
-  // Fallback to default
-  return backgrounds.default
-}
 
 /**
  * Default Reveal.js init config.
