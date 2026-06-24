@@ -13,5 +13,6 @@
  */
 export * from './decide'
 export * from './resolve-role'
+export * from './role-config'
 export * from './roles'
 export * from './status'
