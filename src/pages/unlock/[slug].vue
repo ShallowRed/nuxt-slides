@@ -6,6 +6,25 @@ definePageMeta({
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
+/**
+ * Password gate, route-agnostic. The deck pages redirect here on a 401
+ * `requiresPassword`, passing:
+ *   - `api`    : the endpoint to verify against (slides → /api/presentations/:slug,
+ *                diffused → /api/p/:alias). The verified password sets the shared
+ *                24h `access_<slug>` cookie server-side.
+ *   - `return` : where to send the user once unlocked (their original URL), so a
+ *                deck reached via /p/<alias> returns to /p/<alias>, not /slides.
+ * Both default sanely so a bare /unlock/<slug> still works for the slides route.
+ */
+const verifyApi = computed(() => {
+  const api = route.query.api as string | undefined
+  return api && api.startsWith('/api/') ? api : `/api/presentations/${slug.value}`
+})
+const returnTo = computed(() => {
+  const r = route.query.return as string | undefined
+  return r && r.startsWith('/') && !r.startsWith('//') ? r : `/slides/${slug.value}`
+})
+
 const password = ref('')
 const errorMessage = ref('')
 const loading = ref(false)
@@ -17,22 +36,17 @@ async function unlock() {
   hasAttempted.value = true
 
   try {
-    // Try to fetch the presentation with the password
-    await $fetch(`/api/presentations/${slug.value}?password=${encodeURIComponent(password.value)}`)
-
-    // Success! Redirect to the presentation
-    await navigateTo(`/slides/${slug.value}`)
+    const sep = verifyApi.value.includes('?') ? '&' : '?'
+    await $fetch(`${verifyApi.value}${sep}password=${encodeURIComponent(password.value)}`)
+    await navigateTo(returnTo.value)
   }
   catch (e: any) {
-    if (e.statusCode === 403) {
+    if (e.statusCode === 403)
       errorMessage.value = 'Mot de passe incorrect'
-    }
-    else if (e.statusCode === 401) {
+    else if (e.statusCode === 401)
       errorMessage.value = 'Mot de passe requis'
-    }
-    else {
+    else
       errorMessage.value = e.message || 'Une erreur est survenue'
-    }
   }
   finally {
     loading.value = false
@@ -55,9 +69,9 @@ async function unlock() {
         </p>
 
         <form @submit.prevent="unlock">
-          <!-- Error message - only show after an attempt -->
           <div
             v-if="hasAttempted && errorMessage"
+            role="alert"
             class="alert alert-error mb-4"
           >
             <svg
@@ -76,7 +90,6 @@ async function unlock() {
             <span>{{ errorMessage }}</span>
           </div>
 
-          <!-- Password input -->
           <div class="form-control">
             <label class="label">
               <span class="label-text">Mot de passe</span>
@@ -85,13 +98,12 @@ async function unlock() {
               v-model="password"
               type="password"
               placeholder="Entrez le mot de passe"
-              class="input input-bordered"
+              class="input input-bordered w-full"
               :disabled="loading"
               autofocus
             >
           </div>
 
-          <!-- Submit button -->
           <div class="form-control mt-6">
             <button
               type="submit"
@@ -102,7 +114,7 @@ async function unlock() {
                 v-if="loading"
                 class="loading loading-spinner loading-sm"
               />
-              {{ loading ? 'Vérification...' : 'Déverrouiller' }}
+              {{ loading ? 'Vérification…' : 'Déverrouiller' }}
             </button>
           </div>
         </form>
