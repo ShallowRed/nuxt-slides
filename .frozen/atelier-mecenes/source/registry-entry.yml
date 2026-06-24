@@ -1,0 +1,8 @@
+atelier-mecenes:
+  title: Atelier mécènes — maquettes live
+  lifecycle: frozen
+  slug: atelier-mecenes
+  access: public
+  frozenBundle: atelier-mecenes
+  aliases:
+    - codimd/h2rk2TRvMr
