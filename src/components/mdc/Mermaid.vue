@@ -315,7 +315,11 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Controls -->
-        <div class="mermaid-controls" @mousedown.stop @click.stop>
+        <div
+          class="mermaid-controls"
+          @mousedown.stop
+          @click.stop
+        >
           <button
             class="mermaid-control-btn"
             title="Zoom arrière"

@@ -72,13 +72,14 @@ function extractStoryIds(markdown) {
   const ids = []
   const seen = new Set()
   const re = /\bstory=["']([^"']+)["']/g
-  let m
-  while ((m = re.exec(markdown)) !== null) {
+  let m = re.exec(markdown)
+  while (m !== null) {
     const id = m[1]
     if (!seen.has(id)) {
       seen.add(id)
       ids.push(id)
     }
+    m = re.exec(markdown)
   }
   return ids
 }
