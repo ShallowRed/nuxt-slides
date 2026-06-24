@@ -4,5 +4,6 @@
  * shape and the status vocabulary live in one place (they used to be duplicated
  * and out of sync).
  */
+export * from './catalog-view'
 export * from './list-item'
 export * from './status-config'
