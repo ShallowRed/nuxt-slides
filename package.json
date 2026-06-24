@@ -24,30 +24,30 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@iconify/vue": "^5.0.0",
-    "@nuxtjs/mdc": "^0.19.1",
-    "@types/node": "^24.10.1",
-    "js-yaml": "^5.1.0",
-    "mermaid": "^11.12.2",
-    "nuxt": "^4.2.1",
-    "nuxt-auth-utils": "^0.5.25",
-    "reveal.js": "^5.2.1",
-    "unist-util-visit": "^5.0.0",
-    "vue": "^3.5.25",
-    "vue-router": "^4.6.3",
-    "zod": "^4.4.3"
+    "@iconify/vue": "catalog:",
+    "@nuxtjs/mdc": "catalog:",
+    "@types/node": "catalog:",
+    "js-yaml": "catalog:",
+    "mermaid": "catalog:",
+    "nuxt": "catalog:",
+    "nuxt-auth-utils": "catalog:",
+    "reveal.js": "catalog:",
+    "unist-util-visit": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.4.2",
-    "@iconify-json/ri": "^1.2.6",
-    "@nuxt/icon": "^2.1.0",
-    "@tailwindcss/vite": "^4.1.17",
-    "@types/js-yaml": "^4.0.9",
-    "concurrently": "^9.2.1",
-    "daisyui": "^5.5.8",
-    "eslint": "^9.39.1",
-    "sass": "^1.94.2",
-    "tailwindcss": "^4.1.17",
-    "vitest": "^4.1.9"
+    "@antfu/eslint-config": "catalog:",
+    "@iconify-json/ri": "catalog:",
+    "@nuxt/icon": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@types/js-yaml": "catalog:",
+    "concurrently": "catalog:",
+    "daisyui": "catalog:",
+    "eslint": "catalog:",
+    "sass": "catalog:",
+    "tailwindcss": "catalog:",
+    "vitest": "catalog:"
   }
 }
