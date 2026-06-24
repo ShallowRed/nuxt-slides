@@ -24,11 +24,16 @@ const to = computed(() =>
     : `/slides/${props.presentation.slug}`)
 
 const statusDisplay = computed(() => STATUS_CONFIG[props.presentation.status])
+
+// Resolve the real NuxtLink component: passing the string 'NuxtLink' to <component
+// :is> renders an inert <nuxtlink> HTML element (no navigation) — the click bug.
+const NuxtLink = resolveComponent('NuxtLink')
+const rootTag = computed(() => (props.variant === 'public' ? NuxtLink : 'div'))
 </script>
 
 <template>
   <component
-    :is="variant === 'public' ? 'NuxtLink' : 'div'"
+    :is="rootTag"
     :to="variant === 'public' ? to : undefined"
     class="card shadow-lg transition-all duration-300"
     :class="[
