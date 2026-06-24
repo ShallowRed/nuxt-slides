@@ -4,6 +4,7 @@ import { STATUS_CONFIG } from '#shared/presentations'
 
 definePageMeta({
   layout: false,
+  middleware: 'admin',
 })
 
 // Fetch all presentations (including protected ones since we're authenticated)
