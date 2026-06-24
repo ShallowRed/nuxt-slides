@@ -27,8 +27,14 @@ export default defineOAuthGitHubEventHandler({
       },
     })
 
-    // Privileged users land on the dashboard; viewers go back to the catalog.
-    return sendRedirect(event, role === 'viewer' ? '/' : '/admin')
+    // Honour an intended destination stashed before the OAuth round-trip (only
+    // same-origin paths, to avoid an open-redirect), then clear it. Otherwise
+    // privileged users land on the dashboard; viewers go back to the catalog.
+    const intended = getCookie(event, 'auth_redirect')
+    deleteCookie(event, 'auth_redirect')
+    const isSafe = intended && intended.startsWith('/') && !intended.startsWith('//')
+    const fallback = role === 'viewer' ? '/' : '/admin'
+    return sendRedirect(event, isSafe ? intended : fallback)
   },
   onError(event, error) {
     console.error('GitHub OAuth error:', error)

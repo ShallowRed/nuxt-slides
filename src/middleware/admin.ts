@@ -9,13 +9,16 @@ import { isPrivileged } from '#shared/access'
  * This is UX/defense-in-depth: the API handlers remain the real enforcement
  * boundary (they gate by role server-side regardless of navigation).
  */
-export default defineNuxtRouteMiddleware(async () => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const session = await $fetch<{ loggedIn: boolean, role: Role }>('/api/auth/session')
     .catch(() => null)
 
+  // Not logged in → login, remembering where they were headed.
   if (!session?.loggedIn)
-    return navigateTo('/login')
+    return navigateTo({ path: '/login', query: { redirect: to.fullPath } })
 
+  // Logged in but not privileged (a viewer) → a clear "forbidden" page rather
+  // than a silent bounce, so they understand why they can't proceed.
   if (!isPrivileged(session.role))
-    return navigateTo('/')
+    return navigateTo({ path: '/forbidden', query: { from: to.fullPath } })
 })

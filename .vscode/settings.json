@@ -51,5 +51,9 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#381e1e"
+
+  }
 }

@@ -9,7 +9,7 @@ const alias = route.params.alias as string
 // Resolve lifecycle first: a frozen/archived alias redirects to its static bundle
 // (DDR-018), a live one renders here. The redirect happens server-side during SSR
 // and client-side on hydration, so the stable URL hands off transparently.
-const { data: resolved } = await useAsyncData(`p-resolve-${alias}`, () =>
+const { data: resolved, error: resolveError } = await useAsyncData(`p-resolve-${alias}`, () =>
   $fetch<{ lifecycle: string, frozenUrl?: string }>(`/api/p/${alias}`))
 
 if (resolved.value?.frozenUrl) {
@@ -18,9 +18,27 @@ if (resolved.value?.frozenUrl) {
 
 // Live: render through the shared composable (frontmatter from repo stub + body
 // from CodiMD). Skipped when redirecting above.
-const { presentationData, error } = usePresentation(`p-${alias}`, `/api/p/${alias}`)
+const { presentationData, error: loadError } = usePresentation(`p-${alias}`, `/api/p/${alias}`)
 
 const editUrl = computed(() => presentationData.value?.editUrl || null)
+
+// A semi-private deck reached via its alias also returns 401 `requiresPassword` —
+// previously this route had no handling and just showed a generic error. Send the
+// visitor to the password gate, verifying against /api/p/<alias> and returning
+// here once unlocked.
+const error = computed(() => resolveError.value || loadError.value)
+const requiresPassword = computed(() => {
+  const err = error.value as any
+  return !!(err && (err.data?.requiresPassword || err.statusCode === 401))
+})
+
+watch(requiresPassword, (needsPassword) => {
+  if (needsPassword) {
+    const api = encodeURIComponent(`/api/p/${alias}`)
+    const ret = encodeURIComponent(`/p/${alias}`)
+    navigateTo(`/unlock/${alias}?api=${api}&return=${ret}`)
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -47,16 +65,10 @@ const editUrl = computed(() => presentationData.value?.editUrl || null)
       </a>
     </template>
 
-    <div
-      v-if="error"
-      class="error-message"
-    >
-      <h1>Error Loading Presentation</h1>
-      <p>{{ error.message || 'Failed to load presentation' }}</p>
-      <NuxtLink to="/">
-        ← Back to presentations
-      </NuxtLink>
-    </div>
+    <DeckError
+      v-else-if="error && !requiresPassword"
+      :message="error.message"
+    />
   </div>
 </template>
 
@@ -68,37 +80,6 @@ const editUrl = computed(() => presentationData.value?.editUrl || null)
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.error-message {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-  padding: 2rem;
-}
-
-.error-message h1 {
-  color: #e53e3e;
-  margin-bottom: 1rem;
-}
-
-.error-message a {
-  margin-top: 2rem;
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-size: 1.5rem;
-  color: #666;
 }
 
 .codimd-edit-link {

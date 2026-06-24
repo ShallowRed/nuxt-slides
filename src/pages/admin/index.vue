@@ -1,165 +1,105 @@
 <script setup lang="ts">
-import type { PresentationListItem } from '#shared/presentations'
-import { STATUS_CONFIG } from '#shared/presentations'
+import type { PublicationStatus } from '#shared/access'
+import type { CatalogQuery, PresentationListItem } from '#shared/presentations'
+import { PUBLICATION_STATUSES } from '#shared/access'
+import { applyCatalogQuery, STATUS_CONFIG } from '#shared/presentations'
 
 definePageMeta({
   layout: false,
   middleware: 'admin',
 })
 
-// Fetch all presentations (including protected ones since we're authenticated)
 const { data: presentations, status, error } = await useAsyncData(
   'admin-presentations',
   () => $fetch<PresentationListItem[]>('/api/presentations'),
-  {
-    default: () => [],
-  },
+  { default: () => [] },
 )
 
-// Group presentations by status
-const groupedPresentations = computed(() => {
-  const groups: Record<string, PresentationListItem[]> = {
-    'public': [],
-    'semi-private': [],
-    'private': [],
-    'draft': [],
-  }
+const query = ref<CatalogQuery>({ search: '', statuses: [], sortKey: 'title', sortDir: 'asc' })
 
-  presentations.value?.forEach((p) => {
+// Search/sort apply across all statuses; the status *filter* is handled by the
+// grouping below, so the toolbar's own status chips are hidden here.
+const visible = computed(() => applyCatalogQuery(presentations.value, { ...query.value, statuses: [] }))
+
+const grouped = computed(() => {
+  const groups = Object.fromEntries(
+    PUBLICATION_STATUSES.map(s => [s, [] as PresentationListItem[]]),
+  ) as Record<PublicationStatus, PresentationListItem[]>
+  for (const p of visible.value)
     groups[p.status]?.push(p)
-  })
-
   return groups
 })
-
-const statusConfig = STATUS_CONFIG
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-primary to-secondary p-8"
+    class="min-h-screen bg-base-200 p-6 sm:p-8"
     data-theme="corporate"
   >
-    <header class="max-w-6xl mx-auto mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-primary-content">
-          Admin Dashboard
-        </h1>
-        <p class="text-primary-content/70">
-          Manage your presentations
-        </p>
-      </div>
-      <div class="flex gap-2">
-        <NuxtLink
-          to="/"
-          class="btn btn-ghost btn-sm text-primary-content"
-        >
-          ← Public View
-        </NuxtLink>
-        <a
-          href="/auth/logout"
-          class="btn btn-outline btn-sm text-primary-content border-primary-content/30"
-        >
-          Sign Out
-        </a>
-      </div>
-    </header>
+    <div class="max-w-6xl mx-auto">
+      <AppHeader
+        title="Admin Dashboard"
+        subtitle="Gérez vos présentations"
+      />
 
-    <main class="max-w-6xl mx-auto">
-      <!-- Loading state -->
-      <div
-        v-if="status === 'pending'"
-        class="card bg-base-100 shadow-xl"
-      >
-        <div class="card-body items-center">
-          <span class="loading loading-spinner loading-lg text-primary" />
-          <p class="mt-4">
-            Loading presentations...
-          </p>
-        </div>
-      </div>
+      <main>
+        <CatalogState
+          v-if="status === 'pending'"
+          state="pending"
+        />
+        <CatalogState
+          v-else-if="error"
+          state="error"
+          :message="error.message"
+        />
 
-      <!-- Error state -->
-      <div
-        v-else-if="error"
-        class="alert alert-error"
-      >
-        <span>{{ error.message }}</span>
-      </div>
-
-      <!-- Presentations grouped by status -->
-      <template v-else>
-        <div
-          v-for="statusKey in ['public', 'semi-private', 'private', 'draft']"
-          :key="statusKey"
-          class="mb-8"
-        >
-          <h2 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
-            <span>{{ statusConfig[statusKey as keyof typeof statusConfig].icon }}</span>
-            <span>{{ statusConfig[statusKey as keyof typeof statusConfig].label }}</span>
-            <span class="badge badge-sm">{{ groupedPresentations[statusKey]?.length || 0 }}</span>
-          </h2>
+        <template v-else>
+          <CatalogToolbar
+            v-model="query"
+            :items="presentations"
+            :show-status-filter="false"
+          />
 
           <div
-            v-if="groupedPresentations[statusKey]?.length"
-            class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+            v-for="statusKey in PUBLICATION_STATUSES"
+            :key="statusKey"
+            class="mb-8"
           >
+            <h2 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
+              <Icon
+                :name="STATUS_CONFIG[statusKey].icon"
+                class="text-base-content/60"
+                size="1.2rem"
+              />
+              <span>{{ STATUS_CONFIG[statusKey].label }}</span>
+              <span class="badge badge-sm badge-neutral">{{ grouped[statusKey]?.length || 0 }}</span>
+            </h2>
+
             <div
-              v-for="presentation in groupedPresentations[statusKey]"
-              :key="presentation.slug"
-              class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow"
+              v-if="grouped[statusKey]?.length"
+              class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
             >
-              <div class="card-body">
-                <h3 class="card-title text-lg">
-                  {{ presentation.title }}
-                </h3>
-                <div class="flex gap-2 mb-2">
-                  <span
-                    class="badge"
-                    :class="[statusConfig[presentation.status].badge]"
-                  >
-                    {{ statusConfig[presentation.status].label }}
-                  </span>
-                  <span
-                    v-if="presentation.unlisted"
-                    class="badge badge-ghost"
-                  >
-                    👻 Unlisted
-                  </span>
-                  <span class="badge badge-outline">
-                    {{ presentation.theme }}
-                  </span>
-                </div>
-                <p class="text-sm text-base-content/60">
-                  {{ presentation.filename }}
+              <PresentationCard
+                v-for="presentation in grouped[statusKey]"
+                :key="presentation.slug"
+                :presentation="presentation"
+                variant="admin"
+              />
+            </div>
+
+            <div
+              v-else
+              class="card bg-base-100/50 border-2 border-dashed border-base-300"
+            >
+              <div class="card-body items-center text-center py-6">
+                <p class="text-base-content/50 text-sm">
+                  Aucune présentation {{ STATUS_CONFIG[statusKey].label.toLowerCase() }}
                 </p>
-                <div class="card-actions justify-end mt-4">
-                  <NuxtLink
-                    :to="`/slides/${presentation.slug}`"
-                    class="btn btn-primary btn-sm"
-                  >
-                    View
-                  </NuxtLink>
-                </div>
               </div>
             </div>
           </div>
-
-          <div
-            v-else
-            class="card bg-base-100/50 border-2 border-dashed border-base-300"
-          >
-            <div class="card-body items-center text-center py-8">
-              <p class="text-base-content/50">
-                No {{ statusKey }} presentations yet
-              </p>
-              <p class="text-sm text-base-content/40">
-                Add .md files to <code class="bg-base-200 px-1 rounded">presentations/{{ statusKey }}/</code>
-              </p>
-            </div>
-          </div>
-        </div>
-      </template>
-    </main>
+        </template>
+      </main>
+    </div>
   </div>
 </template>
