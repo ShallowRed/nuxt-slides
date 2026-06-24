@@ -70,7 +70,10 @@ const ACCESS = accessHint ? [accessHint] : ['public', 'draft', 'private', 'semi-
 let stubPath = null
 for (const a of ACCESS) {
   const p = join(ROOT, 'presentations', a, `${slug}.md`)
-  if (existsSync(p)) { stubPath = p; break }
+  if (existsSync(p)) {
+    stubPath = p
+    break
+  }
 }
 if (!stubPath) {
   console.error(`❌ Stub "${slug}.md" not found under presentations/{${ACCESS.join(',')}}/`)

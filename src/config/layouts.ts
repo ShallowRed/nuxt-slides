@@ -18,7 +18,7 @@
 export type LayoutStrategy = 'full' | 'default'
 
 export const SLIDE_LAYOUT_REGISTRY: Record<string, LayoutStrategy> = {
-  full: 'full',
+  'full': 'full',
   'media-right': 'default',
   'media-left': 'default',
   'media-right-wide': 'default',

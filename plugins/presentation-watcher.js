@@ -1,5 +1,6 @@
 import { watch } from 'node:fs'
 import { resolve } from 'node:path'
+import process from 'node:process'
 
 /**
  * Vite plugin to watch presentation markdown files and trigger HMR
