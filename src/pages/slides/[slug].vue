@@ -26,9 +26,14 @@ const requiresPassword = computed(() => {
 
 // Handle access control errors - redirect to unlock page for password-protected
 // presentations, telling it to return here once unlocked.
+//
+// `replace: true` so this redirect does NOT push a history entry: /slides/<slug>
+// only ever bounces to /unlock, so leaving it in history traps Back (Back lands
+// here, the watch re-fires, and bounces forward to /unlock again). Replacing it
+// means Back from /unlock returns straight to the catalog.
 watch(requiresPassword, (needsPassword) => {
   if (needsPassword)
-    navigateTo(`/unlock/${slug}?return=/slides/${slug}`)
+    navigateTo(`/unlock/${slug}?return=/slides/${slug}`, { replace: true })
 }, { immediate: true })
 </script>
 

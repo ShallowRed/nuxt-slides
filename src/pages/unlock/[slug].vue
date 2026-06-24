@@ -38,7 +38,10 @@ async function unlock() {
   try {
     const sep = verifyApi.value.includes('?') ? '&' : '?'
     await $fetch(`${verifyApi.value}${sep}password=${encodeURIComponent(password.value)}`)
-    await navigateTo(returnTo.value)
+    // `replace: true` so the unlock page drops out of history once unlocked:
+    // Back from the now-accessible deck returns to the catalog, not to /unlock
+    // (which would re-redirect to the deck since the cookie is now set).
+    await navigateTo(returnTo.value, { replace: true })
   }
   catch (e: any) {
     if (e.statusCode === 403)
