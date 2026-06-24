@@ -22,8 +22,11 @@ const roleDisplay = computed(() => ROLE_CONFIG[role.value])
   >
     <div class="card bg-base-100 shadow-xl w-full max-w-md">
       <div class="card-body items-center text-center">
-        <div class="text-5xl mb-2">
-          🚫
+        <div class="grid place-items-center w-16 h-16 rounded-2xl bg-error/10 text-error mb-2">
+          <Icon
+            name="ri:shield-keyhole-line"
+            size="2rem"
+          />
         </div>
         <h1 class="card-title text-2xl">
           Accès refusé
@@ -38,7 +41,11 @@ const roleDisplay = computed(() => ROLE_CONFIG[role.value])
             class="badge badge-sm gap-1"
             :class="roleDisplay.badge"
           >
-            {{ roleDisplay.icon }} {{ roleDisplay.label }}
+            <Icon
+              :name="roleDisplay.icon"
+              size="0.85rem"
+            />
+            {{ roleDisplay.label }}
           </span>
         </div>
 
@@ -49,14 +56,22 @@ const roleDisplay = computed(() => ROLE_CONFIG[role.value])
         <div class="flex gap-2">
           <NuxtLink
             to="/"
-            class="btn btn-primary btn-sm"
+            class="btn btn-primary btn-sm gap-1"
           >
-            ← Retour aux présentations
+            <Icon
+              name="ri:arrow-left-line"
+              size="1rem"
+            />
+            Retour aux présentations
           </NuxtLink>
           <a
             href="/auth/logout"
-            class="btn btn-ghost btn-sm"
+            class="btn btn-ghost btn-sm gap-1"
           >
+            <Icon
+              name="ri:logout-box-r-line"
+              size="1rem"
+            />
             Se déconnecter
           </a>
         </div>

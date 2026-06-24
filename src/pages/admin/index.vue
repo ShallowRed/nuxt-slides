@@ -33,7 +33,7 @@ const grouped = computed(() => {
 
 <template>
   <div
-    class="min-h-screen bg-neutral p-8"
+    class="min-h-screen bg-base-200 p-6 sm:p-8"
     data-theme="corporate"
   >
     <div class="max-w-6xl mx-auto">
@@ -66,9 +66,13 @@ const grouped = computed(() => {
             class="mb-8"
           >
             <h2 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
-              <span>{{ STATUS_CONFIG[statusKey].icon }}</span>
+              <Icon
+                :name="STATUS_CONFIG[statusKey].icon"
+                class="text-base-content/60"
+                size="1.2rem"
+              />
               <span>{{ STATUS_CONFIG[statusKey].label }}</span>
-              <span class="badge badge-sm">{{ grouped[statusKey]?.length || 0 }}</span>
+              <span class="badge badge-sm badge-neutral">{{ grouped[statusKey]?.length || 0 }}</span>
             </h2>
 
             <div

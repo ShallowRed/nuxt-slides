@@ -27,15 +27,25 @@ defineProps<{
     role="alert"
     class="alert alert-error"
   >
+    <Icon
+      name="ri:error-warning-line"
+      size="1.25rem"
+    />
     <span>{{ message || 'Échec du chargement des présentations.' }}</span>
   </div>
 
   <div
     v-else
-    class="card bg-base-100 shadow-xl"
+    class="card bg-base-100 border border-base-300"
   >
-    <div class="card-body items-center text-center">
-      <p class="text-base-content/70">
+    <div class="card-body items-center text-center py-12">
+      <div class="grid place-items-center w-14 h-14 rounded-2xl bg-base-200 text-base-content/40 mb-2">
+        <Icon
+          name="ri:slideshow-3-line"
+          size="1.75rem"
+        />
+      </div>
+      <p class="text-base-content/70 font-medium">
         {{ message || 'Aucune présentation trouvée.' }}
       </p>
       <p class="text-sm text-base-content/50">

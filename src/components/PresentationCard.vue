@@ -6,7 +6,7 @@ import { STATUS_CONFIG } from '#shared/presentations'
  * One presentation card, shared by the home and the admin dashboard (the markup
  * was duplicated and had drifted). `variant` toggles the small differences:
  * the public home links via the canonical alias and flags frozen decks; admin
- * shows the filename and a status badge for management.
+ * shows the filename and a manage action.
  */
 const props = withDefaults(defineProps<{
   presentation: PresentationListItem
@@ -35,67 +35,100 @@ const rootTag = computed(() => (props.variant === 'public' ? NuxtLink : 'div'))
   <component
     :is="rootTag"
     :to="variant === 'public' ? to : undefined"
-    class="card shadow-lg transition-all duration-300"
-    :class="[
-      variant === 'public' ? 'hover:shadow-2xl hover:-translate-y-1' : 'hover:shadow-xl',
-      frozen ? 'bg-base-200 border-l-4 border-info' : 'bg-base-100',
-    ]"
+    class="group card bg-base-100 border border-base-300 shadow-sm transition-all duration-200 overflow-hidden"
+    :class="variant === 'public'
+      ? 'hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 cursor-pointer'
+      : ''"
   >
-    <div class="card-body">
-      <h2 class="card-title text-base-content text-lg">
-        {{ presentation.title }}
-        <span
-          v-if="presentation.lifecycle === 'archived'"
-          class="text-xs font-normal opacity-50"
-        >· archivée</span>
-      </h2>
+    <!-- Status accent strip -->
+    <div
+      class="h-1 w-full"
+      :class="frozen ? 'bg-info' : {
+        'public': 'bg-success',
+        'semi-private': 'bg-warning',
+        'private': 'bg-info',
+        'draft': 'bg-base-300',
+      }[presentation.status]"
+    />
 
-      <div class="flex flex-wrap gap-2 mt-2">
+    <div class="card-body gap-3 p-5">
+      <div class="flex items-start justify-between gap-3">
+        <h2 class="font-semibold text-base-content leading-snug line-clamp-2">
+          {{ presentation.title }}
+        </h2>
+        <Icon
+          v-if="variant === 'public'"
+          name="ri:arrow-right-up-line"
+          class="shrink-0 text-base-content/30 group-hover:text-primary transition-colors mt-0.5"
+          size="1.1rem"
+        />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-1.5">
         <span
           v-if="frozen"
-          class="badge badge-info gap-1"
+          class="badge badge-info badge-sm gap-1 font-medium"
           title="Bundle autoportant — instantané gelé, non éditable en direct (DDR-017)"
         >
-          ❄️ Gelée
+          <Icon
+            name="ri:snowflake-line"
+            size="0.85rem"
+          />
+          {{ presentation.lifecycle === 'archived' ? 'Archivée' : 'Gelée' }}
         </span>
         <span
           v-else
-          class="badge gap-1"
+          class="badge badge-sm gap-1 font-medium"
           :class="statusDisplay?.badge || 'badge-ghost'"
         >
-          {{ statusDisplay?.icon }} {{ statusDisplay?.label || presentation.status }}
+          <Icon
+            :name="statusDisplay?.icon || 'ri:file-line'"
+            size="0.85rem"
+          />
+          {{ statusDisplay?.label || presentation.status }}
         </span>
 
         <span
           v-if="presentation.unlisted"
-          class="badge badge-ghost gap-1"
+          class="badge badge-sm badge-ghost gap-1"
         >
-          👻 Unlisted
+          <Icon
+            name="ri:eye-off-line"
+            size="0.85rem"
+          />
+          Unlisted
         </span>
 
-        <span class="badge badge-outline">
+        <span class="badge badge-sm badge-outline gap-1 text-base-content/60">
+          <Icon
+            name="ri:palette-line"
+            size="0.85rem"
+          />
           {{ presentation.theme }}
         </span>
       </div>
 
-      <p
-        v-if="variant === 'admin'"
-        class="text-sm text-base-content/50 mt-1"
-      >
-        {{ presentation.filename }}
-      </p>
-
-      <div
-        v-if="variant === 'admin'"
-        class="card-actions justify-end mt-4"
-      >
-        <NuxtLink
-          :to="to"
-          class="btn btn-primary btn-sm"
-        >
-          View
-        </NuxtLink>
-      </div>
+      <template v-if="variant === 'admin'">
+        <p class="text-xs text-base-content/40 font-mono flex items-center gap-1">
+          <Icon
+            name="ri:file-text-line"
+            size="0.85rem"
+          />
+          {{ presentation.filename }}
+        </p>
+        <div class="card-actions justify-end pt-1">
+          <NuxtLink
+            :to="to"
+            class="btn btn-primary btn-sm gap-1"
+          >
+            <Icon
+              name="ri:eye-line"
+              size="1rem"
+            />
+            Ouvrir
+          </NuxtLink>
+        </div>
+      </template>
     </div>
   </component>
 </template>

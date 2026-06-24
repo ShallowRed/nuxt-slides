@@ -46,11 +46,15 @@ function toggleDir() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 mb-6">
+  <div class="flex flex-col gap-4 mb-8">
     <div class="flex flex-wrap gap-2 items-center">
       <!-- Search -->
-      <label class="input input-bordered input-sm flex items-center gap-2 flex-1 min-w-[12rem]">
-        <span class="opacity-50">🔍</span>
+      <label class="input input-bordered flex items-center gap-2 flex-1 min-w-56 bg-base-100">
+        <Icon
+          name="ri:search-line"
+          class="text-base-content/40"
+          size="1.1rem"
+        />
         <input
           :value="query.search ?? ''"
           type="search"
@@ -63,7 +67,7 @@ function toggleDir() {
       <!-- Sort -->
       <select
         :value="query.sortKey ?? 'title'"
-        class="select select-bordered select-sm"
+        class="select select-bordered bg-base-100"
         aria-label="Trier par"
         @change="query = { ...query, sortKey: ($event.target as HTMLSelectElement).value as SortKey }"
       >
@@ -77,11 +81,14 @@ function toggleDir() {
       </select>
       <button
         type="button"
-        class="btn btn-sm btn-ghost"
+        class="btn btn-square btn-ghost border border-base-300 bg-base-100"
         :title="query.sortDir === 'desc' ? 'Décroissant' : 'Croissant'"
         @click="toggleDir"
       >
-        {{ query.sortDir === 'desc' ? '↓' : '↑' }}
+        <Icon
+          :name="query.sortDir === 'desc' ? 'ri:sort-desc' : 'ri:sort-asc'"
+          size="1.2rem"
+        />
       </button>
     </div>
 
@@ -94,12 +101,18 @@ function toggleDir() {
         v-for="status in PUBLICATION_STATUSES"
         :key="status"
         type="button"
-        class="badge gap-1 cursor-pointer transition-opacity"
-        :class="isActive(status) ? STATUS_CONFIG[status].badge : 'badge-outline opacity-60 hover:opacity-100'"
+        class="badge badge-lg gap-1.5 cursor-pointer transition-all"
+        :class="isActive(status)
+          ? STATUS_CONFIG[status].badge
+          : 'badge-outline border-base-300 text-base-content/60 hover:border-base-content/40'"
         @click="toggleStatus(status)"
       >
-        {{ STATUS_CONFIG[status].icon }} {{ STATUS_CONFIG[status].label }}
-        <span class="opacity-70">({{ counts[status] }})</span>
+        <Icon
+          :name="STATUS_CONFIG[status].icon"
+          size="0.9rem"
+        />
+        {{ STATUS_CONFIG[status].label }}
+        <span class="opacity-70 tabular-nums">{{ counts[status] }}</span>
       </button>
     </div>
   </div>

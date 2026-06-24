@@ -15,7 +15,7 @@ const visible = computed(() => applyCatalogQuery(presentations.value, query.valu
 
 <template>
   <div
-    class="min-h-screen bg-neutral p-8"
+    class="min-h-screen bg-base-200 p-6 sm:p-8"
     data-theme="corporate"
   >
     <div class="max-w-6xl mx-auto">
@@ -48,8 +48,13 @@ const visible = computed(() => applyCatalogQuery(presentations.value, query.valu
 
           <div
             v-if="visible.length === 0"
-            class="text-center text-base-content/50 py-12"
+            class="flex flex-col items-center text-center text-base-content/50 py-16 gap-2"
           >
+            <Icon
+              name="ri:search-eye-line"
+              size="2rem"
+              class="opacity-50"
+            />
             Aucune présentation ne correspond à votre recherche.
           </div>
           <div

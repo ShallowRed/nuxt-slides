@@ -61,10 +61,16 @@ async function unlock() {
   >
     <div class="card bg-base-100 shadow-xl w-full max-w-md">
       <div class="card-body">
-        <h1 class="card-title text-xl mb-2">
-          🔐 Présentation protégée
+        <div class="grid place-items-center w-14 h-14 rounded-2xl bg-warning/15 text-warning mb-3">
+          <Icon
+            name="ri:lock-password-line"
+            size="1.75rem"
+          />
+        </div>
+        <h1 class="card-title text-xl mb-1">
+          Présentation protégée
         </h1>
-        <p class="text-base-content/70 mb-6">
+        <p class="text-base-content/60 mb-6">
           Cette présentation nécessite un mot de passe.
         </p>
 
@@ -74,19 +80,10 @@ async function unlock() {
             role="alert"
             class="alert alert-error mb-4"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="stroke-current shrink-0 h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <Icon
+              name="ri:error-warning-line"
+              size="1.25rem"
+            />
             <span>{{ errorMessage }}</span>
           </div>
 
@@ -125,9 +122,13 @@ async function unlock() {
 
         <NuxtLink
           to="/"
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm gap-1"
         >
-          ← Retour aux présentations
+          <Icon
+            name="ri:arrow-left-line"
+            size="1rem"
+          />
+          Retour aux présentations
         </NuxtLink>
       </div>
     </div>
