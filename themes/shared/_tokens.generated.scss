@@ -16,6 +16,23 @@
     --deck-height: 800;
   }
 
+  // dsfr-alt
+  :root[data-theme='dsfr-alt'],
+  .theme-dsfr-alt {
+    --bg-h1: url('/backgrounds/slide-bg-default.png');
+    --bg-h2: url('/backgrounds/slide-bg-contrast.png');
+    --bg-h3: url('/backgrounds/slide-bg-subtle.png');
+    --deck-width: 1200;
+    --deck-height: 800;
+  }
+
+  // dsfr-standalone
+  :root[data-theme='dsfr-standalone'],
+  .theme-dsfr-standalone {
+    --deck-width: 1200;
+    --deck-height: 800;
+  }
+
   // minimal: no background/dimension tokens
 
   // lee

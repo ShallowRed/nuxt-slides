@@ -51,20 +51,23 @@ describe('checkThemeConsistency', () => {
     expect(report.ok).toBe(true)
   })
 
-  it('reflects the real repo drift: dsfr-alt css without tokens', () => {
+  it('the real repo CSS set matches the manifest (no drift)', () => {
+    // dsfr-alt and dsfr-standalone now have tokens entries, so the full compiled
+    // set is consistent with KNOWN_THEMES — no warnings at boot.
     const report = checkThemeConsistency({
-      tokens: ['dsfr', 'minimal', 'lee'],
       cssFiles: ['dsfr', 'dsfr-alt', 'dsfr-standalone', 'lee', 'minimal'],
     })
-    // dsfr-alt and dsfr-standalone render but have no tokens entry.
-    expect(report.missingTokens).toEqual(['dsfr-alt', 'dsfr-standalone'])
-    // No tokens theme is missing its CSS here.
+    expect(report.ok).toBe(true)
+    expect(report.missingTokens).toEqual([])
     expect(report.missingCss).toEqual([])
   })
 
   it('defaults tokens to KNOWN_THEMES when not provided', () => {
-    // Passing only cssFiles must not throw and must compare against the manifest.
-    const report = checkThemeConsistency({ cssFiles: ['dsfr', 'minimal', 'lee'] })
+    // Passing only cssFiles must not throw and must compare against the manifest
+    // (the full set of compiled themes, which now includes the dsfr derivatives).
+    const report = checkThemeConsistency({
+      cssFiles: ['dsfr', 'dsfr-alt', 'dsfr-standalone', 'minimal', 'lee'],
+    })
     expect(report.missingCss).toEqual([])
   })
 })

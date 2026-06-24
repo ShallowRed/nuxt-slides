@@ -48,6 +48,36 @@ export const THEME_TOKENS: Record<string, ThemeTokens> = {
       height: 800,
     },
   },
+  'dsfr-alt': {
+    // A DSFR-derivative skin: reuses the full DSFR layout/scale, swapping only
+    // colors and typography. Same layout → same backgrounds and dimensions as dsfr.
+    name: 'dsfr-alt',
+    lang: 'fr',
+    parser: 'separator',
+    backgrounds: {
+      h1: '/backgrounds/slide-bg-default.png',
+      h2: '/backgrounds/slide-bg-contrast.png',
+      h3: '/backgrounds/slide-bg-subtle.png',
+    },
+    reveal: {
+      slideNumber: true,
+      width: 1200,
+      height: 800,
+    },
+  },
+  'dsfr-standalone': {
+    // Self-contained DSFR variant for vanilla Reveal/HackMD: it paints its own
+    // backgrounds (no semantic layer), so no background images here — only the
+    // shared DSFR dimensions and parsing defaults.
+    name: 'dsfr-standalone',
+    lang: 'fr',
+    parser: 'separator',
+    reveal: {
+      slideNumber: true,
+      width: 1200,
+      height: 800,
+    },
+  },
   minimal: {
     name: 'minimal',
     lang: 'fr',
