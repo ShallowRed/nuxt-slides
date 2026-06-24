@@ -8,12 +8,16 @@
  * where a cwd-relative path would not resolve.
  */
 
-/**
- * Valid publication status folders
- */
-export type PublicationStatus = 'public' | 'draft' | 'private' | 'semi-private'
+import type { PublicationStatus } from '#shared/access'
+import { PUBLICATION_STATUSES } from '#shared/access'
 
-export const PUBLICATION_STATUSES: PublicationStatus[] = ['public', 'draft', 'private', 'semi-private']
+/**
+ * Valid publication status folders. The canonical definition lives in the access
+ * domain (`shared/access`, zod-validated); re-exported here (local binding, not a
+ * bare `export … from`, so it survives Nitro's bundling) for existing imports.
+ */
+export type { PublicationStatus }
+export { PUBLICATION_STATUSES }
 
 /**
  * The Nitro storage mount that exposes the bundled `presentations/` folder.
@@ -100,4 +104,14 @@ export async function readPresentationContentAt(
   if (raw == null)
     return null
   return { content: typeof raw === 'string' ? raw : String(raw), status: access }
+}
+
+/**
+ * Read a frozen/archived deck's stub from `presentations/archived/`. Archived is
+ * a lifecycle location, not a publication status, so it has its own reader (used
+ * by the catalog to source a frozen deck's theme).
+ */
+export async function readArchivedStub(slug: string): Promise<string | null> {
+  const raw = await presentationsStorage().getItem(`archived:${slug}.md`)
+  return raw == null ? null : (typeof raw === 'string' ? raw : String(raw))
 }

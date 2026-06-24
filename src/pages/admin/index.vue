@@ -1,34 +1,16 @@
 <script setup lang="ts">
-interface Presentation {
-  slug: string
-  title: string
-  theme: string
-  status: 'public' | 'draft' | 'private' | 'semi-private'
-  filename: string
-  unlisted?: boolean
-}
-
-interface SessionResponse {
-  user: { id: number, login: string, name: string, avatar: string } | null
-  loggedIn: boolean
-}
+import type { PresentationListItem } from '#shared/presentations'
+import { STATUS_CONFIG } from '#shared/presentations'
 
 definePageMeta({
   layout: false,
+  middleware: 'admin',
 })
-
-// Check authentication
-const { data: session } = await useFetch<SessionResponse>('/api/auth/session')
-
-// Redirect to login if not authenticated
-if (!session.value?.loggedIn) {
-  await navigateTo('/login')
-}
 
 // Fetch all presentations (including protected ones since we're authenticated)
 const { data: presentations, status, error } = await useAsyncData(
   'admin-presentations',
-  () => $fetch<Presentation[]>('/api/presentations'),
+  () => $fetch<PresentationListItem[]>('/api/presentations'),
   {
     default: () => [],
   },
@@ -36,7 +18,7 @@ const { data: presentations, status, error } = await useAsyncData(
 
 // Group presentations by status
 const groupedPresentations = computed(() => {
-  const groups: Record<string, Presentation[]> = {
+  const groups: Record<string, PresentationListItem[]> = {
     'public': [],
     'semi-private': [],
     'private': [],
@@ -50,12 +32,7 @@ const groupedPresentations = computed(() => {
   return groups
 })
 
-const statusConfig = {
-  'public': { badge: 'badge-success', label: 'Public', icon: '🌐' },
-  'semi-private': { badge: 'badge-warning', label: 'Password', icon: '🔑' },
-  'private': { badge: 'badge-info', label: 'Private', icon: '🔒' },
-  'draft': { badge: 'badge-ghost', label: 'Draft', icon: '📝' },
-}
+const statusConfig = STATUS_CONFIG
 </script>
 
 <template>
