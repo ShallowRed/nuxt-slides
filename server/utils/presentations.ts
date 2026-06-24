@@ -105,3 +105,13 @@ export async function readPresentationContentAt(
     return null
   return { content: typeof raw === 'string' ? raw : String(raw), status: access }
 }
+
+/**
+ * Read a frozen/archived deck's stub from `presentations/archived/`. Archived is
+ * a lifecycle location, not a publication status, so it has its own reader (used
+ * by the catalog to source a frozen deck's theme).
+ */
+export async function readArchivedStub(slug: string): Promise<string | null> {
+  const raw = await presentationsStorage().getItem(`archived:${slug}.md`)
+  return raw == null ? null : (typeof raw === 'string' ? raw : String(raw))
+}

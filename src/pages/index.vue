@@ -1,35 +1,21 @@
 <script setup lang="ts">
-interface Presentation {
-  slug: string
-  title: string
-  theme: string
-  status: 'public' | 'draft' | 'private' | 'semi-private'
-  filename: string
-  /** Canonical alias (DDR-018) — link to /p/<alias> when present. */
-  alias?: string
-  /** Registry lifecycle (DDR-018): frozen/archived decks serve a static bundle. */
-  lifecycle?: 'live' | 'frozen' | 'archived'
-}
+import type { PresentationListItem } from '#shared/presentations'
+import { STATUS_CONFIG } from '#shared/presentations'
 
 const { data: presentations, status, error } = await useAsyncData(
   'presentations',
-  () => $fetch<Presentation[]>('/api/presentations'),
+  () => $fetch<PresentationListItem[]>('/api/presentations'),
   {
     default: () => [],
   },
 )
 
-const statusConfig: Record<string, { badge: string, label: string, icon: string }> = {
-  'public': { badge: 'badge-success', label: 'Public', icon: '🌐' },
-  'semi-private': { badge: 'badge-warning', label: 'Password', icon: '🔑' },
-  'private': { badge: 'badge-info', label: 'Private', icon: '🔒' },
-  'draft': { badge: 'badge-ghost', label: 'Draft', icon: '📝' },
-}
+const statusConfig = STATUS_CONFIG
 
 // A frozen/archived deck serves a self-contained static bundle (DDR-017/018):
 // it's a snapshot, no longer editable live. Flagged so it reads differently from
 // a live deck still wired to its collaborative note.
-function isFrozen(p: Presentation) {
+function isFrozen(p: PresentationListItem) {
   return p.lifecycle === 'frozen' || p.lifecycle === 'archived'
 }
 </script>
