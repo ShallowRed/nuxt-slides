@@ -39,7 +39,7 @@ describe('access policy — golden', () => {
         "anonymous | public | view": "allow",
         "anonymous | semi-private | admin": "deny:auth-required",
         "anonymous | semi-private | edit": "deny:auth-required",
-        "anonymous | semi-private | view": "allow",
+        "anonymous | semi-private | view": "deny:auth-required",
         "editor | draft | admin": "allow",
         "editor | draft | edit": "allow",
         "editor | draft | view": "allow",
@@ -75,7 +75,7 @@ describe('access policy — golden', () => {
         "viewer | public | view": "allow",
         "viewer | semi-private | admin": "deny:forbidden",
         "viewer | semi-private | edit": "deny:forbidden",
-        "viewer | semi-private | view": "allow",
+        "viewer | semi-private | view": "deny:forbidden",
       }
     `)
   })

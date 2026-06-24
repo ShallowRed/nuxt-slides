@@ -9,11 +9,19 @@ import process from 'node:process'
  */
 export default function presentationWatcherPlugin() {
   const presentationsDir = 'presentations'
+  // Nuxt dev spins up two Vite servers (client + SSR), so configureServer would
+  // otherwise fire twice — duplicate banner, duplicate fs.watch, double HMR events.
+  // Guard so the watcher is set up exactly once.
+  let watching = false
 
   return {
     name: 'presentation-watcher',
 
     configureServer(server) {
+      if (watching)
+        return
+      watching = true
+
       const watchPath = resolve(process.cwd(), presentationsDir)
 
       watch(watchPath, { recursive: true }, (eventType, filename) => {

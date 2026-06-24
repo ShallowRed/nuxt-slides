@@ -17,7 +17,7 @@ import { isPrivileged } from './roles'
  *   ───────────────┼───────────────────────────┼────────────────
  *   public         │ allow                     │ allow
  *   semi-private   │ allow iff password granted │ allow
- *                  │ (allow if no hash set)    │
+ *                  │ (deny if no hash set)     │
  *   draft          │ deny (auth-required/forbidden) │ allow
  *   private        │ deny (auth-required/forbidden) │ allow
  *
@@ -70,10 +70,13 @@ export function decideAccess(input: AccessInput): AccessDecision {
     case 'public':
       return { outcome: 'allow' }
     case 'semi-private':
-      // No hash declared → no gate (matches the prior behavior where an absent
-      // accessPassword skipped the password check entirely).
+      // Fail-closed: a deck deliberately placed in semi-private/ must never be
+      // world-readable. With no hash declared there is no way to grant access,
+      // so a non-privileged caller is denied (privileged already returned above).
+      // (Previously this returned `allow`, silently exposing any semi-private
+      // deck whose accessPassword was missing — the bug this branch closes.)
       if (!hasPassword)
-        return { outcome: 'allow' }
+        return denyFor(role)
       return passwordGranted ? { outcome: 'allow' } : { outcome: 'needs-password' }
     case 'draft':
     case 'private':
