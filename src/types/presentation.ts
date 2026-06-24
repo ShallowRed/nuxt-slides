@@ -17,8 +17,10 @@ export type { RevealConfig, Slide, ThemeBackgrounds }
  * - draft: Only visible to authenticated owner
  * - private: Only accessible to authenticated users
  * - semi-private: Accessible via password (no login required)
+ *
+ * Canonical definition in the access domain (`shared/access`); re-exported here.
  */
-export type PublicationStatus = 'public' | 'draft' | 'private' | 'semi-private'
+export type { PublicationStatus } from '#shared/access'
 export interface PresentationMeta {
   title?: string
   lang?: string

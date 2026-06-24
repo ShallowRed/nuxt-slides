@@ -14,7 +14,8 @@ import { createTtlCache, DEFAULT_CACHE_TTL_MS } from '#shared/deck'
 import { load as parseYaml } from 'js-yaml'
 import { presentationsStorage } from './presentations'
 
-export type Lifecycle = 'live' | 'frozen' | 'archived'
+// Canonical definition in the access domain (`shared/access`); re-exported here.
+export type { Lifecycle } from '#shared/access'
 
 export interface RegistryEntry {
   /** The stable alias (key in the registry). */
