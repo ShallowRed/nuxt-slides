@@ -1,9 +1,8 @@
 import type { NoteSource } from '#shared/deck'
-import type { PublicationStatus } from '../../utils/presentations'
-import { splitFrontmatter } from '#shared/deck'
+import { resolveDeckStatus, splitFrontmatter } from '#shared/deck'
 import { gateDeckAccess } from '../../utils/access'
 import { resolveDeckForRoute } from '../../utils/deck-resolution'
-import { readPresentationContent, readPresentationContentAt } from '../../utils/presentations'
+import { readArchivedStub, readPresentationContent } from '../../utils/presentations'
 import { resolveAlias } from '../../utils/registry'
 
 /**
@@ -36,21 +35,26 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: `Unknown presentation alias "${alias}"` })
   }
 
-  // Read the stub (frontmatter = access + provenance source of truth). When the
-  // registry pins an access folder, read it directly (disambiguates duplicate
-  // slugs); else search the folders.
-  const result = entry.access
-    ? await readPresentationContentAt(entry.slug, entry.access as PublicationStatus)
-    : await readPresentationContent(entry.slug)
-  if (!result) {
+  // Read the stub (frontmatter = access + provenance source of truth). A
+  // frozen/archived deck's stub lives in presentations/archived/ (a lifecycle
+  // location, not an access folder), so it must be read with the dedicated
+  // archived reader — listStubEntries() deliberately skips archived/. Live decks
+  // are read from the flat layout by slug.
+  const isFrozen = entry.lifecycle === 'frozen' || entry.lifecycle === 'archived'
+  const stub = isFrozen
+    ? await readArchivedStub(entry.slug)
+    : (await readPresentationContent(entry.slug))?.content ?? null
+  if (stub == null) {
     throw createError({
       statusCode: 404,
       statusMessage: `Stub "${entry.slug}" for alias "${alias}" not found`,
     })
   }
 
-  const { content: stub, status } = result
   const stubMeta = splitFrontmatter(stub).data
+  // Frozen stubs carry no folder; derive status from the stub's frontmatter
+  // (fail-closed), falling back to the registry's pinned access folder.
+  const status = resolveDeckStatus(stub, entry.access)
 
   // Enforce access BEFORE the frozen short-circuit — a frozen private deck must
   // not be served just because it has a bundle.

@@ -14,6 +14,8 @@ export interface PresentationListItem {
   theme: string
   status: PublicationStatus
   filename: string
+  /** Frontmatter `project:` slug — the catalog's grouping axis (projects.yml). */
+  project?: string
   /** Frontmatter flag: hidden from the catalog for non-privileged actors. */
   unlisted?: boolean
   /** Stable alias (DDR-018) — link to `/p/<alias>` when present. */

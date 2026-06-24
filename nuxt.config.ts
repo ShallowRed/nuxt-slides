@@ -1,11 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import presentationWatcher from './plugins/presentation-watcher.js'
 import themeWatcher from './plugins/theme-watcher.js'
 import { readBundleConfig } from './shared/build/bundle'
+import { discoverPublicSlugs } from './shared/build/public-decks'
 
 // Single typed read of the standalone-bundle toggles (audit §7 P2 #10).
 const bundle = readBundleConfig()
@@ -155,8 +155,6 @@ export default defineNuxtConfig({
   // Hook to discover and prerender only PUBLIC presentation routes
   hooks: {
     'nitro:config': async function (nitroConfig) {
-      const publicDir = join(process.cwd(), 'presentations', 'public')
-
       // BUNDLE_ONLY_SLUG: restrict prerender to a single slug (standalone bundle mode)
       const onlySlug = bundle.onlySlug
       if (onlySlug) {
@@ -172,10 +170,9 @@ export default defineNuxtConfig({
       }
 
       try {
-        const files = await readdir(publicDir)
-        const slugs = files
-          .filter((file: string) => file.endsWith('.md'))
-          .map((file: string) => file.replace('.md', ''))
+        // Status now lives in the frontmatter (docs/presentation-metadata.md), so
+        // public decks are discovered by parsing stubs, not by listing public/.
+        const slugs = await discoverPublicSlugs(join(process.cwd(), 'presentations'))
 
         const publicRoutes = slugs.flatMap((slug: string) => [
           `/slides/${slug}`,

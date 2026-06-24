@@ -10,6 +10,7 @@
 
 import type { PublicationStatus } from '#shared/access'
 import { PUBLICATION_STATUSES } from '#shared/access'
+import { resolveDeckStatus } from '#shared/deck'
 
 /**
  * Valid publication status folders. The canonical definition lives in the access
@@ -27,83 +28,102 @@ export function presentationsStorage() {
 }
 
 /**
- * Find a presentation by slug across all status folders
- * Returns null if not found, throws if duplicate slugs exist
+ * Reserved top-level keys under `presentations/` that are not deck stubs.
+ * `archived/` is a lifecycle location (DDR-018), not a publication status, and is
+ * sourced via the registry — excluded from catalog discovery.
+ */
+const NON_STUB_PREFIXES = ['archived']
+
+/** A discovered stub: its slug, raw content, derived status, and storage key. */
+interface StubEntry {
+  slug: string
+  status: PublicationStatus
+  content: string
+  key: string
+}
+
+/**
+ * Enumerate every deck stub under `presentations/`, regardless of layout —
+ * flattened (`<slug>.md`) or the legacy access folders (`<status>/<slug>.md`).
+ * Status is derived from each stub's frontmatter (closed default), so the
+ * folder is no longer the source of truth; `archived/` is skipped (registry).
+ */
+async function listStubEntries(): Promise<StubEntry[]> {
+  const storage = presentationsStorage()
+  const keys = (await storage.getKeys()).filter(k => k.endsWith('.md'))
+
+  const entries: StubEntry[] = []
+  for (const key of keys) {
+    // Storage keys are colon-delimited (`<folder>:<slug>.md` or `<slug>.md`).
+    const segments = key.split(':')
+    const folderHint = segments.length > 1 ? segments[segments.length - 2] : undefined
+    if (folderHint && NON_STUB_PREFIXES.includes(folderHint))
+      continue
+    const slug = segments[segments.length - 1]!.replace(/\.md$/, '')
+    const raw = await storage.getItem(key)
+    if (raw == null)
+      continue
+    const content = typeof raw === 'string' ? raw : String(raw)
+    entries.push({ slug, status: resolveDeckStatus(content, folderHint), content, key })
+  }
+  return entries
+}
+
+/**
+ * Find a presentation by slug. Returns its (frontmatter-derived) status, or null
+ * if not found; throws if the same slug exists in more than one stub.
  */
 export async function findPresentationBySlug(slug: string): Promise<{
   status: PublicationStatus
 } | null> {
-  const matches: PublicationStatus[] = []
-
-  for (const status of PUBLICATION_STATUSES) {
-    if (await readPresentationContentAt(slug, status))
-      matches.push(status)
-  }
-
-  if (matches.length === 0) {
+  const matches = (await listStubEntries()).filter(e => e.slug === slug)
+  if (matches.length === 0)
     return null
-  }
-
   if (matches.length > 1) {
-    throw new Error(`Duplicate slug "${slug}" found in multiple folders: ${matches.join(', ')}`)
+    throw new Error(`Duplicate slug "${slug}" found in: ${matches.map(m => m.key).join(', ')}`)
   }
-
-  return { status: matches[0]! }
+  return { status: matches[0]!.status }
 }
 
 /**
- * List all presentations from a specific status folder
+ * List all presentations from a specific status (filtered by frontmatter status,
+ * across whatever layout the stubs live in).
  */
 export async function listPresentationsByStatus(status: PublicationStatus): Promise<string[]> {
-  const keys = await presentationsStorage().getKeys(status)
-  return keys
-    .filter((key: string) => key.endsWith('.md'))
-    .map((key: string) => key.slice(key.lastIndexOf(':') + 1).replace(/\.md$/, ''))
+  return (await listStubEntries()).filter(e => e.status === status).map(e => e.slug)
 }
 
 /**
- * List all presentations across all status folders
+ * List all presentations with their (frontmatter-derived) status.
  */
 export async function listAllPresentations(): Promise<{ slug: string, status: PublicationStatus }[]> {
-  const results: { slug: string, status: PublicationStatus }[] = []
-
-  for (const status of PUBLICATION_STATUSES) {
-    const slugs = await listPresentationsByStatus(status)
-    for (const slug of slugs) {
-      results.push({ slug, status })
-    }
-  }
-
-  return results
+  return (await listStubEntries()).map(({ slug, status }) => ({ slug, status }))
 }
 
 /**
- * Read presentation content by slug
+ * Read presentation content by slug, with its derived status.
  */
 export async function readPresentationContent(slug: string): Promise<{
   content: string
   status: PublicationStatus
 } | null> {
-  const found = await findPresentationBySlug(slug)
-  if (!found) {
+  const match = (await listStubEntries()).find(e => e.slug === slug)
+  if (!match)
     return null
-  }
-
-  return readPresentationContentAt(slug, found.status)
+  return { content: match.content, status: match.status }
 }
 
 /**
- * Read presentation content from a specific access folder. Used by the registry
- * (DDR-018) to disambiguate when the same slug exists in several folders.
+ * Read a stub by slug regardless of which folder (if any) it lives in. Kept for
+ * the registry (DDR-018) and the catalog, which previously passed a status to
+ * disambiguate folders; status now comes from the frontmatter, so the `access`
+ * argument is accepted for source-compat but ignored.
  */
 export async function readPresentationContentAt(
   slug: string,
-  access: PublicationStatus,
+  _access?: PublicationStatus,
 ): Promise<{ content: string, status: PublicationStatus } | null> {
-  const raw = await presentationsStorage().getItem(`${access}:${slug}.md`)
-  if (raw == null)
-    return null
-  return { content: typeof raw === 'string' ? raw : String(raw), status: access }
+  return readPresentationContent(slug)
 }
 
 /**

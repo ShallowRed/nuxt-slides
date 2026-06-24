@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PublicationStatusSchema } from '../access/status'
 
 /**
  * Single source of truth for a deck's validated configuration (audit §5.3).
@@ -68,6 +69,18 @@ export const DeckMetaSchema = z
     storybook: z.string().optional(),
     backgrounds: ThemeBackgroundsSchema.optional(),
     reveal: RevealConfigSchema.optional(),
+    /**
+     * Publication status — the access axis, now sourced from the frontmatter
+     * rather than the `presentations/<status>/` folder (see
+     * docs/presentation-metadata.md). A missing/invalid value must be treated as
+     * the most closed status (`private`) by readers — the schema keeps it
+     * optional so an un-migrated stub still parses, and the closed-default is
+     * enforced at resolution (server/utils/presentations.ts), never here.
+     */
+    status: PublicationStatusSchema.optional(),
+    /** Grouping axis for the catalog (slug into `presentations/projects.yml`). */
+    project: z.string().optional(),
+    /** @deprecated legacy alias of `status` (pre-frontmatter-status stubs). */
     access: z.string().optional(),
     accessPassword: z.string().optional(),
     source: NoteSourceSchema.optional(),

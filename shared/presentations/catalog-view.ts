@@ -16,9 +16,14 @@ export interface CatalogQuery {
   search?: string
   /** When set, keep only these statuses; empty/undefined ⇒ all statuses. */
   statuses?: PublicationStatus[]
+  /** When set, keep only these project slugs; empty/undefined ⇒ all projects. */
+  projects?: string[]
   sortKey?: SortKey
   sortDir?: SortDir
 }
+
+/** Bucket key for decks with no `project:` — kept distinct so they're filterable. */
+export const UNGROUPED_PROJECT = '__ungrouped__'
 
 /** Status display order (matches the admin grouping & legend). */
 const STATUS_ORDER: Record<PublicationStatus, number> = {
@@ -51,6 +56,7 @@ export function applyCatalogQuery(
 ): PresentationListItem[] {
   const term = query.search?.trim().toLowerCase() ?? ''
   const statuses = query.statuses && query.statuses.length > 0 ? new Set(query.statuses) : null
+  const projects = query.projects && query.projects.length > 0 ? new Set(query.projects) : null
   const sortKey = query.sortKey ?? 'title'
   const sortDir = query.sortDir ?? 'asc'
 
@@ -58,6 +64,8 @@ export function applyCatalogQuery(
     if (term && !matchesSearch(item, term))
       return false
     if (statuses && !statuses.has(item.status))
+      return false
+    if (projects && !projects.has(item.project ?? UNGROUPED_PROJECT))
       return false
     return true
   })
@@ -82,4 +90,44 @@ export function countByStatus(items: PresentationListItem[]): Record<Publication
   for (const item of items)
     counts[item.status]++
   return counts
+}
+
+export interface ProjectGroup {
+  /** Project slug, or {@link UNGROUPED_PROJECT} for the no-project bucket. */
+  project: string
+  items: PresentationListItem[]
+}
+
+/**
+ * Group a catalog into project buckets. Pure: the bucket order follows
+ * `projectOrder` (the `projects.yml` order) when given, with unknown projects
+ * appended alphabetically and the ungrouped bucket always last. Within a bucket,
+ * input order is preserved (feed it an already-sorted list).
+ */
+export function groupByProject(
+  items: PresentationListItem[],
+  projectOrder: string[] = [],
+): ProjectGroup[] {
+  const buckets = new Map<string, PresentationListItem[]>()
+  for (const item of items) {
+    const key = item.project ?? UNGROUPED_PROJECT
+    if (!buckets.has(key))
+      buckets.set(key, [])
+    buckets.get(key)!.push(item)
+  }
+
+  const rank = new Map(projectOrder.map((slug, i) => [slug, i]))
+  return [...buckets.entries()]
+    .map(([project, groupItems]): ProjectGroup => ({ project, items: groupItems }))
+    .sort((a, b) => {
+      if (a.project === UNGROUPED_PROJECT)
+        return 1
+      if (b.project === UNGROUPED_PROJECT)
+        return -1
+      const ra = rank.get(a.project) ?? Number.POSITIVE_INFINITY
+      const rb = rank.get(b.project) ?? Number.POSITIVE_INFINITY
+      if (ra !== rb)
+        return ra - rb
+      return a.project.localeCompare(b.project)
+    })
 }

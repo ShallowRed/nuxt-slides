@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CatalogQuery, PresentationListItem } from '#shared/presentations'
+import type { Project } from '#shared/projects'
 import { applyCatalogQuery } from '#shared/presentations'
 
 const { data: presentations, status, error } = await useAsyncData(
@@ -8,7 +9,13 @@ const { data: presentations, status, error } = await useAsyncData(
   { default: () => [] },
 )
 
-const query = ref<CatalogQuery>({ search: '', statuses: [], sortKey: 'title', sortDir: 'asc' })
+const { data: projects } = await useAsyncData(
+  'projects',
+  () => $fetch<Project[]>('/api/projects'),
+  { default: () => [] },
+)
+
+const query = ref<CatalogQuery>({ search: '', statuses: [], projects: [], sortKey: 'title', sortDir: 'asc' })
 
 const visible = computed(() => applyCatalogQuery(presentations.value, query.value))
 </script>
@@ -43,6 +50,7 @@ const visible = computed(() => applyCatalogQuery(presentations.value, query.valu
           <CatalogToolbar
             v-model="query"
             :items="presentations"
+            :projects="projects"
             show-status-filter
           />
 

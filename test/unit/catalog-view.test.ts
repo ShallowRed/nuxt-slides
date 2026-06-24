@@ -1,6 +1,6 @@
 import type { PresentationListItem } from '../../shared/presentations/list-item'
 import { describe, expect, it } from 'vitest'
-import { applyCatalogQuery, countByStatus } from '../../shared/presentations/catalog-view'
+import { applyCatalogQuery, countByStatus, groupByProject, UNGROUPED_PROJECT } from '../../shared/presentations/catalog-view'
 
 function item(partial: Partial<PresentationListItem> & { slug: string }): PresentationListItem {
   return {
@@ -74,5 +74,59 @@ describe('countByStatus', () => {
       'draft': 1,
     })
     expect(countByStatus([])).toEqual({ 'public': 0, 'semi-private': 0, 'private': 0, 'draft': 0 })
+  })
+})
+
+const projectCatalog: PresentationListItem[] = [
+  item({ slug: 'r1', title: 'RSE one', project: 'portail-rse' }),
+  item({ slug: 'v1', title: 'Vitrine one', project: 'vitrine' }),
+  item({ slug: 'r2', title: 'RSE two', project: 'portail-rse' }),
+  item({ slug: 'orphan', title: 'No project' }),
+]
+
+describe('applyCatalogQuery — project filter', () => {
+  it('filters by project set; empty/undefined means all', () => {
+    expect(applyCatalogQuery(projectCatalog, { projects: ['portail-rse'] }).map(p => p.slug))
+      .toEqual(['r1', 'r2'])
+    expect(applyCatalogQuery(projectCatalog, { projects: [] }).map(p => p.slug).sort())
+      .toEqual(['orphan', 'r1', 'r2', 'v1'])
+  })
+
+  it('matches the ungrouped sentinel against project-less decks', () => {
+    expect(applyCatalogQuery(projectCatalog, { projects: [UNGROUPED_PROJECT] }).map(p => p.slug))
+      .toEqual(['orphan'])
+  })
+
+  it('combines project + status filters', () => {
+    const mixed: PresentationListItem[] = [
+      item({ slug: 'a', project: 'p', status: 'public' }),
+      item({ slug: 'b', project: 'p', status: 'draft' }),
+      item({ slug: 'c', project: 'q', status: 'public' }),
+    ]
+    expect(applyCatalogQuery(mixed, { projects: ['p'], statuses: ['public'] }).map(p => p.slug))
+      .toEqual(['a'])
+  })
+})
+
+describe('groupByProject', () => {
+  it('buckets by project, ungrouped last, order from registry', () => {
+    const groups = groupByProject(projectCatalog, ['vitrine', 'portail-rse'])
+    expect(groups.map(g => g.project)).toEqual(['vitrine', 'portail-rse', UNGROUPED_PROJECT])
+    expect(groups.find(g => g.project === 'portail-rse')!.items.map(i => i.slug)).toEqual(['r1', 'r2'])
+  })
+
+  it('appends unknown projects alphabetically before the ungrouped bucket', () => {
+    const groups = groupByProject(projectCatalog, ['vitrine'])
+    // portail-rse not in order → after known, before ungrouped.
+    expect(groups.map(g => g.project)).toEqual(['vitrine', 'portail-rse', UNGROUPED_PROJECT])
+  })
+
+  it('preserves input (e.g. already-sorted) order within a bucket', () => {
+    const items = [
+      item({ slug: 'b', title: 'B', project: 'p' }),
+      item({ slug: 'a', title: 'A', project: 'p' }),
+    ]
+    expect(groupByProject(items).find(g => g.project === 'p')!.items.map(i => i.slug))
+      .toEqual(['b', 'a'])
   })
 })

@@ -33,6 +33,7 @@ export default defineEventHandler(async (event): Promise<PresentationListItem[]>
           theme: (data.theme as string) || 'dsfr',
           status,
           filename: `${slug}.md`,
+          project: (data.project as string) || undefined,
           unlisted: Boolean(data.unlisted),
           alias: entry?.alias,
           lifecycle: entry?.lifecycle,
